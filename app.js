@@ -576,6 +576,8 @@ class FirebaseSyncService {
         this.lastError = error;
         if (error.code === 'permission-denied') {
           this.updateStatus('error', 'Izin Ditolak (Rules)', 'Aturan Firestore menolak akses. Pastikan tab Rules Firestore mengizinkan: allow read, write: if true;');
+        } else if (error.code === 'not-found' || (error.message && error.message.includes('404'))) {
+          this.updateStatus('error', 'Database Belum Dibuat', 'Database Firestore belum dibuat di Firebase Console untuk project dvh-grocery. Klik tombol "Buka Firestore Console" di atas.');
         } else {
           this.updateStatus('offline', 'Mode Celengan Lokal', error.message || 'Penyimpanan lokal aktif.');
         }
