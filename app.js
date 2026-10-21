@@ -11,7 +11,8 @@ const STORAGE_KEYS = {
   ACCOUNTS_LIST: 'dvh_grocery_accounts_v3',
   CART: 'dvh_grocery_cart_v3',
   HISTORY: 'dvh_grocery_history_v3',
-  LOOKUP: 'dvh_grocery_lookup_v3'
+  LOOKUP: 'dvh_grocery_lookup_v3',
+  FIREBASE_CONFIG: 'dvh_grocery_firebase_config_v1'
 };
 
 const CATEGORIES = [
@@ -350,7 +351,7 @@ function formatDateIndo(timestamp) {
 // ==========================================
 // 3.5. FIREBASE INTEGRATION & REALTIME CLOUD SYNC
 // ==========================================
-const FIREBASE_CONFIG = {
+const DEFAULT_FIREBASE_CONFIG = {
   apiKey: "AIzaSyAhtJ6TS6IxXKe49eb5nZqJgRWTLda3pq4",
   authDomain: "dvh-grocery.firebaseapp.com",
   projectId: "dvh-grocery",
@@ -358,6 +359,53 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "255581478806",
   appId: "1:255581478806:web:5b3774b875587998aac7b7"
 };
+
+function getActiveFirebaseConfig() {
+  try {
+    const custom = localStorage.getItem(STORAGE_KEYS.FIREBASE_CONFIG);
+    if (custom) {
+      const parsed = JSON.parse(custom);
+      if (parsed && parsed.apiKey && parsed.projectId) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.warn('[Firebase] Error reading custom config:', e);
+  }
+  return DEFAULT_FIREBASE_CONFIG;
+}
+
+function parseFirebaseConfigSnippet(text) {
+  if (!text || typeof text !== 'string') return null;
+  const clean = text.trim();
+
+  // Try parsing direct JSON
+  try {
+    const direct = JSON.parse(clean);
+    if (direct && (direct.apiKey || direct.projectId)) return direct;
+  } catch (e) {}
+
+  // Regex extraction from JavaScript snippet
+  const apiKeyMatch = clean.match(/apiKey\s*:\s*["']([^"']+)["']/i);
+  const authDomainMatch = clean.match(/authDomain\s*:\s*["']([^"']+)["']/i);
+  const projectIdMatch = clean.match(/projectId\s*:\s*["']([^"']+)["']/i);
+  const storageBucketMatch = clean.match(/storageBucket\s*:\s*["']([^"']+)["']/i);
+  const messagingSenderIdMatch = clean.match(/messagingSenderId\s*:\s*["']([^"']+)["']/i);
+  const appIdMatch = clean.match(/appId\s*:\s*["']([^"']+)["']/i);
+
+  if (apiKeyMatch || projectIdMatch) {
+    const pId = projectIdMatch ? projectIdMatch[1].trim() : '';
+    return {
+      apiKey: apiKeyMatch ? apiKeyMatch[1].trim() : '',
+      authDomain: authDomainMatch ? authDomainMatch[1].trim() : (pId ? `${pId}.firebaseapp.com` : ''),
+      projectId: pId,
+      storageBucket: storageBucketMatch ? storageBucketMatch[1].trim() : (pId ? `${pId}.firebasestorage.app` : ''),
+      messagingSenderId: messagingSenderIdMatch ? messagingSenderIdMatch[1].trim() : '',
+      appId: appIdMatch ? appIdMatch[1].trim() : ''
+    };
+  }
+  return null;
+}
 
 class FirebaseSyncService {
   constructor() {
@@ -367,21 +415,44 @@ class FirebaseSyncService {
     this.debounceTimer = null;
     this.isApplyingCloudUpdate = false;
     this.status = 'initializing';
+    this.statusDetail = '';
+    this.lastError = null;
+    this.activeConfig = null;
+    this.unsubscribeSnapshot = null;
   }
 
-  init(store) {
+  getConfig() {
+    return getActiveFirebaseConfig();
+  }
+
+  isConfigured() {
+    const cfg = this.getConfig();
+    return !!(cfg && cfg.apiKey && cfg.projectId && cfg.apiKey !== 'AIzaSyAhtJ6TS6IxXKe49eb5nZqJgRWTLda3pq4');
+  }
+
+  async init(store) {
     this.store = store;
 
     // Check if Firebase Compat SDK is present
     if (typeof firebase === 'undefined') {
       console.warn('[Firebase] SDK is not loaded. Operating in Offline LocalStorage mode.');
-      this.updateStatus('offline', 'Mode Celengan Lokal');
+      this.updateStatus('offline', 'Mode Celengan Lokal', 'SDK Firebase belum dimuat.');
+      return;
+    }
+
+    this.activeConfig = this.getConfig();
+
+    if (!this.isConfigured()) {
+      this.updateStatus('offline', 'Atur Firebase Cloud', 'Belum terhubung ke Firestore. Klik untuk memasukkan config Firebase Anda.');
       return;
     }
 
     try {
-      // Initialize Firebase App
-      const app = firebase.apps.length ? firebase.app() : firebase.initializeApp(FIREBASE_CONFIG);
+      if (firebase.apps.length) {
+        await Promise.all(firebase.apps.map(a => a.delete()));
+      }
+
+      const app = firebase.initializeApp(this.activeConfig);
       this.db = firebase.firestore(app);
 
       // Enable offline persistence if supported
@@ -396,30 +467,63 @@ class FirebaseSyncService {
       } catch (e) {}
 
       this.setupUserDoc();
-      this.updateStatus('connecting', 'Menghubungkan Cloud...');
+      this.updateStatus('connecting', 'Menghubungkan Cloud...', 'Menghubungi Google Cloud Firestore...');
 
       window.addEventListener('online', () => {
-        this.updateStatus('connecting', 'Online, Menyinkronkan...');
+        this.updateStatus('connecting', 'Online, Menyinkronkan...', 'Jaringan aktif kembali.');
         this.syncNow();
       });
       window.addEventListener('offline', () => {
-        this.updateStatus('offline', 'Mode Celengan Lokal');
+        this.updateStatus('offline', 'Mode Celengan Lokal', 'Koneksi internet terputus.');
       });
-
-      const syncPill = document.getElementById('cloud-sync-pill');
-      if (syncPill) {
-        syncPill.style.cursor = 'pointer';
-        syncPill.addEventListener('click', () => {
-          feedback.tap();
-          this.syncNow();
-        });
-      }
 
       this.listenToCloud();
     } catch (err) {
       console.error('[Firebase] Initialization error:', err);
-      this.updateStatus('offline', 'Mode Celengan Lokal');
+      this.lastError = err;
+      this.updateStatus('error', 'Gagal Konek Firebase', err.message || 'Periksa API Key dan Project ID.');
     }
+  }
+
+  async reconfigure(newConfig) {
+    if (!newConfig || !newConfig.apiKey || !newConfig.projectId) {
+      throw new Error('API Key dan Project ID wajib diisi!');
+    }
+
+    localStorage.setItem(STORAGE_KEYS.FIREBASE_CONFIG, JSON.stringify(newConfig));
+    this.activeConfig = newConfig;
+
+    if (this.unsubscribeSnapshot) {
+      this.unsubscribeSnapshot();
+      this.unsubscribeSnapshot = null;
+    }
+
+    if (typeof firebase !== 'undefined' && firebase.apps.length) {
+      await Promise.all(firebase.apps.map(a => a.delete()));
+    }
+
+    const app = firebase.initializeApp(newConfig);
+    this.db = firebase.firestore(app);
+
+    this.setupUserDoc();
+    this.updateStatus('connecting', 'Menghubungkan Cloud...', 'Menguji koneksi ke cloud database...');
+    this.listenToCloud();
+
+    await this.syncNow();
+    return { success: true };
+  }
+
+  async resetConfig() {
+    localStorage.removeItem(STORAGE_KEYS.FIREBASE_CONFIG);
+    if (this.unsubscribeSnapshot) {
+      this.unsubscribeSnapshot();
+      this.unsubscribeSnapshot = null;
+    }
+    if (typeof firebase !== 'undefined' && firebase.apps.length) {
+      await Promise.all(firebase.apps.map(a => a.delete()));
+    }
+    this.activeConfig = DEFAULT_FIREBASE_CONFIG;
+    this.updateStatus('offline', 'Atur Firebase Cloud', 'Mode lokal celengan diaktifkan.');
   }
 
   setupUserDoc() {
@@ -439,7 +543,12 @@ class FirebaseSyncService {
   listenToCloud() {
     if (!this.sessionDocRef) return;
 
-    this.sessionDocRef.onSnapshot(
+    if (this.unsubscribeSnapshot) {
+      this.unsubscribeSnapshot();
+      this.unsubscribeSnapshot = null;
+    }
+
+    this.unsubscribeSnapshot = this.sessionDocRef.onSnapshot(
       { includeMetadataChanges: true },
       (snapshot) => {
         if (this.isApplyingCloudUpdate) return;
@@ -452,11 +561,11 @@ class FirebaseSyncService {
           this.applyCloudData(cloudData);
 
           if (hasPendingWrites) {
-            this.updateStatus('syncing', 'Menyimpan ke Cloud...');
+            this.updateStatus('syncing', 'Menyimpan ke Cloud...', 'Mengirim perubahan ke Firestore...');
           } else if (fromCache) {
-            this.updateStatus('synced', 'Celengan Cloud (Cache)');
+            this.updateStatus('synced', 'Celengan Cloud (Cache)', 'Data tersinkron dari cache offline.');
           } else {
-            this.updateStatus('synced', 'Celengan Cloud Aktif');
+            this.updateStatus('synced', 'Celengan Cloud Aktif', 'Tersambung lancar dengan Firestore.');
           }
         } else {
           this.syncNow();
@@ -464,7 +573,12 @@ class FirebaseSyncService {
       },
       (error) => {
         console.warn('[Firebase] Firestore notice:', error.code, error.message);
-        this.updateStatus('offline', 'Mode Celengan Lokal');
+        this.lastError = error;
+        if (error.code === 'permission-denied') {
+          this.updateStatus('error', 'Izin Ditolak (Rules)', 'Aturan Firestore menolak akses. Pastikan tab Rules Firestore mengizinkan: allow read, write: if true;');
+        } else {
+          this.updateStatus('offline', 'Mode Celengan Lokal', error.message || 'Penyimpanan lokal aktif.');
+        }
       }
     );
   }
@@ -515,7 +629,7 @@ class FirebaseSyncService {
   triggerDebouncedSync() {
     if (this.isApplyingCloudUpdate || !this.sessionDocRef) return;
 
-    this.updateStatus('syncing', 'Menyimpan...');
+    this.updateStatus('syncing', 'Menyimpan...', 'Menyimpan transaksi ke Firestore...');
 
     clearTimeout(this.debounceTimer);
     this.debounceTimer = setTimeout(() => {
@@ -541,38 +655,52 @@ class FirebaseSyncService {
       };
 
       await this.sessionDocRef.set(payload, { merge: true });
-      this.updateStatus('synced', 'Celengan Cloud Aktif');
+      this.updateStatus('synced', 'Celengan Cloud Aktif', 'Data belanja berhasil disinkronkan ke Cloud Firestore.');
     } catch (err) {
       console.warn('[Firebase] Save status (fallback active):', err.code || err);
-      this.updateStatus('offline', 'Mode Celengan Lokal');
+      this.lastError = err;
+      if (err.code === 'permission-denied') {
+        this.updateStatus('error', 'Izin Ditolak (Rules)', 'Firestore Security Rules menolak penulisan data.');
+      } else {
+        this.updateStatus('offline', 'Mode Celengan Lokal', err.message || 'Penyimpanan lokal aktif.');
+      }
     }
   }
 
-  updateStatus(status, label) {
+  updateStatus(status, label, detail = '') {
     this.status = status;
+    this.statusDetail = detail;
     const dot = document.getElementById('cloud-sync-dot');
     const text = document.getElementById('cloud-sync-label');
-    if (!dot || !text) return;
+    if (dot && text) {
+      text.textContent = label;
+      dot.className = 'w-1.5 h-1.5 rounded-full';
+      text.className = 'text-[9px] font-bold';
 
-    text.textContent = label;
-    dot.className = 'w-1.5 h-1.5 rounded-full';
-    text.className = 'text-[9px] font-bold';
+      switch (status) {
+        case 'synced':
+          dot.className += ' bg-emerald-500';
+          text.className += ' text-emerald-600';
+          break;
+        case 'syncing':
+        case 'connecting':
+          dot.className += ' bg-amber-400 animate-pulse';
+          text.className += ' text-amber-600';
+          break;
+        case 'error':
+          dot.className += ' bg-rose-500';
+          text.className += ' text-rose-600';
+          break;
+        case 'offline':
+        default:
+          dot.className += ' bg-pink-400';
+          text.className += ' text-pink-600';
+          break;
+      }
+    }
 
-    switch (status) {
-      case 'synced':
-        dot.className += ' bg-emerald-500';
-        text.className += ' text-emerald-600';
-        break;
-      case 'syncing':
-      case 'connecting':
-        dot.className += ' bg-amber-400 animate-pulse';
-        text.className += ' text-amber-600';
-        break;
-      case 'offline':
-      default:
-        dot.className += ' bg-pink-400';
-        text.className += ' text-pink-600';
-        break;
+    if (window.appController && typeof window.appController.renderFirebaseModalStatus === 'function') {
+      window.appController.renderFirebaseModalStatus(status, label, detail);
     }
   }
 }
@@ -1080,6 +1208,26 @@ class GroceryUIController {
     this.budgetPagePercent = document.getElementById('budget-page-percent');
     this.budgetBreakdownContainer = document.getElementById('budget-breakdown-container');
     this.budgetGaugeBar = document.getElementById('budget-gauge-bar');
+
+    // Modal Firebase Elements
+    this.modalFirebase = document.getElementById('modal-firebase');
+    this.btnCloseFirebaseModal = document.getElementById('btn-close-firebase-modal');
+    this.firebaseStatusBanner = document.getElementById('firebase-status-banner');
+    this.firebaseStatusIcon = document.getElementById('firebase-status-icon');
+    this.firebaseStatusTitle = document.getElementById('firebase-status-title');
+    this.firebaseStatusDesc = document.getElementById('firebase-status-desc');
+    this.firebasePasteInput = document.getElementById('firebase-paste-input');
+    this.btnParseFirebasePaste = document.getElementById('btn-parse-firebase-paste');
+    this.inputFirebaseApiKey = document.getElementById('firebase-input-apikey');
+    this.inputFirebaseProjectId = document.getElementById('firebase-input-projectid');
+    this.inputFirebaseAppId = document.getElementById('firebase-input-appid');
+    this.inputFirebaseAuthDomain = document.getElementById('firebase-input-authdomain');
+    this.btnCopyFirestoreRules = document.getElementById('btn-copy-firestore-rules');
+    this.btnSaveTestFirebase = document.getElementById('btn-save-test-firebase');
+    this.btnTestSyncFirebase = document.getElementById('btn-test-sync-firebase');
+    this.btnResetFirebase = document.getElementById('btn-reset-firebase');
+    this.btnLoginFirebaseConfig = document.getElementById('btn-login-firebase-config');
+    this.cloudSyncPill = document.getElementById('cloud-sync-pill');
   }
 
   bindEvents() {
@@ -1351,6 +1499,163 @@ class GroceryUIController {
       const val = parseRupiahInput(e.target.value);
       if (val > 0) e.target.value = formatRupiahNumber(val);
     });
+
+    // Firebase Modal Triggers & Actions
+    this.cloudSyncPill?.addEventListener('click', () => {
+      feedback.tap();
+      this.openFirebaseModal();
+    });
+
+    this.btnLoginFirebaseConfig?.addEventListener('click', () => {
+      feedback.tap();
+      this.openFirebaseModal();
+    });
+
+    this.btnCloseFirebaseModal?.addEventListener('click', () => {
+      feedback.tap();
+      this.closeFirebaseModal();
+    });
+
+    this.modalFirebase?.addEventListener('click', (e) => {
+      if (e.target === this.modalFirebase) this.closeFirebaseModal();
+    });
+
+    this.btnParseFirebasePaste?.addEventListener('click', () => {
+      feedback.tap();
+      const text = this.firebasePasteInput?.value || '';
+      const parsed = parseFirebaseConfigSnippet(text);
+      if (parsed) {
+        if (this.inputFirebaseApiKey) this.inputFirebaseApiKey.value = parsed.apiKey || '';
+        if (this.inputFirebaseProjectId) this.inputFirebaseProjectId.value = parsed.projectId || '';
+        if (this.inputFirebaseAppId) this.inputFirebaseAppId.value = parsed.appId || '';
+        if (this.inputFirebaseAuthDomain) this.inputFirebaseAuthDomain.value = parsed.authDomain || '';
+        feedback.success();
+        alert('✨ Berhasil mengekstrak konfigurasi Firebase! Klik "Simpan & Sambungkan Sekarang" untuk mengaktifkan.');
+      } else {
+        alert('Format config belum dikenali. Silakan salin teks langsung dari Firebase Console atau masukkan API Key dan Project ID ke kolom di bawah.');
+      }
+    });
+
+    this.btnSaveTestFirebase?.addEventListener('click', async () => {
+      feedback.tap();
+      const apiKey = this.inputFirebaseApiKey?.value.trim();
+      const projectId = this.inputFirebaseProjectId?.value.trim();
+      const appId = this.inputFirebaseAppId?.value.trim() || '';
+      const authDomain = this.inputFirebaseAuthDomain?.value.trim() || (projectId ? `${projectId}.firebaseapp.com` : '');
+
+      if (!apiKey || !projectId) {
+        alert('Harap masukkan API Key dan Project ID terlebih dahulu!');
+        return;
+      }
+
+      const cfg = {
+        apiKey,
+        projectId,
+        appId,
+        authDomain,
+        storageBucket: `${projectId}.firebasestorage.app`
+      };
+
+      try {
+        this.renderFirebaseModalStatus('connecting', 'Menghubungkan...', 'Sedang menguji koneksi ke Google Cloud Firestore...');
+        await firebaseSync.reconfigure(cfg);
+        feedback.success();
+        alert('🎉 Selamat! Berhasil terhubung ke Firebase Firestore.');
+      } catch (err) {
+        feedback.dangerAlert();
+        alert('Gagal menyambung ke Firebase: ' + err.message);
+      }
+    });
+
+    this.btnTestSyncFirebase?.addEventListener('click', async () => {
+      feedback.tap();
+      try {
+        this.renderFirebaseModalStatus('syncing', 'Menyimpan...', 'Mengirim data aktif ke Firestore...');
+        await firebaseSync.syncNow();
+        feedback.success();
+        alert('✅ Sinkronisasi cloud berhasil!');
+      } catch (err) {
+        alert('Gagal sinkronisasi: ' + err.message);
+      }
+    });
+
+    this.btnResetFirebase?.addEventListener('click', async () => {
+      if (confirm('Kembalikan ke mode penyimpanan lokal?')) {
+        feedback.tap();
+        await firebaseSync.resetConfig();
+        this.populateFirebaseModalFields();
+        this.renderFirebaseModalStatus('offline', 'Mode Lokal Aktif', 'Penyimpanan lokal diaktifkan.');
+      }
+    });
+
+    this.btnCopyFirestoreRules?.addEventListener('click', () => {
+      feedback.tap();
+      const rules = `rules_version = '2';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    match /{document=**} {\n      allow read, write: if true;\n    }\n  }\n}`;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(rules).then(() => {
+          alert('🛡️ Aturan Firestore berhasil disalin ke clipboard!');
+        }).catch(() => {
+          alert(rules);
+        });
+      } else {
+        alert(rules);
+      }
+    });
+  }
+
+  openFirebaseModal() {
+    this.populateFirebaseModalFields();
+    const isConfigured = firebaseSync.isConfigured();
+    if (!isConfigured) {
+      this.renderFirebaseModalStatus('offline', 'Belum Dikonfigurasi', 'Masukkan API Key dan Project ID Firebase Anda untuk mengaktifkan sinkronisasi otomatis multi-perangkat.');
+    } else {
+      this.renderFirebaseModalStatus(firebaseSync.status, document.getElementById('cloud-sync-label')?.textContent || 'Cloud Sync', firebaseSync.statusDetail);
+    }
+    this.modalFirebase?.classList.remove('hidden');
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  closeFirebaseModal() {
+    this.modalFirebase?.classList.add('hidden');
+  }
+
+  populateFirebaseModalFields() {
+    const cfg = firebaseSync.getConfig();
+    const isCustom = !!localStorage.getItem(STORAGE_KEYS.FIREBASE_CONFIG);
+    if (this.inputFirebaseApiKey) this.inputFirebaseApiKey.value = isCustom ? (cfg.apiKey || '') : '';
+    if (this.inputFirebaseProjectId) this.inputFirebaseProjectId.value = isCustom ? (cfg.projectId || '') : '';
+    if (this.inputFirebaseAppId) this.inputFirebaseAppId.value = isCustom ? (cfg.appId || '') : '';
+    if (this.inputFirebaseAuthDomain) this.inputFirebaseAuthDomain.value = isCustom ? (cfg.authDomain || '') : '';
+  }
+
+  renderFirebaseModalStatus(status, title, desc) {
+    if (!this.firebaseStatusBanner) return;
+    switch (status) {
+      case 'synced':
+        this.firebaseStatusBanner.className = 'p-3 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-start gap-2.5 text-xs transition-all';
+        if (this.firebaseStatusIcon) this.firebaseStatusIcon.textContent = '🟢';
+        if (this.firebaseStatusTitle) this.firebaseStatusTitle.className = 'font-black text-emerald-800 text-xs';
+        break;
+      case 'syncing':
+      case 'connecting':
+        this.firebaseStatusBanner.className = 'p-3 rounded-2xl bg-amber-50 border border-amber-200 flex items-start gap-2.5 text-xs transition-all';
+        if (this.firebaseStatusIcon) this.firebaseStatusIcon.textContent = '⏳';
+        if (this.firebaseStatusTitle) this.firebaseStatusTitle.className = 'font-black text-amber-800 text-xs';
+        break;
+      case 'error':
+        this.firebaseStatusBanner.className = 'p-3 rounded-2xl bg-rose-50 border border-rose-300 flex items-start gap-2.5 text-xs transition-all';
+        if (this.firebaseStatusIcon) this.firebaseStatusIcon.textContent = '🚨';
+        if (this.firebaseStatusTitle) this.firebaseStatusTitle.className = 'font-black text-rose-800 text-xs';
+        break;
+      case 'offline':
+      default:
+        this.firebaseStatusBanner.className = 'p-3 rounded-2xl bg-pink-50 border border-pink-200 flex items-start gap-2.5 text-xs transition-all';
+        if (this.firebaseStatusIcon) this.firebaseStatusIcon.textContent = '💡';
+        if (this.firebaseStatusTitle) this.firebaseStatusTitle.className = 'font-black text-pink-800 text-xs';
+        break;
+    }
+    if (this.firebaseStatusTitle) this.firebaseStatusTitle.textContent = title;
+    if (this.firebaseStatusDesc) this.firebaseStatusDesc.textContent = desc || (status === 'synced' ? 'Tersambung lancar ke Cloud Firestore.' : '');
   }
 
   switchAuthTab(tab) {

@@ -84,6 +84,14 @@
       <div class="absolute -top-20 -left-20 w-64 h-64 bg-pink-300/30 rounded-full blur-2xl pointer-events-none"></div>
       <div class="absolute -bottom-20 -right-20 w-64 h-64 bg-rose-300/30 rounded-full blur-2xl pointer-events-none"></div>
 
+      <!-- Cloud Settings Quick Button on Login Screen -->
+      <div class="absolute top-4 right-4 z-20">
+        <button id="btn-login-firebase-config" type="button" class="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-white/90 hover:bg-white border border-pink-200 text-pink-700 text-xs font-bold shadow-xs tap-effect" title="Koneksi Firebase Cloud">
+          <span class="text-xs">🔥</span>
+          <span class="text-[10px] font-extrabold">Firebase</span>
+        </button>
+      </div>
+
       <!-- Top Branding -->
       <div class="relative pt-3 text-center space-y-2">
         <div class="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-pink-500 via-rose-400 to-amber-300 p-1 shadow-xl shadow-pink-300/60 animate-cute-float">
@@ -313,11 +321,12 @@
               <h1 id="header-brand-title" class="text-sm font-black tracking-tight text-pink-700 leading-none">Dvh Kids Grocery</h1>
               <span class="text-[9px] bg-pink-100 text-pink-600 border border-pink-200 px-1.5 py-0.2 rounded-full font-extrabold">PINTAR ⭐</span>
             </div>
-            <!-- Cloud Sync Status Badge -->
-            <div id="cloud-sync-pill" class="flex items-center gap-1.5 mt-0.5" title="Status Sinkronisasi">
+            <!-- Cloud Sync Status Badge Button -->
+            <button id="cloud-sync-pill" type="button" class="flex items-center gap-1.5 mt-0.5 px-2 py-0.5 rounded-full bg-white/80 hover:bg-white border border-pink-200 tap-effect text-left shadow-2xs group" title="Pengaturan Cloud & Status Firebase">
               <span id="cloud-sync-dot" class="w-1.5 h-1.5 rounded-full bg-pink-500 animate-pulse"></span>
-              <span id="cloud-sync-label" class="text-[9px] font-bold text-pink-600">Celengan Cloud Aktif</span>
-            </div>
+              <span id="cloud-sync-label" class="text-[9px] font-bold text-pink-600">Celengan Cloud</span>
+              <i data-lucide="settings" class="w-2.5 h-2.5 text-pink-400 group-hover:text-pink-600 transition-colors"></i>
+            </button>
           </div>
         </div>
 
@@ -1018,6 +1027,112 @@
         <button id="btn-finish-done" type="button" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-pink-500 via-rose-400 to-pink-500 text-white font-black text-xs tap-effect shadow-md shadow-pink-300">
           Lihat Buku Catatan Riwayat 📖
         </button>
+
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- MODAL 6: PENGATURAN FIREBASE CLOUD SYNC & FIRESTORE -->
+    <!-- ======================================================== -->
+    <div id="modal-firebase" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+      <div class="w-full max-w-sm bg-white rounded-t-3xl sm:rounded-3xl p-5 shadow-2xl space-y-3.5 max-h-[90vh] overflow-y-auto border-2 border-pink-200">
+        
+        <div class="flex items-center justify-between pb-2 border-b border-pink-100">
+          <div class="flex items-center gap-2">
+            <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-amber-400 to-rose-400 text-white flex items-center justify-center text-lg shadow-xs font-black">
+              🔥
+            </div>
+            <div>
+              <h3 class="text-sm font-black text-pink-700 leading-tight">Koneksi Firebase Cloud</h3>
+              <p class="text-[10px] text-slate-500 font-medium">Sinkronisasi Realtime Cloud Firestore</p>
+            </div>
+          </div>
+          <button id="btn-close-firebase-modal" type="button" class="touch-target w-8 h-8 rounded-xl text-slate-400 hover:text-pink-600 flex items-center justify-center tap-effect">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <!-- Connection Status Banner -->
+        <div id="firebase-status-banner" class="p-3 rounded-2xl bg-pink-50 border border-pink-200 flex items-start gap-2.5 text-xs transition-all">
+          <span id="firebase-status-icon" class="text-base leading-none">⏳</span>
+          <div class="flex-1 space-y-0.5">
+            <div id="firebase-status-title" class="font-black text-pink-800 text-xs">Mengecek Status...</div>
+            <div id="firebase-status-desc" class="text-[10px] text-slate-600 leading-tight">Menghubungkan ke layanan Firestore.</div>
+          </div>
+        </div>
+
+        <!-- Smart Config Paste Box -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <label class="text-[11px] font-black text-slate-700" for="firebase-paste-input">Tempel Config Firebase</label>
+            <span class="text-[9px] bg-pink-100 text-pink-700 font-extrabold px-1.5 py-0.5 rounded-full">Auto-Parse Snippet</span>
+          </div>
+          <textarea id="firebase-paste-input" rows="3" placeholder='Tempelkan kode firebaseConfig dari Firebase Console di sini...
+Contoh:
+const firebaseConfig = {
+  apiKey: "AIzaSy...",
+  projectId: "nama-project",
+  ...
+};' class="w-full text-[10px] font-mono bg-pink-50/60 border border-pink-200 rounded-xl p-2.5 focus:outline-none focus:ring-2 focus:ring-pink-400 resize-none"></textarea>
+          <button id="btn-parse-firebase-paste" type="button" class="w-full py-1.5 rounded-xl bg-pink-100 hover:bg-pink-200 text-pink-700 text-[11px] font-extrabold tap-effect flex items-center justify-center gap-1.5">
+            <span>✨</span>
+            <span>Terapkan dari Teks Tempelan</span>
+          </button>
+        </div>
+
+        <!-- Config Details Form -->
+        <div class="space-y-2 text-xs pt-1 border-t border-pink-100">
+          <div class="text-[10px] font-black text-slate-500 uppercase tracking-wider">Detail Parameter Konfigurasi:</div>
+          
+          <div class="space-y-1">
+            <label class="text-[10px] font-bold text-slate-600" for="firebase-input-apikey">API Key <span class="text-rose-500">*</span></label>
+            <input id="firebase-input-apikey" type="text" placeholder="AIzaSy..." class="w-full text-xs font-mono bg-white border border-pink-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-pink-400">
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div class="space-y-1">
+              <label class="text-[10px] font-bold text-slate-600" for="firebase-input-projectid">Project ID <span class="text-rose-500">*</span></label>
+              <input id="firebase-input-projectid" type="text" placeholder="my-grocery-app" class="w-full text-xs font-mono bg-white border border-pink-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-pink-400">
+            </div>
+            <div class="space-y-1">
+              <label class="text-[10px] font-bold text-slate-600" for="firebase-input-appid">App ID</label>
+              <input id="firebase-input-appid" type="text" placeholder="1:12345:web:abc" class="w-full text-xs font-mono bg-white border border-pink-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-pink-400">
+            </div>
+          </div>
+
+          <div class="space-y-1">
+            <label class="text-[10px] font-bold text-slate-600" for="firebase-input-authdomain">Auth Domain (Opsional)</label>
+            <input id="firebase-input-authdomain" type="text" placeholder="my-grocery.firebaseapp.com" class="w-full text-xs font-mono bg-white border border-pink-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-pink-400">
+          </div>
+        </div>
+
+        <!-- Firestore Rules Guide Notice -->
+        <div class="rounded-2xl bg-amber-50 border border-amber-200 p-2.5 text-[10px] text-amber-900 space-y-1">
+          <div class="flex items-center justify-between font-black text-amber-800">
+            <span class="flex items-center gap-1">🛡️ Aturan Firestore (Security Rules)</span>
+            <button id="btn-copy-firestore-rules" type="button" class="text-[9px] bg-amber-200 hover:bg-amber-300 text-amber-900 px-2 py-0.5 rounded-md font-bold tap-effect">Salin Rules</button>
+          </div>
+          <p class="text-[9px] text-amber-700 leading-tight">
+            Di Firebase Console &gt; Firestore Database &gt; Rules, izinkan akses:
+          </p>
+          <div class="bg-amber-100/80 p-1.5 rounded-lg font-mono text-[9px] text-amber-950 select-all overflow-x-auto whitespace-pre">match /{document=**} { allow read, write: if true; }</div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="space-y-2 pt-1">
+          <button id="btn-save-test-firebase" type="button" class="w-full py-3 rounded-2xl bg-gradient-to-r from-pink-500 via-rose-500 to-pink-500 text-white font-black text-xs tap-effect shadow-md shadow-pink-300 flex items-center justify-center gap-1.5">
+            <span>💾</span>
+            <span>Simpan & Sambungkan Sekarang</span>
+          </button>
+          <div class="flex items-center gap-2">
+            <button id="btn-test-sync-firebase" type="button" class="flex-1 py-2 rounded-xl bg-pink-100 hover:bg-pink-200 text-pink-700 font-bold text-[11px] tap-effect">
+              🔄 Tes Sinkron Sekarang
+            </button>
+            <button id="btn-reset-firebase" type="button" class="flex-1 py-2 rounded-xl bg-slate-100 hover:bg-rose-100 text-slate-600 hover:text-rose-600 font-bold text-[11px] tap-effect">
+              Mode Lokal Saja
+            </button>
+          </div>
+        </div>
 
       </div>
     </div>
