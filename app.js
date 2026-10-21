@@ -427,7 +427,7 @@ class FirebaseSyncService {
 
   isConfigured() {
     const cfg = this.getConfig();
-    return !!(cfg && cfg.apiKey && cfg.projectId && cfg.apiKey !== 'AIzaSyAhtJ6TS6IxXKe49eb5nZqJgRWTLda3pq4');
+    return !!(cfg && cfg.apiKey && cfg.projectId);
   }
 
   async init(store) {
@@ -1621,11 +1621,10 @@ class GroceryUIController {
 
   populateFirebaseModalFields() {
     const cfg = firebaseSync.getConfig();
-    const isCustom = !!localStorage.getItem(STORAGE_KEYS.FIREBASE_CONFIG);
-    if (this.inputFirebaseApiKey) this.inputFirebaseApiKey.value = isCustom ? (cfg.apiKey || '') : '';
-    if (this.inputFirebaseProjectId) this.inputFirebaseProjectId.value = isCustom ? (cfg.projectId || '') : '';
-    if (this.inputFirebaseAppId) this.inputFirebaseAppId.value = isCustom ? (cfg.appId || '') : '';
-    if (this.inputFirebaseAuthDomain) this.inputFirebaseAuthDomain.value = isCustom ? (cfg.authDomain || '') : '';
+    if (this.inputFirebaseApiKey) this.inputFirebaseApiKey.value = cfg.apiKey || '';
+    if (this.inputFirebaseProjectId) this.inputFirebaseProjectId.value = cfg.projectId || '';
+    if (this.inputFirebaseAppId) this.inputFirebaseAppId.value = cfg.appId || '';
+    if (this.inputFirebaseAuthDomain) this.inputFirebaseAuthDomain.value = cfg.authDomain || '';
   }
 
   renderFirebaseModalStatus(status, title, desc) {
