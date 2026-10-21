@@ -6,6 +6,7 @@ const AuthContext = createContext();
 const STORAGE_KEY_USERS = 'dvh_registered_users';
 const STORAGE_KEY_TOKEN = 'dvh_active_token';
 const STORAGE_KEY_ACTIVE_USER_ID = 'dvh_active_user_id';
+const STORAGE_KEY_LOGGED_OUT = 'dvh_has_logged_out';
 
 export function AuthProvider({ children }) {
   const [registeredUsers, setRegisteredUsers] = useState(() => {
@@ -17,7 +18,6 @@ export function AuthProvider({ children }) {
     } catch (e) {
       console.error('Failed to parse registered users', e);
     }
-    // Seed initial demo users
     localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(DEMO_USERS));
     return DEMO_USERS;
   });
@@ -26,7 +26,7 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(null);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
 
-  // Initialize demo data for demo users if not present in localStorage
+  // Initialize demo data for demo users
   useEffect(() => {
     DEMO_USERS.forEach((demoUser) => {
       const cartKey = `dvh_cart_${demoUser.id}`;
@@ -45,22 +45,35 @@ export function AuthProvider({ children }) {
     });
   }, []);
 
-  // Restore session on mount
+  // Restore session on mount OR auto-login default demo student user
   useEffect(() => {
     try {
+      const hasExplicitlyLoggedOut = localStorage.getItem(STORAGE_KEY_LOGGED_OUT) === 'true';
       const savedToken = localStorage.getItem(STORAGE_KEY_TOKEN);
       const savedUserId = localStorage.getItem(STORAGE_KEY_ACTIVE_USER_ID);
 
-      if (savedToken && savedUserId) {
+      if (savedToken && savedUserId && !hasExplicitlyLoggedOut) {
         const found = registeredUsers.find((u) => u.id === savedUserId);
         if (found) {
           setCurrentUser(found);
           setToken(savedToken);
-        } else {
-          // Token invalid or user deleted, hard clear
-          localStorage.removeItem(STORAGE_KEY_TOKEN);
-          localStorage.removeItem(STORAGE_KEY_ACTIVE_USER_ID);
+          setIsLoadingAuth(false);
+          return;
         }
+      }
+
+      // If opening for first time (no active session and not explicitly logged out)
+      // Automatically activate Ahmad Rizky Pratama (User 1) so mobile app renders immediately!
+      if (!hasExplicitlyLoggedOut) {
+        const defaultUser = registeredUsers[0] || DEMO_USERS[0];
+        const defaultToken = `JWT_DVH_DEMO_${defaultUser.id}`;
+        localStorage.setItem(STORAGE_KEY_TOKEN, defaultToken);
+        localStorage.setItem(STORAGE_KEY_ACTIVE_USER_ID, defaultUser.id);
+        setCurrentUser(defaultUser);
+        setToken(defaultToken);
+      } else {
+        setCurrentUser(null);
+        setToken(null);
       }
     } catch (e) {
       console.error('Failed to restore auth session', e);
@@ -69,13 +82,11 @@ export function AuthProvider({ children }) {
     }
   }, [registeredUsers]);
 
-  // Sync registered users to localStorage
   const updateRegisteredUsers = (newUsers) => {
     setRegisteredUsers(newUsers);
     localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(newUsers));
   };
 
-  // Password strength calculator
   const checkPasswordStrength = (pass) => {
     if (!pass) return { score: 0, label: 'Belum diisi', color: '#94a3b8' };
     let score = 0;
@@ -98,7 +109,6 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Register New User
   const register = ({ fullName, email, phone, password, confirmPassword }) => {
     const cleanName = fullName?.trim();
     const cleanEmail = email?.trim().toLowerCase();
@@ -121,13 +131,11 @@ export function AuthProvider({ children }) {
       return { success: false, error: 'Konfirmasi password tidak cocok!' };
     }
 
-    // Check uniqueness
     const exists = registeredUsers.some((u) => u.email.toLowerCase() === cleanEmail);
     if (exists) {
       return { success: false, error: 'Alamat email sudah terdaftar. Silakan login!' };
     }
 
-    // Create unique user ID
     const newUserId = `user_dvh_${Date.now()}`;
     const simulatedToken = `JWT_DVH_${btoa(cleanEmail + ':' + Date.now())}`;
 
@@ -143,15 +151,14 @@ export function AuthProvider({ children }) {
 
     const defaultAddress = {
       id: `addr_${Date.now()}`,
-      label: 'Rumah',
+      label: 'Kost Mahasiswa',
       recipient: cleanName,
       phone: cleanPhone,
-      address: 'Jl. Merdeka No. 10, Jakarta',
-      notes: 'Dekat gerbang masuk',
+      address: 'Jl. Senopati No. 42, Kebayoran Baru, Jakarta Selatan',
+      notes: 'Pagar hitam, kamar No. 12',
       isDefault: true
     };
 
-    // Save user isolation storage entries
     localStorage.setItem(`dvh_cart_${newUserId}`, JSON.stringify([]));
     localStorage.setItem(`dvh_orders_${newUserId}`, JSON.stringify([]));
     localStorage.setItem(`dvh_addresses_${newUserId}`, JSON.stringify([defaultAddress]));
@@ -159,7 +166,7 @@ export function AuthProvider({ children }) {
     const updated = [...registeredUsers, newUser];
     updateRegisteredUsers(updated);
 
-    // Set active session
+    localStorage.removeItem(STORAGE_KEY_LOGGED_OUT);
     localStorage.setItem(STORAGE_KEY_TOKEN, simulatedToken);
     localStorage.setItem(STORAGE_KEY_ACTIVE_USER_ID, newUserId);
 
@@ -169,7 +176,6 @@ export function AuthProvider({ children }) {
     return { success: true, user: newUser };
   };
 
-  // Login
   const login = (email, password) => {
     const cleanEmail = email?.trim().toLowerCase();
     if (!cleanEmail || !password) {
@@ -186,6 +192,7 @@ export function AuthProvider({ children }) {
     }
 
     const simulatedToken = `JWT_DVH_${btoa(cleanEmail + ':' + Date.now())}`;
+    localStorage.removeItem(STORAGE_KEY_LOGGED_OUT);
     localStorage.setItem(STORAGE_KEY_TOKEN, simulatedToken);
     localStorage.setItem(STORAGE_KEY_ACTIVE_USER_ID, user.id);
 
@@ -195,11 +202,11 @@ export function AuthProvider({ children }) {
     return { success: true, user };
   };
 
-  // Fast demo switcher for testing strict isolation
   const loginAsDemo = (userId) => {
     const user = registeredUsers.find((u) => u.id === userId) || DEMO_USERS.find((u) => u.id === userId);
     if (user) {
       const simulatedToken = `JWT_DVH_DEMO_${user.id}`;
+      localStorage.removeItem(STORAGE_KEY_LOGGED_OUT);
       localStorage.setItem(STORAGE_KEY_TOKEN, simulatedToken);
       localStorage.setItem(STORAGE_KEY_ACTIVE_USER_ID, user.id);
       setCurrentUser(user);
@@ -209,15 +216,15 @@ export function AuthProvider({ children }) {
     return { success: false, error: 'Demo user not found' };
   };
 
-  // Logout - Hard Clear of active session token & state
+  // Hard Logout
   const logout = () => {
+    localStorage.setItem(STORAGE_KEY_LOGGED_OUT, 'true');
     localStorage.removeItem(STORAGE_KEY_TOKEN);
     localStorage.removeItem(STORAGE_KEY_ACTIVE_USER_ID);
     setCurrentUser(null);
     setToken(null);
   };
 
-  // Address helpers for current user
   const getUserAddresses = () => {
     if (!currentUser) return [];
     try {

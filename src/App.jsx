@@ -180,6 +180,19 @@ export default function App() {
       {/* Mobile Smartphone Frame: Exactly max-w-[430px] centered */}
       <div className="w-full max-w-[430px] min-h-screen bg-slate-50 flex flex-col relative shadow-2xl border-x border-slate-800/40">
         
+        {/* Smartphone Dynamic Island & Status Bar */}
+        <div className="bg-slate-950 text-white px-5 pt-2 pb-1.5 flex items-center justify-between text-[11px] font-black select-none border-b border-slate-900">
+          <span className="tracking-tight">09:41</span>
+          <div className="w-24 h-4 bg-black rounded-full flex items-center justify-center gap-1.5 border border-slate-800">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+            <span className="text-[8px] text-emerald-300 font-extrabold uppercase tracking-wider">Troli PWA</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-slate-300 text-[10px]">
+            <span>5G</span>
+            <span>🔋 100%</span>
+          </div>
+        </div>
+
         {/* Mobile Top Navbar */}
         <Navbar
           searchQuery={searchQuery}
