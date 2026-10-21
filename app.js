@@ -410,6 +410,7 @@ function parseFirebaseConfigSnippet(text) {
 class FirebaseSyncService {
   constructor() {
     this.db = null;
+    this.cartDocRef = null;
     this.sessionDocRef = null;
     this.store = null;
     this.debounceTimer = null;
@@ -419,6 +420,10 @@ class FirebaseSyncService {
     this.lastError = null;
     this.activeConfig = null;
     this.unsubscribeSnapshot = null;
+    this.unsubscribeAccounts = null;
+    this.toastTimer = null;
+    this.heartbeatTimer = null;
+    this.lastCloudUpdatedAt = 0;
   }
 
   getConfig() {
@@ -428,6 +433,25 @@ class FirebaseSyncService {
   isConfigured() {
     const cfg = this.getConfig();
     return !!(cfg && cfg.apiKey && cfg.projectId);
+  }
+
+  showRealtimeToast(msg, icon = '✨') {
+    const toast = document.getElementById('cloud-realtime-toast');
+    const toastText = document.getElementById('cloud-toast-text');
+    const toastIcon = document.getElementById('cloud-toast-icon');
+    if (!toast) return;
+
+    if (toastText) toastText.textContent = msg;
+    if (toastIcon) toastIcon.textContent = icon;
+
+    toast.classList.remove('opacity-0', '-translate-y-3', 'pointer-events-none');
+    toast.classList.add('opacity-100', 'translate-y-0');
+
+    clearTimeout(this.toastTimer);
+    this.toastTimer = setTimeout(() => {
+      toast.classList.remove('opacity-100', 'translate-y-0');
+      toast.classList.add('opacity-0', '-translate-y-3', 'pointer-events-none');
+    }, 2800);
   }
 
   async init(store) {
@@ -443,7 +467,7 @@ class FirebaseSyncService {
     this.activeConfig = this.getConfig();
 
     if (!this.isConfigured()) {
-      this.updateStatus('offline', 'Atur Firebase Cloud', 'Belum terhubung ke Firestore. Klik untuk memasukkan config Firebase Anda.');
+      this.updateStatus('offline', 'Atur Firebase Cloud', 'Belum terhubung ke Firestore.');
       return;
     }
 
@@ -455,29 +479,42 @@ class FirebaseSyncService {
       const app = firebase.initializeApp(this.activeConfig);
       this.db = firebase.firestore(app);
 
-      // Enable offline persistence if supported
-      try {
-        this.db.enablePersistence({ synchronizeTabs: true }).catch(err => {
-          if (err.code === 'failed-precondition') {
-            console.info('[Firebase] Persistence enabled in another tab.');
-          } else if (err.code === 'unimplemented') {
-            console.info('[Firebase] Persistence not supported by current browser.');
-          }
-        });
-      } catch (e) {}
+      // Listen to cloud accounts list in realtime
+      this.listenToAccounts();
+      this.fetchAllAccountsFromCloud();
 
-      this.setupUserDoc();
-      this.updateStatus('connecting', 'Menghubungkan Cloud...', 'Menghubungi Google Cloud Firestore...');
+      // If user already logged in, connect user cart session
+      if (this.store && this.store.currentUser) {
+        await this.reconnectForUser();
+      } else {
+        this.updateStatus('synced', 'Celengan Cloud Aktif', 'Tersambung ke Google Cloud Firestore.');
+      }
 
+      // Online/Offline & Focus Event Listeners
       window.addEventListener('online', () => {
         this.updateStatus('connecting', 'Online, Menyinkronkan...', 'Jaringan aktif kembali.');
-        this.syncNow();
+        this.checkLatestFromCloud();
       });
       window.addEventListener('offline', () => {
         this.updateStatus('offline', 'Mode Celengan Lokal', 'Koneksi internet terputus.');
       });
 
-      this.listenToCloud();
+      // Immediate refresh when tab or phone screen wakes up
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          this.checkLatestFromCloud();
+        }
+      });
+      window.addEventListener('focus', () => {
+        this.checkLatestFromCloud();
+      });
+
+      // Heartbeat sync timer (checks cloud every 3.5s for seamless multi-device realtime)
+      clearInterval(this.heartbeatTimer);
+      this.heartbeatTimer = setInterval(() => {
+        this.checkLatestFromCloud();
+      }, 3500);
+
     } catch (err) {
       console.error('[Firebase] Initialization error:', err);
       this.lastError = err;
@@ -485,87 +522,275 @@ class FirebaseSyncService {
     }
   }
 
-  async reconfigure(newConfig) {
-    if (!newConfig || !newConfig.apiKey || !newConfig.projectId) {
-      throw new Error('API Key dan Project ID wajib diisi!');
+  // Save account to Firestore cloud
+  async saveAccountToCloud(account) {
+    if (!account || !account.username) return false;
+    const cleanUser = account.username.toLowerCase().trim();
+    const cleanAccount = {
+      username: cleanUser,
+      name: account.name || cleanUser,
+      avatar: account.avatar || '🍓',
+      pin: String(account.pin || '1234').trim(),
+      budgetLimit: Number(account.budgetLimit) || 250000,
+      updatedAt: Date.now(),
+      createdAt: account.createdAt || Date.now()
+    };
+
+    // 1. Try Firestore SDK
+    if (this.db) {
+      try {
+        await this.db.collection('grocery_accounts').doc(cleanUser).set(cleanAccount, { merge: true });
+        console.info('[Firebase] Account saved to Cloud Firestore:', cleanUser);
+        return true;
+      } catch (e) {
+        console.warn('[Firebase] SDK saveAccount error, trying REST fallback:', e);
+      }
     }
 
-    localStorage.setItem(STORAGE_KEYS.FIREBASE_CONFIG, JSON.stringify(newConfig));
-    this.activeConfig = newConfig;
+    // 2. REST Fallback
+    try {
+      const cfg = this.getConfig();
+      if (cfg && cfg.projectId && cfg.apiKey) {
+        const url = `https://firestore.googleapis.com/v1/projects/${cfg.projectId}/databases/(default)/documents/grocery_accounts/${cleanUser}?key=${cfg.apiKey}`;
+        const restBody = {
+          fields: {
+            username: { stringValue: cleanUser },
+            name: { stringValue: cleanAccount.name },
+            avatar: { stringValue: cleanAccount.avatar },
+            pin: { stringValue: cleanAccount.pin },
+            budgetLimit: { integerValue: String(cleanAccount.budgetLimit) },
+            updatedAt: { integerValue: String(cleanAccount.updatedAt) },
+            createdAt: { integerValue: String(cleanAccount.createdAt) }
+          }
+        };
+        const res = await fetch(url, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(restBody)
+        });
+        if (res.ok) {
+          console.info('[Firebase REST] Account saved via REST fallback:', cleanUser);
+          return true;
+        }
+      }
+    } catch (restErr) {
+      console.warn('[Firebase REST] Failed to save account via REST:', restErr);
+    }
+    return false;
+  }
+
+  // Fetch a specific account from Cloud
+  async fetchAccountFromCloud(cleanUser) {
+    if (!cleanUser) return null;
+    const u = cleanUser.toLowerCase().trim();
+
+    // 1. Try Firestore SDK
+    if (this.db) {
+      try {
+        const snap = await this.db.collection('grocery_accounts').doc(u).get();
+        if (snap.exists) {
+          const d = snap.data();
+          return {
+            username: d.username || u,
+            name: d.name || u,
+            avatar: d.avatar || '🍓',
+            pin: String(d.pin || '1234').trim(),
+            budgetLimit: Number(d.budgetLimit) || 250000,
+            createdAt: Number(d.createdAt) || Date.now()
+          };
+        }
+      } catch (e) {
+        console.warn('[Firebase] SDK fetchAccount error, trying REST fallback:', e);
+      }
+    }
+
+    // 2. Try REST fallback
+    try {
+      const cfg = this.getConfig();
+      if (cfg && cfg.projectId && cfg.apiKey) {
+        const url = `https://firestore.googleapis.com/v1/projects/${cfg.projectId}/databases/(default)/documents/grocery_accounts/${u}?key=${cfg.apiKey}`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const doc = await res.json();
+          if (doc && doc.fields) {
+            return {
+              username: doc.fields.username?.stringValue || u,
+              name: doc.fields.name?.stringValue || u,
+              avatar: doc.fields.avatar?.stringValue || '🍓',
+              pin: doc.fields.pin?.stringValue || '1234',
+              budgetLimit: Number(doc.fields.budgetLimit?.integerValue || 250000),
+              createdAt: Number(doc.fields.createdAt?.integerValue || Date.now())
+            };
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('[Firebase REST] Error fetching account:', e);
+    }
+    return null;
+  }
+
+  // Fetch all accounts from Cloud and merge into store
+  async fetchAllAccountsFromCloud() {
+    if (!this.store) return;
+    try {
+      let accountsData = [];
+      if (this.db) {
+        const querySnapshot = await this.db.collection('grocery_accounts').get();
+        querySnapshot.forEach(doc => {
+          accountsData.push(doc.data());
+        });
+      } else {
+        const cfg = this.getConfig();
+        const url = `https://firestore.googleapis.com/v1/projects/${cfg.projectId}/databases/(default)/documents/grocery_accounts?key=${cfg.apiKey}`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.documents) {
+            accountsData = data.documents.map(d => ({
+              username: d.fields?.username?.stringValue,
+              name: d.fields?.name?.stringValue,
+              avatar: d.fields?.avatar?.stringValue || '🍓',
+              pin: d.fields?.pin?.stringValue || '1234',
+              budgetLimit: Number(d.fields?.budgetLimit?.integerValue || 250000)
+            })).filter(a => !!a.username);
+          }
+        }
+      }
+
+      if (accountsData.length > 0) {
+        let updated = false;
+        accountsData.forEach(cloudAcc => {
+          if (!cloudAcc.username) return;
+          const u = cloudAcc.username.toLowerCase().trim();
+          const idx = this.store.accounts.findIndex(a => a.username.toLowerCase() === u);
+          if (idx === -1) {
+            this.store.accounts.push({
+              username: u,
+              name: cloudAcc.name || u,
+              avatar: cloudAcc.avatar || '🍓',
+              pin: String(cloudAcc.pin || '1234').trim(),
+              budgetLimit: Number(cloudAcc.budgetLimit) || 250000,
+              createdAt: cloudAcc.createdAt || Date.now()
+            });
+            updated = true;
+          } else {
+            this.store.accounts[idx] = { ...this.store.accounts[idx], ...cloudAcc };
+            updated = true;
+          }
+        });
+        if (updated) {
+          localStorage.setItem(STORAGE_KEYS.ACCOUNTS_LIST, JSON.stringify(this.store.accounts));
+        }
+      }
+    } catch (err) {
+      console.warn('[Firebase] fetchAllAccountsFromCloud error:', err);
+    }
+  }
+
+  // Realtime listener for newly registered accounts across devices
+  listenToAccounts() {
+    if (!this.db) return;
+    try {
+      if (this.unsubscribeAccounts) {
+        this.unsubscribeAccounts();
+        this.unsubscribeAccounts = null;
+      }
+      this.unsubscribeAccounts = this.db.collection('grocery_accounts').onSnapshot(snap => {
+        let changed = false;
+        snap.docChanges().forEach(change => {
+          const acc = change.doc.data();
+          if (acc && acc.username) {
+            const u = acc.username.toLowerCase().trim();
+            const idx = this.store.accounts.findIndex(a => a.username.toLowerCase() === u);
+            if (idx === -1) {
+              this.store.accounts.push(acc);
+              changed = true;
+            } else {
+              this.store.accounts[idx] = { ...this.store.accounts[idx], ...acc };
+              changed = true;
+            }
+          }
+        });
+        if (changed) {
+          localStorage.setItem(STORAGE_KEYS.ACCOUNTS_LIST, JSON.stringify(this.store.accounts));
+        }
+      }, err => {
+        console.warn('[Firebase] Accounts listener notice:', err);
+      });
+    } catch (e) {}
+  }
+
+  async reconnectForUser() {
+    if (!this.store || !this.store.currentUser) return;
+    const user = this.store.currentUser.username.toLowerCase().trim();
 
     if (this.unsubscribeSnapshot) {
       this.unsubscribeSnapshot();
       this.unsubscribeSnapshot = null;
     }
 
-    if (typeof firebase !== 'undefined' && firebase.apps.length) {
-      await Promise.all(firebase.apps.map(a => a.delete()));
+    if (this.db) {
+      this.cartDocRef = this.db.collection('grocery_carts').doc(user);
+      this.sessionDocRef = this.db.collection('grocery_users').doc(user).collection('sessions').doc('active_trip');
+
+      // Check if cloud already has saved cart for this user
+      try {
+        const snap = await this.cartDocRef.get();
+        if (snap.exists) {
+          const cloudData = snap.data();
+          if (cloudData && Array.isArray(cloudData.cart)) {
+            this.lastCloudUpdatedAt = cloudData.updatedAt || 0;
+            this.applyCloudData(cloudData);
+          }
+        } else {
+          // If no cart on cloud yet, upload current initial state
+          await this.syncNow();
+        }
+      } catch (e) {
+        console.warn('[Firebase] Initial cart check error:', e);
+      }
+
+      this.listenToCloud();
+    } else {
+      // Fallback via REST
+      await this.checkLatestFromCloud();
     }
-
-    const app = firebase.initializeApp(newConfig);
-    this.db = firebase.firestore(app);
-
-    this.setupUserDoc();
-    this.updateStatus('connecting', 'Menghubungkan Cloud...', 'Menguji koneksi ke cloud database...');
-    this.listenToCloud();
-
-    await this.syncNow();
-    return { success: true };
-  }
-
-  async resetConfig() {
-    localStorage.removeItem(STORAGE_KEYS.FIREBASE_CONFIG);
-    if (this.unsubscribeSnapshot) {
-      this.unsubscribeSnapshot();
-      this.unsubscribeSnapshot = null;
-    }
-    if (typeof firebase !== 'undefined' && firebase.apps.length) {
-      await Promise.all(firebase.apps.map(a => a.delete()));
-    }
-    this.activeConfig = DEFAULT_FIREBASE_CONFIG;
-    this.updateStatus('offline', 'Atur Firebase Cloud', 'Mode lokal celengan diaktifkan.');
-  }
-
-  setupUserDoc() {
-    if (!this.db) return;
-    const user = (this.store && this.store.currentUser && this.store.currentUser.username)
-      ? this.store.currentUser.username.toLowerCase().trim()
-      : 'guest';
-    this.sessionDocRef = this.db.collection('grocery_users').doc(user).collection('sessions').doc('active_trip');
-  }
-
-  reconnectForUser() {
-    if (!this.db) return;
-    this.setupUserDoc();
-    this.listenToCloud();
   }
 
   listenToCloud() {
-    if (!this.sessionDocRef) return;
+    if (!this.cartDocRef) return;
 
     if (this.unsubscribeSnapshot) {
       this.unsubscribeSnapshot();
       this.unsubscribeSnapshot = null;
     }
 
-    this.unsubscribeSnapshot = this.sessionDocRef.onSnapshot(
-      { includeMetadataChanges: true },
+    this.unsubscribeSnapshot = this.cartDocRef.onSnapshot(
+      { includeMetadataChanges: false },
       (snapshot) => {
         if (this.isApplyingCloudUpdate) return;
 
         if (snapshot.exists) {
           const cloudData = snapshot.data();
-          const fromCache = snapshot.metadata.fromCache;
-          const hasPendingWrites = snapshot.metadata.hasPendingWrites;
+          if (!cloudData) return;
 
-          this.applyCloudData(cloudData);
+          // If the update was originated by this device, ignore to prevent loop reflection
+          if (cloudData.updatedBy && cloudData.updatedBy === this.store.deviceId) {
+            this.updateStatus('synced', 'Celengan Cloud Aktif', 'Perubahan kamu tersimpan.');
+            return;
+          }
 
-          if (hasPendingWrites) {
-            this.updateStatus('syncing', 'Menyimpan ke Cloud...', 'Mengirim perubahan ke Firestore...');
-          } else if (fromCache) {
-            this.updateStatus('synced', 'Celengan Cloud (Cache)', 'Data tersinkron dari cache offline.');
-          } else {
-            this.updateStatus('synced', 'Celengan Cloud Aktif', 'Tersambung lancar dengan Firestore.');
+          if (cloudData.updatedAt && cloudData.updatedAt < this.lastCloudUpdatedAt) {
+            return;
+          }
+          this.lastCloudUpdatedAt = cloudData.updatedAt || Date.now();
+
+          const hasApplied = this.applyCloudData(cloudData);
+          if (hasApplied) {
+            this.updateStatus('synced', 'Celengan Cloud Aktif', 'Belanjaan disinkronkan seketika.');
+            const source = (cloudData.updatedBy && cloudData.updatedBy.startsWith('hp_')) ? 'HP' : 'PC';
+            this.showRealtimeToast(`Belanjaan diupdate dari ${source}!`, '✨');
           }
         } else {
           this.syncNow();
@@ -574,19 +799,38 @@ class FirebaseSyncService {
       (error) => {
         console.warn('[Firebase] Firestore notice:', error.code, error.message);
         this.lastError = error;
-        if (error.code === 'permission-denied') {
-          this.updateStatus('error', 'Izin Ditolak (Rules)', 'Aturan Firestore menolak akses. Pastikan tab Rules Firestore mengizinkan: allow read, write: if true;');
-        } else if (error.code === 'not-found' || (error.message && error.message.includes('404'))) {
-          this.updateStatus('error', 'Database Belum Dibuat', 'Database Firestore belum dibuat di Firebase Console untuk project dvh-grocery. Klik tombol "Buka Firestore Console" di atas.');
-        } else {
-          this.updateStatus('offline', 'Mode Celengan Lokal', error.message || 'Penyimpanan lokal aktif.');
-        }
+        this.updateStatus('offline', 'Mode Celengan Lokal', error.message || 'Penyimpanan lokal aktif.');
       }
     );
   }
 
+  // Heartbeat / REST check for latest cloud updates
+  async checkLatestFromCloud() {
+    if (!this.store || !this.store.currentUser || this.isApplyingCloudUpdate) return;
+    const user = this.store.currentUser.username.toLowerCase().trim();
+
+    try {
+      if (this.cartDocRef) {
+        const snap = await this.cartDocRef.get();
+        if (snap.exists) {
+          const cloudData = snap.data();
+          if (cloudData && cloudData.updatedBy !== this.store.deviceId) {
+            if (cloudData.updatedAt && cloudData.updatedAt > this.lastCloudUpdatedAt) {
+              this.lastCloudUpdatedAt = cloudData.updatedAt;
+              const applied = this.applyCloudData(cloudData);
+              if (applied) {
+                const source = (cloudData.updatedBy && cloudData.updatedBy.startsWith('hp_')) ? 'HP' : 'PC';
+                this.showRealtimeToast(`Belanjaan diupdate dari ${source}!`, '✨');
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {}
+  }
+
   applyCloudData(data) {
-    if (!data || !this.store) return;
+    if (!data || !this.store) return false;
     this.isApplyingCloudUpdate = true;
 
     try {
@@ -621,52 +865,112 @@ class FirebaseSyncService {
 
       if (stateChanged) {
         this.store.saveUserState();
-        this.store.listeners.forEach(fn => fn(this.store));
+        this.store.notifyFromCloud();
       }
+      return stateChanged;
     } finally {
       this.isApplyingCloudUpdate = false;
     }
   }
 
   triggerDebouncedSync() {
-    if (this.isApplyingCloudUpdate || !this.sessionDocRef) return;
+    if (this.isApplyingCloudUpdate || !this.store || !this.store.currentUser) return;
 
     this.updateStatus('syncing', 'Menyimpan...', 'Menyimpan transaksi ke Firestore...');
 
     clearTimeout(this.debounceTimer);
     this.debounceTimer = setTimeout(() => {
       this.syncNow();
-    }, 600);
+    }, 400);
   }
 
   async syncNow() {
-    if (!this.sessionDocRef || !this.store || !this.store.currentUser) return;
+    if (!this.store || !this.store.currentUser) return;
+    const user = this.store.currentUser.username.toLowerCase().trim();
 
     try {
+      const now = Date.now();
+      this.lastCloudUpdatedAt = now;
+
       const payload = {
+        username: user,
         cart: this.store.cart,
         budgetLimit: this.store.budgetLimit,
         priceLookup: this.store.priceLookup,
         history: this.store.history,
         user: {
-          username: this.store.currentUser.username,
+          username: user,
           name: this.store.currentUser.name,
           avatar: this.store.currentUser.avatar || '🍓'
         },
-        updatedAt: Date.now()
+        updatedAt: now,
+        updatedBy: this.store.deviceId
       };
 
-      await this.sessionDocRef.set(payload, { merge: true });
+      if (this.cartDocRef) {
+        await this.cartDocRef.set(payload, { merge: true });
+      }
+      if (this.sessionDocRef) {
+        await this.sessionDocRef.set(payload, { merge: true });
+      }
+
       this.updateStatus('synced', 'Celengan Cloud Aktif', 'Data belanja berhasil disinkronkan ke Cloud Firestore.');
     } catch (err) {
-      console.warn('[Firebase] Save status (fallback active):', err.code || err);
+      console.warn('[Firebase] Save error (offline fallback):', err.code || err);
       this.lastError = err;
-      if (err.code === 'permission-denied') {
-        this.updateStatus('error', 'Izin Ditolak (Rules)', 'Firestore Security Rules menolak penulisan data.');
-      } else {
-        this.updateStatus('offline', 'Mode Celengan Lokal', err.message || 'Penyimpanan lokal aktif.');
-      }
+      this.updateStatus('offline', 'Mode Celengan Lokal', 'Penyimpanan lokal aktif.');
     }
+  }
+
+  async reconfigure(newConfig) {
+    if (!newConfig || !newConfig.apiKey || !newConfig.projectId) {
+      throw new Error('API Key dan Project ID wajib diisi!');
+    }
+
+    localStorage.setItem(STORAGE_KEYS.FIREBASE_CONFIG, JSON.stringify(newConfig));
+    this.activeConfig = newConfig;
+
+    if (this.unsubscribeSnapshot) {
+      this.unsubscribeSnapshot();
+      this.unsubscribeSnapshot = null;
+    }
+    if (this.unsubscribeAccounts) {
+      this.unsubscribeAccounts();
+      this.unsubscribeAccounts = null;
+    }
+
+    if (typeof firebase !== 'undefined' && firebase.apps.length) {
+      await Promise.all(firebase.apps.map(a => a.delete()));
+    }
+
+    const app = firebase.initializeApp(newConfig);
+    this.db = firebase.firestore(app);
+
+    this.listenToAccounts();
+    this.fetchAllAccountsFromCloud();
+
+    if (this.store && this.store.currentUser) {
+      await this.reconnectForUser();
+    }
+    await this.syncNow();
+    return { success: true };
+  }
+
+  async resetConfig() {
+    localStorage.removeItem(STORAGE_KEYS.FIREBASE_CONFIG);
+    if (this.unsubscribeSnapshot) {
+      this.unsubscribeSnapshot();
+      this.unsubscribeSnapshot = null;
+    }
+    if (this.unsubscribeAccounts) {
+      this.unsubscribeAccounts();
+      this.unsubscribeAccounts = null;
+    }
+    if (typeof firebase !== 'undefined' && firebase.apps.length) {
+      await Promise.all(firebase.apps.map(a => a.delete()));
+    }
+    this.activeConfig = DEFAULT_FIREBASE_CONFIG;
+    this.updateStatus('offline', 'Atur Firebase Cloud', 'Mode lokal celengan diaktifkan.');
   }
 
   updateStatus(status, label, detail = '') {
@@ -715,6 +1019,15 @@ window.firebaseSync = firebaseSync;
 // ==========================================
 class GroceryStore {
   constructor() {
+    // Generate unique persistent device ID for client identification (HP vs PC)
+    let storedDevId = sessionStorage.getItem('dvh_grocery_device_id');
+    if (!storedDevId) {
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 640;
+      storedDevId = (isMobile ? 'hp_' : 'pc_') + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6);
+      sessionStorage.setItem('dvh_grocery_device_id', storedDevId);
+    }
+    this.deviceId = storedDevId;
+
     this.accounts = JSON.parse(localStorage.getItem(STORAGE_KEYS.ACCOUNTS_LIST) || '[]');
     
     // Seed default demo account if empty
@@ -756,23 +1069,34 @@ class GroceryStore {
     return `dvh_kids_${username}_${key}_v3`;
   }
 
-  // Register a brand new account
-  registerAccount({ name, avatar, username, pin, budgetLimit }) {
+  // Register a brand new account and save to Cloud
+  async registerAccount({ name, avatar, username, pin, budgetLimit }) {
     const cleanUser = String(username || '').toLowerCase().trim();
     if (!cleanUser) throw new Error('Username wajib diisi!');
     if (!name || !name.trim()) throw new Error('Nama si kecil wajib diisi!');
 
-    // Check if username already exists
+    // Check if username already exists locally
     const existing = this.accounts.find(a => a.username.toLowerCase() === cleanUser);
     if (existing) {
       throw new Error(`Username "${cleanUser}" sudah terdaftar. Silakan pilih username lain atau masuk akun.`);
+    }
+
+    // Check if username already exists in Cloud
+    if (window.firebaseSync) {
+      const cloudExisting = await window.firebaseSync.fetchAccountFromCloud(cleanUser);
+      if (cloudExisting) {
+        // Merge into local list
+        this.accounts.push(cloudExisting);
+        localStorage.setItem(STORAGE_KEYS.ACCOUNTS_LIST, JSON.stringify(this.accounts));
+        throw new Error(`Username "${cleanUser}" sudah terdaftar di Cloud! Silakan langsung login di tab Masuk Akun.`);
+      }
     }
 
     const newAccount = {
       username: cleanUser,
       name: name.trim(),
       avatar: avatar || '🍓',
-      pin: pin || '1234',
+      pin: String(pin || '1234').trim(),
       budgetLimit: Math.max(10000, parseRupiahInput(budgetLimit) || 250000),
       createdAt: Date.now()
     };
@@ -780,13 +1104,28 @@ class GroceryStore {
     this.accounts.push(newAccount);
     localStorage.setItem(STORAGE_KEYS.ACCOUNTS_LIST, JSON.stringify(this.accounts));
 
+    // Save account to Cloud Firestore so any device (HP/PC) can log in
+    if (window.firebaseSync) {
+      await window.firebaseSync.saveAccountToCloud(newAccount);
+    }
+
     // Automatically log in to the newly created account
-    return this.login(newAccount.username, newAccount.pin);
+    return await this.login(newAccount.username, newAccount.pin);
   }
 
-  login(username, pin = '1234') {
+  async login(username, pin = '1234') {
     const cleanUser = String(username || '').toLowerCase().trim();
-    const account = this.accounts.find(a => a.username.toLowerCase() === cleanUser);
+    let account = this.accounts.find(a => a.username.toLowerCase() === cleanUser);
+
+    // If not found in local memory, check Cloud Firestore!
+    if (!account && window.firebaseSync) {
+      const cloudAccount = await window.firebaseSync.fetchAccountFromCloud(cleanUser);
+      if (cloudAccount) {
+        account = cloudAccount;
+        this.accounts.push(account);
+        localStorage.setItem(STORAGE_KEYS.ACCOUNTS_LIST, JSON.stringify(this.accounts));
+      }
+    }
 
     if (!account) {
       // Auto-fallback creation for Devin/Rian demo
@@ -801,7 +1140,10 @@ class GroceryStore {
         };
         this.accounts.push(demoAcc);
         localStorage.setItem(STORAGE_KEYS.ACCOUNTS_LIST, JSON.stringify(this.accounts));
-        return this.setUserSession(demoAcc);
+        if (window.firebaseSync) {
+          window.firebaseSync.saveAccountToCloud(demoAcc);
+        }
+        return await this.setUserSession(demoAcc);
       }
       throw new Error('Akun tidak ditemukan! Silakan buat akun baru di tab sebelah.');
     }
@@ -810,16 +1152,17 @@ class GroceryStore {
       throw new Error('PIN keamanan salah! Silakan coba lagi.');
     }
 
-    return this.setUserSession(account);
+    return await this.setUserSession(account);
   }
 
-  setUserSession(account) {
+  async setUserSession(account) {
     this.currentUser = { ...account, loginAt: Date.now() };
     this.budgetLimit = account.budgetLimit || 250000;
     localStorage.setItem(STORAGE_KEYS.ACTIVE_USER, JSON.stringify(this.currentUser));
     this.loadUserState();
+
     if (window.firebaseSync) {
-      window.firebaseSync.reconnectForUser();
+      await window.firebaseSync.reconnectForUser();
     }
     this.notify(true);
     return this.currentUser;
@@ -905,6 +1248,11 @@ class GroceryStore {
     if (window.firebaseSync && this.currentUser) {
       window.firebaseSync.triggerDebouncedSync();
     }
+    this.listeners.forEach(fn => fn(this));
+  }
+
+  notifyFromCloud() {
+    this.saveUserState();
     this.listeners.forEach(fn => fn(this));
   }
 
@@ -1174,6 +1522,7 @@ class GroceryUIController {
     this.autoLookupNotice = document.getElementById('auto-lookup-notice');
     this.modalPreviewSubtotal = document.getElementById('modal-preview-subtotal');
     this.modalPreviewSaving = document.getElementById('modal-preview-saving');
+    this.modalPriceComparatorIndicator = document.getElementById('modal-price-comparator-indicator');
     this.modalCloseBtn = document.getElementById('modal-close-btn');
 
     this.modalBudget = document.getElementById('modal-budget');
@@ -1265,32 +1614,51 @@ class GroceryUIController {
       });
     });
 
-    // Login Form Submission
-    this.formLogin?.addEventListener('submit', (e) => {
+    // Login Form Submission (Checks local and Cloud Firestore)
+    this.formLogin?.addEventListener('submit', async (e) => {
       e.preventDefault();
       const u = this.inputLoginUsername?.value.trim() || 'devin';
       const p = this.inputLoginPin?.value.trim() || '1234';
 
+      const submitBtn = this.formLogin.querySelector('button[type="submit"]');
+      const originalHtml = submitBtn ? submitBtn.innerHTML : '';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<span>⏳</span> Memeriksa Akun...`;
+      }
+
       try {
-        store.login(u, p);
+        await store.login(u, p);
         feedback.success();
         this.updateAuthView();
       } catch (err) {
         feedback.dangerAlert();
         alert(err.message || 'Gagal masuk akun');
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalHtml;
+        }
       }
     });
 
-    // Register Form Submission
-    this.formRegister?.addEventListener('submit', (e) => {
+    // Register Form Submission (Saves to local & Cloud Firestore)
+    this.formRegister?.addEventListener('submit', async (e) => {
       e.preventDefault();
       const name = this.regName?.value.trim();
       const username = this.regUsername?.value.trim();
       const pin = this.regPin?.value.trim() || '1234';
       const budgetLimit = this.regBudget?.value || '250.000';
 
+      const submitBtn = this.formRegister.querySelector('button[type="submit"]');
+      const originalHtml = submitBtn ? submitBtn.innerHTML : '';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<span>⏳</span> Mendaftarkan Akun ke Cloud...`;
+      }
+
       try {
-        store.registerAccount({
+        await store.registerAccount({
           name,
           username,
           pin,
@@ -1301,19 +1669,28 @@ class GroceryUIController {
         if (typeof confetti === 'function') {
           confetti({ particleCount: 70, spread: 60, origin: { y: 0.5 } });
         }
-        alert(`🎉 Selamat datang ${name}! Akun ceria kamu berhasil dibuat.`);
+        alert(`🎉 Selamat datang ${name}! Akun kamu berhasil dibuat dan disimpan di Cloud Firestore.`);
         this.updateAuthView();
       } catch (err) {
         feedback.dangerAlert();
         alert(err.message || 'Gagal mendaftar akun');
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalHtml;
+        }
       }
     });
 
     // Quick 1-Click Login for Demo
-    this.btnQuickLoginRian?.addEventListener('click', () => {
-      feedback.success();
-      store.login('devin', '1234');
-      this.updateAuthView();
+    this.btnQuickLoginRian?.addEventListener('click', async () => {
+      try {
+        await store.login('devin', '1234');
+        feedback.success();
+        this.updateAuthView();
+      } catch (err) {
+        alert(err.message);
+      }
     });
 
     // Logout
@@ -1382,7 +1759,7 @@ class GroceryUIController {
       this.updateModalCalculationPreview();
     });
 
-    [this.inputItemPrice, this.inputItemDiscount, this.inputItemQty].forEach(el => {
+    [this.inputItemPrice, this.inputItemDiscount, this.inputItemQty, this.inputItemLastPrice].forEach(el => {
       el?.addEventListener('input', () => {
         this.updateModalCalculationPreview();
       });
@@ -1761,6 +2138,7 @@ class GroceryUIController {
     const unitPrice = parseRupiahInput(this.inputItemPrice.value);
     const qty = parseFloat(this.inputItemQty.value) || 1;
     const discountRaw = this.inputItemDiscount.value;
+    const lastPrice = this.inputItemLastPrice?.value ? parseRupiahInput(this.inputItemLastPrice.value) : null;
 
     const discountInfo = Calculator.calculateDiscount(unitPrice, discountRaw);
     const subtotal = discountInfo.finalUnitPrice * qty;
@@ -1772,6 +2150,61 @@ class GroceryUIController {
       this.modalPreviewSaving.classList.remove('hidden');
     } else {
       this.modalPreviewSaving.classList.add('hidden');
+    }
+
+    // F-04: Realtime Price Comparator vs Bulan Lalu
+    if (this.modalPriceComparatorIndicator) {
+      if (lastPrice !== null && lastPrice > 0 && unitPrice > 0) {
+        const diff = unitPrice - lastPrice;
+        this.modalPriceComparatorIndicator.classList.remove('hidden');
+        if (diff > 0) {
+          this.modalPriceComparatorIndicator.className = 'rounded-xl p-2.5 border text-xs font-bold flex items-center justify-between bg-rose-50 text-rose-700 border-rose-300 shadow-xs';
+          this.modalPriceComparatorIndicator.innerHTML = `
+            <span class="flex items-center gap-1.5">
+              <span class="text-base">🔺</span>
+              <span>Harga Naik dibanding bulan lalu:</span>
+            </span>
+            <span class="font-black font-mono-num bg-rose-100 text-rose-800 px-2 py-0.5 rounded-lg border border-rose-200">
+              &uarr; +${formatRupiah(diff)} (Naik)
+            </span>
+          `;
+        } else if (diff < 0) {
+          const saving = Math.abs(diff);
+          this.modalPriceComparatorIndicator.className = 'rounded-xl p-2.5 border text-xs font-bold flex items-center justify-between bg-emerald-50 text-emerald-700 border-emerald-300 shadow-xs';
+          this.modalPriceComparatorIndicator.innerHTML = `
+            <span class="flex items-center gap-1.5">
+              <span class="text-base">🔻</span>
+              <span>Harga Turun dibanding bulan lalu:</span>
+            </span>
+            <span class="font-black font-mono-num bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-lg border border-emerald-200">
+              &darr; -${formatRupiah(saving)} (Hemat!)
+            </span>
+          `;
+        } else {
+          this.modalPriceComparatorIndicator.className = 'rounded-xl p-2.5 border text-xs font-bold flex items-center justify-between bg-pink-50 text-pink-700 border-pink-300 shadow-xs';
+          this.modalPriceComparatorIndicator.innerHTML = `
+            <span class="flex items-center gap-1.5">
+              <span class="text-base">⚖️</span>
+              <span>Harga Sama / Stabil:</span>
+            </span>
+            <span class="font-black font-mono-num bg-pink-100 text-pink-800 px-2 py-0.5 rounded-lg border border-pink-200">
+              = Tetap (${formatRupiah(unitPrice)})
+            </span>
+          `;
+        }
+      } else if (unitPrice > 0) {
+        this.modalPriceComparatorIndicator.classList.remove('hidden');
+        this.modalPriceComparatorIndicator.className = 'rounded-xl p-2.5 border text-xs font-bold flex items-center justify-between bg-sky-50 text-sky-700 border-sky-200';
+        this.modalPriceComparatorIndicator.innerHTML = `
+          <span class="flex items-center gap-1.5">
+            <span class="text-base">⭐</span>
+            <span>Jajanan Baru (Belum ada data bulan lalu)</span>
+          </span>
+          <span class="text-[11px] font-semibold text-slate-500 font-mono-num">${formatRupiah(unitPrice)}</span>
+        `;
+      } else {
+        this.modalPriceComparatorIndicator.classList.add('hidden');
+      }
     }
   }
 
