@@ -999,8 +999,8 @@ class FirebaseSyncService {
           break;
         case 'offline':
         default:
-          dot.className += ' bg-pink-400';
-          text.className += ' text-pink-600';
+          dot.className += ' bg-slate-500';
+          text.className += ' text-slate-400';
           break;
       }
     }
@@ -1435,7 +1435,7 @@ class GroceryStore {
 const store = new GroceryStore();
 
 // ==========================================
-// 5. UI CONTROLLER (PINK KIDS THEME)
+// 5. UI CONTROLLER (GALAXY SPACE THEME)
 // ==========================================
 class GroceryUIController {
   constructor() {
@@ -1597,11 +1597,11 @@ class GroceryUIController {
     this.avatarOptions.forEach(btn => {
       btn.addEventListener('click', () => {
         feedback.tap();
-        this.selectedAvatar = btn.dataset.avatar || '🐰';
+        this.selectedAvatar = btn.dataset.avatar || '🧑‍🚀';
         this.avatarOptions.forEach(b => {
-          b.className = 'avatar-option-btn p-2 rounded-2xl border border-pink-200 bg-pink-50/60 text-2xl flex items-center justify-center';
+          b.className = 'avatar-option-btn p-2 rounded-2xl border border-violet-500/30 bg-slate-900/80 text-2xl flex items-center justify-center';
         });
-        btn.className = 'avatar-option-btn p-2 rounded-2xl border-2 border-pink-400 bg-pink-100 text-2xl flex items-center justify-center shadow-xs';
+        btn.className = 'avatar-option-btn p-2 rounded-2xl border-2 border-cyan-400 bg-cyan-950/80 text-2xl flex items-center justify-center shadow-md shadow-cyan-500/30';
       });
     });
 
@@ -2027,9 +2027,9 @@ class GroceryUIController {
         break;
       case 'offline':
       default:
-        this.firebaseStatusBanner.className = 'p-3 rounded-2xl bg-pink-50 border border-pink-200 flex items-start gap-2.5 text-xs transition-all';
+        this.firebaseStatusBanner.className = 'p-3 rounded-2xl bg-slate-900/90 border border-violet-500/30 flex items-start gap-2.5 text-xs transition-all';
         if (this.firebaseStatusIcon) this.firebaseStatusIcon.textContent = '💡';
-        if (this.firebaseStatusTitle) this.firebaseStatusTitle.className = 'font-black text-pink-800 text-xs';
+        if (this.firebaseStatusTitle) this.firebaseStatusTitle.className = 'font-black text-cyan-300 text-xs';
         break;
     }
     if (this.firebaseStatusTitle) this.firebaseStatusTitle.textContent = title;
@@ -2038,13 +2038,13 @@ class GroceryUIController {
 
   switchAuthTab(tab) {
     if (tab === 'register') {
-      this.authTabBtnLogin.className = 'py-2 rounded-xl transition-all duration-200 text-slate-500 hover:text-pink-600 flex items-center justify-center gap-1.5';
-      this.authTabBtnRegister.className = 'py-2 rounded-xl transition-all duration-200 bg-white text-pink-600 shadow-sm flex items-center justify-center gap-1.5';
+      this.authTabBtnLogin.className = 'py-2 rounded-xl transition-all duration-200 text-slate-400 hover:text-cyan-300 flex items-center justify-center gap-1.5';
+      this.authTabBtnRegister.className = 'py-2 rounded-xl transition-all duration-200 bg-gradient-to-r from-cyan-500 via-violet-600 to-fuchsia-500 text-white shadow-md shadow-violet-500/40 flex items-center justify-center gap-1.5 font-bold';
       this.authPanelLogin.classList.add('hidden');
       this.authPanelRegister.classList.remove('hidden');
     } else {
-      this.authTabBtnLogin.className = 'py-2 rounded-xl transition-all duration-200 bg-white text-pink-600 shadow-sm flex items-center justify-center gap-1.5';
-      this.authTabBtnRegister.className = 'py-2 rounded-xl transition-all duration-200 text-slate-500 hover:text-pink-600 flex items-center justify-center gap-1.5';
+      this.authTabBtnLogin.className = 'py-2 rounded-xl transition-all duration-200 bg-gradient-to-r from-cyan-500 via-violet-600 to-fuchsia-500 text-white shadow-md shadow-violet-500/40 flex items-center justify-center gap-1.5 font-bold';
+      this.authTabBtnRegister.className = 'py-2 rounded-xl transition-all duration-200 text-slate-400 hover:text-cyan-300 flex items-center justify-center gap-1.5';
       this.authPanelLogin.classList.remove('hidden');
       this.authPanelRegister.classList.add('hidden');
     }
@@ -2112,7 +2112,7 @@ class GroceryUIController {
     const found = store.lookupProduct(typedName);
     if (found && typedName.trim().length >= 3) {
       this.autoLookupNotice.innerHTML = `
-        <div class="flex items-center gap-1.5 text-xs text-pink-700 bg-pink-100 border border-pink-200 rounded-xl px-2.5 py-1.5">
+        <div class="flex items-center gap-1.5 text-xs text-cyan-300 bg-cyan-950/80 border border-cyan-500/40 rounded-xl px-2.5 py-1.5">
           <span>✨</span>
           <span>Ditemukan referensi: <b>${formatRupiah(found.price)}</b> / ${found.unit || 'pcs'}</span>
         </div>
@@ -2181,13 +2181,13 @@ class GroceryUIController {
             </span>
           `;
         } else {
-          this.modalPriceComparatorIndicator.className = 'rounded-xl p-2.5 border text-xs font-bold flex items-center justify-between bg-pink-50 text-pink-700 border-pink-300 shadow-xs';
+          this.modalPriceComparatorIndicator.className = 'rounded-xl p-2.5 border text-xs font-bold flex items-center justify-between bg-slate-900/90 text-slate-300 border-slate-600/50 shadow-xs';
           this.modalPriceComparatorIndicator.innerHTML = `
             <span class="flex items-center gap-1.5">
               <span class="text-base">⚖️</span>
               <span>Harga Sama / Stabil:</span>
             </span>
-            <span class="font-black font-mono-num bg-pink-100 text-pink-800 px-2 py-0.5 rounded-lg border border-pink-200">
+            <span class="font-black font-mono-num bg-slate-800 text-slate-200 px-2 py-0.5 rounded-lg border border-slate-700">
               = Tetap (${formatRupiah(unitPrice)})
             </span>
           `;
