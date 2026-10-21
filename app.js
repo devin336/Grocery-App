@@ -16,23 +16,23 @@ const STORAGE_KEYS = {
 };
 
 const CATEGORIES = [
-  { id: 'all', name: '🌟 Semua', icon: 'sparkles', color: 'bg-pink-100 text-pink-700 border-pink-300' },
-  { id: 'sayur', name: '🥬 Sayur Sehat', icon: 'salad', color: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
-  { id: 'minuman', name: '🥤 Minuman & Susu', icon: 'coffee', color: 'bg-cyan-100 text-cyan-800 border-cyan-300' },
-  { id: 'buah', name: '🍎 Buah Manis', icon: 'apple', color: 'bg-lime-100 text-lime-800 border-lime-300' },
-  { id: 'camilan', name: '🍪 Biskuit & Camilan', icon: 'cookie', color: 'bg-orange-100 text-orange-800 border-orange-300' },
-  { id: 'daging', name: '🍳 Sarapan & Lauk', icon: 'drumstick', color: 'bg-rose-100 text-rose-800 border-rose-300' },
-  { id: 'sembako', name: '🌾 Sembako Dapur', icon: 'wheat', color: 'bg-amber-100 text-amber-800 border-amber-300' },
-  { id: 'kebersihan', name: '🧼 Mandi Wangi', icon: 'sparkles', color: 'bg-purple-100 text-purple-800 border-purple-300' },
-  { id: 'peralatan', name: '🔧 Peralatan', icon: 'wrench', color: 'bg-blue-100 text-blue-800 border-blue-300' },
-  { id: 'lainnya', name: 'Lainnya', icon: 'tag', color: 'bg-slate-100 text-slate-700 border-slate-300' }
+  { id: 'all', name: '🌟 Semua', icon: 'sparkles', color: 'bg-violet-950/70 text-violet-300 border-violet-500/50 shadow-xs shadow-violet-500/20' },
+  { id: 'sayur', name: '🥬 Sayur Segar', icon: 'salad', color: 'bg-emerald-950/70 text-emerald-300 border-emerald-500/50 shadow-xs shadow-emerald-500/20' },
+  { id: 'minuman', name: '🥤 Minuman & Susu', icon: 'coffee', color: 'bg-cyan-950/70 text-cyan-300 border-cyan-500/50 shadow-xs shadow-cyan-500/20' },
+  { id: 'buah', name: '🍎 Buah Segar', icon: 'apple', color: 'bg-lime-950/70 text-lime-300 border-lime-500/50 shadow-xs shadow-lime-500/20' },
+  { id: 'camilan', name: '🍪 Camilan & Snack', icon: 'cookie', color: 'bg-amber-950/70 text-amber-300 border-amber-500/50 shadow-xs shadow-amber-500/20' },
+  { id: 'daging', name: '🥩 Daging & Protein', icon: 'drumstick', color: 'bg-rose-950/70 text-rose-300 border-rose-500/50 shadow-xs shadow-rose-500/20' },
+  { id: 'sembako', name: '🌾 Sembako Dapur', icon: 'wheat', color: 'bg-yellow-950/70 text-yellow-300 border-yellow-500/50 shadow-xs shadow-yellow-500/20' },
+  { id: 'kebersihan', name: '🧼 Mandi & Perawatan', icon: 'sparkles', color: 'bg-fuchsia-950/70 text-fuchsia-300 border-fuchsia-500/50 shadow-xs shadow-fuchsia-500/20' },
+  { id: 'peralatan', name: '🔧 Kebutuhan Rumah', icon: 'wrench', color: 'bg-blue-950/70 text-blue-300 border-blue-500/50 shadow-xs shadow-blue-500/20' },
+  { id: 'lainnya', name: '🏷️ Lainnya', icon: 'tag', color: 'bg-slate-900/80 text-slate-300 border-slate-700/60' }
 ];
 
 // Initial mock items for newly created cart
 const DEFAULT_KIDS_CART = [
   {
     id: 'mock-1',
-    name: 'Bayam Hijau Segar Kelinci',
+    name: 'Bayam Hijau Segar Hidroponik',
     category: 'sayur',
     unit: 'ikat',
     qty: 2,
@@ -89,20 +89,20 @@ const DEFAULT_KIDS_CART = [
 
 // 1-Tap Quick Catalog Carousel items (User can tap + to add immediately)
 const QUICK_CATALOG_ITEMS = [
-  { name: 'Bayam Hijau Kelinci', category: 'sayur', unit: 'ikat', price: 6000, lastMonthPrice: 5500, discount: '' },
-  { name: 'Wortel Manis Kelinci', category: 'sayur', unit: 'kg', price: 12000, lastMonthPrice: 12000, discount: '' },
+  { name: 'Bayam Hijau Hidroponik', category: 'sayur', unit: 'ikat', price: 6000, lastMonthPrice: 5500, discount: '' },
+  { name: 'Wortel Berastagi Manis', category: 'sayur', unit: 'kg', price: 12000, lastMonthPrice: 12000, discount: '' },
   { name: 'Brokoli Hijau Super', category: 'sayur', unit: 'pack', price: 18000, lastMonthPrice: 20000, discount: '' },
   { name: 'Susu Ultra Strawberry', category: 'minuman', unit: 'kotak', price: 6000, lastMonthPrice: 5500, discount: '' },
   { name: 'Yakult Probiotik (5 botol)', category: 'minuman', unit: 'pack', price: 11000, lastMonthPrice: 10500, discount: '' },
-  { name: 'Air Aqua Dingin 1.5L', category: 'minuman', unit: 'botol', price: 7000, lastMonthPrice: 6500, discount: '' },
+  { name: 'Air Mineral Aqua 1.5L', category: 'minuman', unit: 'botol', price: 7000, lastMonthPrice: 6500, discount: '' },
   { name: 'Milo Kotak Cokelat', category: 'minuman', unit: 'kotak', price: 6000, lastMonthPrice: 6000, discount: '' },
-  { name: 'Pisang Sunpride Manis', category: 'buah', unit: 'sisir', price: 18000, lastMonthPrice: 20000, discount: '' },
-  { name: 'Apel Fuji Merah', category: 'buah', unit: 'kg', price: 38000, lastMonthPrice: 40000, discount: '' },
+  { name: 'Pisang Sunpride Cavendish', category: 'buah', unit: 'sisir', price: 18000, lastMonthPrice: 20000, discount: '' },
+  { name: 'Apel Fuji Merah Manis', category: 'buah', unit: 'kg', price: 38000, lastMonthPrice: 40000, discount: '' },
   { name: 'Wafer Tango Cokelat', category: 'camilan', unit: 'pack', price: 8500, lastMonthPrice: 8500, discount: '' },
-  { name: 'Biskuit Marie Susu', category: 'camilan', unit: 'pack', price: 10000, lastMonthPrice: 10000, discount: '' },
+  { name: 'Biskuit Roma Kelapa', category: 'camilan', unit: 'pack', price: 10000, lastMonthPrice: 10000, discount: '' },
   { name: 'Nugget Fiesta Dinosaurus', category: 'daging', unit: 'pack', price: 48000, lastMonthPrice: 46000, discount: '10%' },
-  { name: 'Sosis Kanzler Siap Makan', category: 'daging', unit: 'pcs', price: 9000, lastMonthPrice: 9000, discount: '' },
-  { name: 'Telur Ayam Rebus 1kg', category: 'daging', unit: 'kg', price: 31000, lastMonthPrice: 32000, discount: '' }
+  { name: 'Sosis Kanzler Singles Original', category: 'daging', unit: 'pcs', price: 9000, lastMonthPrice: 9000, discount: '' },
+  { name: 'Telur Ayam Negeri 1kg', category: 'daging', unit: 'kg', price: 31000, lastMonthPrice: 32000, discount: '' }
 ];
 
 // Product lookup database for instant autofill
@@ -2069,11 +2069,11 @@ class GroceryUIController {
 
     [this.navBelanja, this.navRiwayat, this.navAnggaran].forEach(el => {
       if (!el) return;
-      el.classList.remove('text-pink-600', 'font-black');
+      el.classList.remove('text-cyan-400', 'font-black');
       el.classList.add('text-slate-400');
       const icon = el.querySelector('.nav-icon-container');
       if (icon) {
-        icon.classList.remove('bg-pink-100', 'text-pink-600', 'ring-2', 'ring-pink-300');
+        icon.classList.remove('bg-violet-950/80', 'text-cyan-400', 'ring-2', 'ring-cyan-400/50', 'shadow-xs');
       }
     });
 
@@ -2083,22 +2083,22 @@ class GroceryUIController {
 
     if (tab === 'belanja') {
       this.tabBelanja?.classList.remove('hidden');
-      this.navBelanja?.classList.add('text-pink-600', 'font-black');
+      this.navBelanja?.classList.add('text-cyan-400', 'font-black');
       this.navBelanja?.classList.remove('text-slate-400');
-      this.navBelanja?.querySelector('.nav-icon-container')?.classList.add('bg-pink-100', 'text-pink-600', 'ring-2', 'ring-pink-300');
+      this.navBelanja?.querySelector('.nav-icon-container')?.classList.add('bg-violet-950/80', 'text-cyan-400', 'ring-2', 'ring-cyan-400/50', 'shadow-xs');
       this.floatingAddBtn?.classList.remove('hidden');
     } else if (tab === 'riwayat') {
       this.tabRiwayat?.classList.remove('hidden');
-      this.navRiwayat?.classList.add('text-pink-600', 'font-black');
+      this.navRiwayat?.classList.add('text-cyan-400', 'font-black');
       this.navRiwayat?.classList.remove('text-slate-400');
-      this.navRiwayat?.querySelector('.nav-icon-container')?.classList.add('bg-pink-100', 'text-pink-600', 'ring-2', 'ring-pink-300');
+      this.navRiwayat?.querySelector('.nav-icon-container')?.classList.add('bg-violet-950/80', 'text-cyan-400', 'ring-2', 'ring-cyan-400/50', 'shadow-xs');
       this.floatingAddBtn?.classList.add('hidden');
       this.renderHistoryList();
     } else if (tab === 'anggaran') {
       this.tabAnggaran?.classList.remove('hidden');
-      this.navAnggaran?.classList.add('text-pink-600', 'font-black');
+      this.navAnggaran?.classList.add('text-cyan-400', 'font-black');
       this.navAnggaran?.classList.remove('text-slate-400');
-      this.navAnggaran?.querySelector('.nav-icon-container')?.classList.add('bg-pink-100', 'text-pink-600', 'ring-2', 'ring-pink-300');
+      this.navAnggaran?.querySelector('.nav-icon-container')?.classList.add('bg-violet-950/80', 'text-cyan-400', 'ring-2', 'ring-cyan-400/50', 'shadow-xs');
       this.floatingAddBtn?.classList.add('hidden');
       this.renderAnggaranPage();
     }
@@ -2444,42 +2444,42 @@ class GroceryUIController {
 
     if (summary.remainingBudget >= 0) {
       this.headerRemaining.textContent = formatRupiah(summary.remainingBudget);
-      this.headerRemaining.className = 'text-base font-black text-emerald-600 font-mono-num tracking-tight leading-tight';
-      this.headerRemainingLabel.textContent = 'Sisa Uang Saku';
+      this.headerRemaining.className = 'text-base font-black text-cyan-400 font-mono-num tracking-tight leading-tight';
+      this.headerRemainingLabel.textContent = 'Sisa Anggaran';
     } else {
       this.headerRemaining.textContent = `- ${formatRupiah(Math.abs(summary.remainingBudget))}`;
-      this.headerRemaining.className = 'text-base font-black text-rose-600 font-mono-num tracking-tight leading-tight';
-      this.headerRemainingLabel.textContent = 'Uang Saku Kurang!';
+      this.headerRemaining.className = 'text-base font-black text-rose-400 font-mono-num tracking-tight leading-tight';
+      this.headerRemainingLabel.textContent = 'Melebihi Limit!';
     }
 
     this.headerProgressBar.style.width = `${summary.budgetUsagePercent}%`;
     this.headerProgressPercent.textContent = `${Math.round(summary.rawPercentage)}%`;
 
-    this.headerContainer.classList.remove('animate-danger-pulse', 'border-rose-400');
+    this.headerContainer.classList.remove('animate-danger-pulse', 'border-rose-500/60');
 
     const overbudgetTopBanner = document.getElementById('overbudget-top-banner');
 
     if (summary.budgetStatus === 'safe') {
-      this.headerProgressBar.className = 'h-full rounded-full transition-progress bg-gradient-to-r from-pink-400 to-pink-500';
-      this.headerStatusBadge.className = 'text-[11px] font-bold px-2 py-0.5 rounded-full bg-pink-100 text-pink-700 border border-pink-200 flex items-center gap-1';
-      this.headerStatusBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-pink-500"></span> 💖 Uang Saku Aman`;
+      this.headerProgressBar.className = 'h-full rounded-full transition-progress bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 shadow-sm shadow-cyan-500/50';
+      this.headerStatusBadge.className = 'text-[11px] font-bold px-2 py-0.5 rounded-full bg-cyan-950/80 text-cyan-300 border border-cyan-500/40 flex items-center gap-1';
+      this.headerStatusBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span> ⚡ Anggaran Aman`;
       if (overbudgetTopBanner) overbudgetTopBanner.classList.add('hidden');
     } else if (summary.budgetStatus === 'warning') {
-      this.headerProgressBar.className = 'h-full rounded-full transition-progress bg-amber-400';
-      this.headerStatusBadge.className = 'text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 flex items-center gap-1 animate-soft-pulse';
-      this.headerStatusBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> ⭐ Sisa Sedikit (${Math.round(summary.rawPercentage)}%)`;
+      this.headerProgressBar.className = 'h-full rounded-full transition-progress bg-gradient-to-r from-amber-400 to-amber-500 shadow-sm shadow-amber-500/50';
+      this.headerStatusBadge.className = 'text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-950/80 text-amber-300 border border-amber-500/40 flex items-center gap-1 animate-soft-pulse';
+      this.headerStatusBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> ⚠️ Limit Menipis (${Math.round(summary.rawPercentage)}%)`;
       if (overbudgetTopBanner) overbudgetTopBanner.classList.add('hidden');
     } else {
-      this.headerProgressBar.className = 'h-full rounded-full transition-progress bg-rose-500';
-      this.headerContainer.classList.add('animate-danger-pulse', 'border-rose-400');
-      this.headerStatusBadge.className = 'text-[11px] font-black px-2 py-0.5 rounded-full bg-rose-500 text-white flex items-center gap-1';
-      this.headerStatusBadge.innerHTML = `<span>🚨</span> UANG SAKU HABIS!`;
+      this.headerProgressBar.className = 'h-full rounded-full transition-progress bg-gradient-to-r from-rose-500 to-red-600 shadow-sm shadow-rose-500/80';
+      this.headerContainer.classList.add('animate-danger-pulse', 'border-rose-500/60');
+      this.headerStatusBadge.className = 'text-[11px] font-black px-2 py-0.5 rounded-full bg-rose-600 text-white flex items-center gap-1 shadow-md shadow-rose-600/50';
+      this.headerStatusBadge.innerHTML = `<span>🚨</span> OVERBUDGET!`;
       if (overbudgetTopBanner) overbudgetTopBanner.classList.remove('hidden');
     }
 
     if (summary.totalSaved > 0) {
       this.totalSavedBadge.innerHTML = `
-        <div class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-pink-100 border border-pink-300 text-pink-700 text-xs font-bold shadow-xs">
+        <div class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-violet-950/80 border border-violet-500/40 text-violet-300 text-xs font-bold shadow-xs">
           <span>🏷️</span>
           <span>Hemat Diskon: ${formatRupiah(summary.totalSaved)}</span>
         </div>
@@ -2500,8 +2500,8 @@ class GroceryUIController {
       pill.type = 'button';
       pill.className = `shrink-0 px-3 py-1.5 rounded-2xl text-xs font-extrabold transition-all duration-150 flex items-center gap-1.5 tap-effect ${
         isSelected
-          ? 'bg-gradient-to-r from-pink-500 to-rose-400 text-white shadow-md shadow-pink-300'
-          : 'bg-white text-pink-700 hover:bg-pink-50 border border-pink-200'
+          ? 'bg-gradient-to-r from-cyan-500 via-violet-600 to-fuchsia-500 text-white shadow-lg shadow-violet-500/40 border border-cyan-400/50'
+          : 'bg-slate-900/80 text-slate-300 hover:bg-slate-800 hover:text-white border border-violet-500/25'
       }`;
       pill.innerHTML = `<span>${cat.name}</span>`;
 
@@ -2531,7 +2531,7 @@ class GroceryUIController {
 
     items.forEach(item => {
       const card = document.createElement('div');
-      card.className = 'shrink-0 w-36 bg-white border-2 border-pink-200 rounded-2xl p-2.5 flex flex-col justify-between shadow-xs hover:border-pink-400 transition-all';
+      card.className = 'shrink-0 w-36 bg-slate-900/85 border border-violet-500/30 rounded-2xl p-2.5 flex flex-col justify-between shadow-lg shadow-black/40 hover:border-cyan-400/60 hover:shadow-cyan-500/20 transition-all backdrop-blur-sm';
       
       const catObj = CATEGORIES.find(c => c.id === item.category) || CATEGORIES[1];
 
@@ -2540,15 +2540,15 @@ class GroceryUIController {
           <span class="text-[9px] font-black px-1.5 py-0.5 rounded-md ${catObj.color} inline-block mb-1">
             ${catObj.name}
           </span>
-          <h4 class="text-xs font-black text-slate-800 truncate" title="${item.name}">${item.name}</h4>
-          <div class="text-[11px] font-mono-num font-black text-pink-600 mt-0.5">
+          <h4 class="text-xs font-black text-slate-100 truncate" title="${item.name}">${item.name}</h4>
+          <div class="text-[11px] font-mono-num font-black text-cyan-400 mt-0.5">
             ${formatRupiah(item.price)}
           </div>
         </div>
 
         <button 
           type="button" 
-          class="mt-2 w-full py-1.5 px-2 rounded-xl bg-pink-100 hover:bg-gradient-to-r hover:from-pink-500 hover:to-rose-400 text-pink-700 hover:text-white border border-pink-200 text-[10px] font-black flex items-center justify-center gap-1 tap-effect transition-all"
+          class="mt-2 w-full py-1.5 px-2 rounded-xl bg-violet-950/80 hover:bg-gradient-to-r hover:from-cyan-500 hover:to-violet-600 text-violet-200 hover:text-white border border-violet-500/40 text-[10px] font-black flex items-center justify-center gap-1 tap-effect transition-all"
         >
           <span>+ Tambah</span>
         </button>
@@ -2606,8 +2606,8 @@ class GroceryUIController {
       this.cartEmptyState?.classList.add('hidden');
       this.cartItemList.innerHTML = `
         <div class="py-12 text-center text-slate-400">
-          <p class="text-sm font-bold text-slate-600">Tidak ada jajanan yang cocok dengan "${store.searchQuery}"</p>
-          <button type="button" class="mt-3 text-xs text-pink-600 underline font-black" id="btn-reset-filters">Tampilkan Semua Jajanan</button>
+          <p class="text-sm font-bold text-slate-300">Tidak ada produk yang cocok dengan "${store.searchQuery}"</p>
+          <button type="button" class="mt-3 text-xs text-cyan-400 hover:text-cyan-300 underline font-black" id="btn-reset-filters">Tampilkan Semua Produk</button>
         </div>
       `;
       document.getElementById('btn-reset-filters')?.addEventListener('click', () => {
@@ -2635,7 +2635,7 @@ class GroceryUIController {
 
   createItemCard(item) {
     const card = document.createElement('div');
-    card.className = 'grocery-card relative bg-white border-2 border-pink-200 rounded-3xl p-3.5 shadow-sm hover:border-pink-400 transition-all';
+    card.className = 'grocery-card relative bg-slate-900/85 border border-violet-500/30 rounded-3xl p-3.5 shadow-xl shadow-black/40 hover:border-cyan-400/50 transition-all backdrop-blur-md';
     card.dataset.itemId = item.id;
 
     const totals = Calculator.getItemTotals(item);
@@ -2647,27 +2647,27 @@ class GroceryUIController {
       const diff = item.unitPrice - item.lastMonthPrice;
       if (diff > 0) {
         priceComparatorBadge = `
-          <span class="inline-flex items-center gap-0.5 text-[11px] font-bold px-2 py-0.5 rounded-lg bg-rose-100 text-rose-700 border border-rose-200">
+          <span class="inline-flex items-center gap-0.5 text-[11px] font-bold px-2 py-0.5 rounded-lg bg-rose-950/80 text-rose-300 border border-rose-500/50">
             &uarr; +${formatRupiah(diff)} (Naik)
           </span>
         `;
       } else if (diff < 0) {
         priceComparatorBadge = `
-          <span class="inline-flex items-center gap-0.5 text-[11px] font-bold px-2 py-0.5 rounded-lg bg-emerald-100 text-emerald-700 border border-emerald-200">
+          <span class="inline-flex items-center gap-0.5 text-[11px] font-bold px-2 py-0.5 rounded-lg bg-emerald-950/80 text-emerald-300 border border-emerald-500/50">
             &darr; -${formatRupiah(Math.abs(diff))} (Hemat)
           </span>
         `;
       } else {
         priceComparatorBadge = `
-          <span class="inline-flex items-center gap-0.5 text-[11px] font-semibold px-2 py-0.5 rounded-lg bg-pink-50 text-pink-600 border border-pink-200">
-            = ${formatRupiah(item.unitPrice)} (Harga Pas)
+          <span class="inline-flex items-center gap-0.5 text-[11px] font-semibold px-2 py-0.5 rounded-lg bg-slate-800/80 text-slate-300 border border-slate-600/50">
+            = ${formatRupiah(item.unitPrice)} (Stabil)
           </span>
         `;
       }
     } else {
       priceComparatorBadge = `
-        <span class="inline-flex items-center gap-0.5 text-[11px] font-bold px-2 py-0.5 rounded-lg bg-sky-100 text-sky-700 border border-sky-200">
-          ⭐ Jajanan Baru
+        <span class="inline-flex items-center gap-0.5 text-[11px] font-bold px-2 py-0.5 rounded-lg bg-cyan-950/80 text-cyan-300 border border-cyan-500/50">
+          ⭐ Produk Baru
         </span>
       `;
     }
@@ -2678,25 +2678,25 @@ class GroceryUIController {
 
     if (totals.isDiscounted) {
       discountBadgeHtml = `
-        <span class="inline-flex items-center gap-1 text-[11px] font-black px-2 py-0.5 rounded-lg bg-amber-100 text-amber-800 border border-amber-300">
+        <span class="inline-flex items-center gap-1 text-[11px] font-black px-2 py-0.5 rounded-lg bg-amber-950/80 text-amber-300 border border-amber-500/40">
           Diskon ${totals.discountText}
         </span>
-        <span class="text-[11px] font-bold text-emerald-600">
+        <span class="text-[11px] font-bold text-emerald-400">
           Hemat ${formatRupiah(totals.totalSaving)}
         </span>
       `;
       unitPriceHtml = `
         <div class="flex items-baseline gap-1.5 flex-wrap">
-          <span class="text-sm font-black text-pink-600 font-mono-num">${formatRupiah(totals.finalUnitPrice)}</span>
-          <span class="text-xs text-slate-400 line-through font-mono-num">${formatRupiah(item.unitPrice)}</span>
-          <span class="text-xs text-slate-500">/${item.unit}</span>
+          <span class="text-sm font-black text-cyan-300 font-mono-num">${formatRupiah(totals.finalUnitPrice)}</span>
+          <span class="text-xs text-slate-500 line-through font-mono-num">${formatRupiah(item.unitPrice)}</span>
+          <span class="text-xs text-slate-400">/${item.unit}</span>
         </div>
       `;
     } else {
       unitPriceHtml = `
         <div class="flex items-baseline gap-1">
-          <span class="text-sm font-black text-pink-600 font-mono-num">${formatRupiah(item.unitPrice)}</span>
-          <span class="text-xs text-slate-500">/${item.unit}</span>
+          <span class="text-sm font-black text-cyan-300 font-mono-num">${formatRupiah(item.unitPrice)}</span>
+          <span class="text-xs text-slate-400">/${item.unit}</span>
         </div>
       `;
     }
@@ -2711,7 +2711,7 @@ class GroceryUIController {
             ${priceComparatorBadge}
           </div>
 
-          <h3 class="text-sm font-black text-slate-800 truncate pr-2 item-title cursor-pointer" title="${item.name}">
+          <h3 class="text-sm font-black text-slate-100 truncate pr-2 item-title cursor-pointer hover:text-cyan-300 transition-colors" title="${item.name}">
             ${item.name}
           </h3>
           ${unitPriceHtml}
@@ -2722,30 +2722,30 @@ class GroceryUIController {
         </div>
 
         <div class="flex items-center gap-1 shrink-0">
-          <button type="button" class="btn-edit-item touch-target w-8 h-8 rounded-xl bg-pink-50 text-pink-600 hover:bg-pink-100 tap-effect" title="Edit">
+          <button type="button" class="btn-edit-item touch-target w-8 h-8 rounded-xl bg-slate-800/80 text-cyan-400 hover:bg-slate-700 hover:text-cyan-300 border border-cyan-500/30 tap-effect" title="Edit">
             <i data-lucide="edit-3" class="w-4 h-4"></i>
           </button>
-          <button type="button" class="btn-delete-item touch-target w-8 h-8 rounded-xl bg-pink-50 text-rose-500 hover:bg-rose-100 tap-effect" title="Hapus">
+          <button type="button" class="btn-delete-item touch-target w-8 h-8 rounded-xl bg-slate-800/80 text-rose-400 hover:bg-rose-950 hover:text-rose-300 border border-rose-500/30 tap-effect" title="Hapus">
             <i data-lucide="trash-2" class="w-4 h-4"></i>
           </button>
         </div>
       </div>
 
-      <div class="pt-2 mt-2 border-t border-pink-100 flex items-center justify-between gap-3">
+      <div class="pt-2 mt-2 border-t border-violet-500/20 flex items-center justify-between gap-3">
         <div>
-          <span class="text-[11px] text-pink-500 block font-bold">Subtotal</span>
-          <span class="text-base font-black text-pink-700 font-mono-num tracking-tight">${formatRupiah(totals.subtotal)}</span>
+          <span class="text-[11px] text-slate-400 block font-bold">Subtotal</span>
+          <span class="text-base font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-violet-300 font-mono-num tracking-tight">${formatRupiah(totals.subtotal)}</span>
         </div>
 
-        <div class="flex items-center bg-pink-50 rounded-2xl p-1 border border-pink-200 shadow-inner">
-          <button type="button" class="btn-stepper-minus touch-target w-10 h-10 rounded-xl bg-white text-pink-700 active:bg-rose-500 active:text-white tap-effect font-black text-xl flex items-center justify-center shadow-xs">
+        <div class="flex items-center bg-slate-950/90 rounded-2xl p-1 border border-violet-500/30 shadow-inner">
+          <button type="button" class="btn-stepper-minus touch-target w-10 h-10 rounded-xl bg-slate-800/90 text-slate-200 active:bg-rose-600 active:text-white border border-slate-700/60 tap-effect font-black text-xl flex items-center justify-center shadow-xs">
             <i data-lucide="minus" class="w-4 h-4"></i>
           </button>
           <div class="w-12 text-center">
-            <span class="font-black text-base text-pink-700 font-mono-num">${item.qty}</span>
-            <span class="text-[10px] text-pink-400 block -mt-1 font-semibold">${item.unit}</span>
+            <span class="font-black text-base text-cyan-300 font-mono-num">${item.qty}</span>
+            <span class="text-[10px] text-slate-400 block -mt-1 font-semibold">${item.unit}</span>
           </div>
-          <button type="button" class="btn-stepper-plus touch-target w-10 h-10 rounded-xl bg-gradient-to-tr from-pink-500 to-rose-400 text-white active:scale-95 tap-effect font-black text-xl flex items-center justify-center shadow-xs">
+          <button type="button" class="btn-stepper-plus touch-target w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-violet-600 text-white active:scale-95 tap-effect font-black text-xl flex items-center justify-center shadow-md shadow-violet-500/30">
             <i data-lucide="plus" class="w-4 h-4"></i>
           </button>
         </div>
@@ -2821,35 +2821,35 @@ class GroceryUIController {
 
     history.forEach(trip => {
       const tripCard = document.createElement('div');
-      tripCard.className = 'bg-white border-2 border-pink-200 rounded-3xl p-4 shadow-xs space-y-3';
+      tripCard.className = 'bg-slate-900/85 border border-violet-500/30 rounded-3xl p-4 shadow-xl space-y-3 backdrop-blur-md';
       
       const itemsListHtml = (trip.items || []).slice(0, 4).map(it => `
-        <div class="flex items-center justify-between text-xs py-1 border-b border-pink-100 last:border-0 font-medium">
-          <span class="text-slate-700 truncate max-w-[200px]">${it.name} (${it.qty} ${it.unit})</span>
-          <span class="font-mono-num text-pink-700 font-bold">${formatRupiah(it.subtotal)}</span>
+        <div class="flex items-center justify-between text-xs py-1 border-b border-violet-500/20 last:border-0 font-medium">
+          <span class="text-slate-300 truncate max-w-[200px]">${it.name} (${it.qty} ${it.unit})</span>
+          <span class="font-mono-num text-cyan-300 font-bold">${formatRupiah(it.subtotal)}</span>
         </div>
       `).join('');
 
       tripCard.innerHTML = `
-        <div class="flex items-center justify-between border-b border-pink-100 pb-2">
+        <div class="flex items-center justify-between border-b border-violet-500/20 pb-2">
           <div class="flex items-center gap-2">
-            <div class="w-8 h-8 rounded-xl bg-pink-100 text-pink-600 flex items-center justify-center text-base">
-              🌸
+            <div class="w-8 h-8 rounded-xl bg-violet-950/80 border border-violet-500/30 text-violet-300 flex items-center justify-center text-base">
+              🪐
             </div>
             <div>
-              <span class="text-xs font-black text-pink-700 block">${formatDateIndo(trip.date)}</span>
-              <span class="text-[10px] text-pink-500 font-bold">${trip.itemCount || 0} macam jajanan</span>
+              <span class="text-xs font-black text-slate-100 block">${formatDateIndo(trip.date)}</span>
+              <span class="text-[10px] text-cyan-400 font-bold">${trip.itemCount || 0} macam item</span>
             </div>
           </div>
           <div class="text-right">
-            <span class="text-sm font-black text-pink-700 font-mono-num block">${formatRupiah(trip.totalSpent)}</span>
-            ${trip.totalSaved > 0 ? `<span class="text-[10px] text-emerald-600 font-extrabold">Hemat ${formatRupiah(trip.totalSaved)}</span>` : ''}
+            <span class="text-sm font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-violet-300 font-mono-num block">${formatRupiah(trip.totalSpent)}</span>
+            ${trip.totalSaved > 0 ? `<span class="text-[10px] text-emerald-400 font-extrabold">Hemat ${formatRupiah(trip.totalSaved)}</span>` : ''}
           </div>
         </div>
 
-        <div class="bg-pink-50 rounded-2xl p-2.5 space-y-1">
+        <div class="bg-slate-950/70 rounded-2xl p-2.5 space-y-1 border border-violet-500/20">
           ${itemsListHtml}
-          ${(trip.items || []).length > 4 ? `<div class="text-[10px] text-pink-500 text-center pt-1 font-bold">+ ${(trip.items || []).length - 4} jajanan lainnya</div>` : ''}
+          ${(trip.items || []).length > 4 ? `<div class="text-[10px] text-slate-400 text-center pt-1 font-bold">+ ${(trip.items || []).length - 4} produk lainnya</div>` : ''}
         </div>
       `;
 
@@ -2866,13 +2866,13 @@ class GroceryUIController {
     if (this.budgetPageCurrent) this.budgetPageCurrent.textContent = formatRupiah(summary.totalSpent);
     if (this.budgetPagePercent) {
       this.budgetPagePercent.textContent = `${Math.round(summary.rawPercentage)}% Digunakan`;
-      this.budgetPagePercent.className = summary.budgetStatus === 'danger' ? 'font-black text-rose-600' : 'font-black text-pink-600';
+      this.budgetPagePercent.className = summary.budgetStatus === 'danger' ? 'font-black text-rose-400' : 'font-black text-cyan-300';
     }
 
     if (this.budgetGaugeBar) {
       this.budgetGaugeBar.style.width = `${summary.budgetUsagePercent}%`;
       this.budgetGaugeBar.className = `h-full rounded-full transition-all duration-300 ${
-        summary.budgetStatus === 'danger' ? 'bg-rose-500' : summary.budgetStatus === 'warning' ? 'bg-amber-400' : 'bg-gradient-to-r from-pink-400 to-pink-500'
+        summary.budgetStatus === 'danger' ? 'bg-gradient-to-r from-rose-500 to-red-600 shadow-sm shadow-rose-500/50' : summary.budgetStatus === 'warning' ? 'bg-gradient-to-r from-amber-400 to-amber-500 shadow-sm shadow-amber-500/50' : 'bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 shadow-sm shadow-cyan-500/50'
       }`;
     }
 
@@ -2883,13 +2883,13 @@ class GroceryUIController {
 
       if (catKeys.length === 0) {
         this.budgetBreakdownContainer.innerHTML = `
-          <div class="text-center py-4 text-xs text-pink-400 font-bold">
-            Troli masih kosong. Belum ada pengeluaran jajanan.
+          <div class="text-center py-4 text-xs text-slate-400 font-bold">
+            Keranjang masih kosong. Belum ada pengeluaran belanja.
           </div>
         `;
       } else {
         catKeys.forEach(catId => {
-          const catObj = CATEGORIES.find(c => c.id === catId) || { name: catId, color: 'bg-pink-100' };
+          const catObj = CATEGORIES.find(c => c.id === catId) || { name: catId, color: 'bg-violet-950/80 text-violet-300' };
           const amount = spend[catId];
           const pct = summary.totalSpent > 0 ? Math.round((amount / summary.totalSpent) * 100) : 0;
 
@@ -2897,11 +2897,11 @@ class GroceryUIController {
           row.className = 'space-y-1 text-xs';
           row.innerHTML = `
             <div class="flex items-center justify-between">
-              <span class="text-slate-700 font-bold">${catObj.name}</span>
-              <span class="font-mono-num font-black text-pink-700">${formatRupiah(amount)} (${pct}%)</span>
+              <span class="text-slate-200 font-bold">${catObj.name}</span>
+              <span class="font-mono-num font-black text-cyan-300">${formatRupiah(amount)} (${pct}%)</span>
             </div>
-            <div class="w-full bg-pink-100 rounded-full h-2 overflow-hidden">
-              <div class="h-full bg-gradient-to-r from-pink-400 to-rose-400 rounded-full" style="width: ${pct}%"></div>
+            <div class="w-full bg-slate-950/90 rounded-full h-2 overflow-hidden border border-violet-500/20">
+              <div class="h-full bg-gradient-to-r from-cyan-500 via-violet-500 to-fuchsia-500 rounded-full" style="width: ${pct}%"></div>
             </div>
           `;
           this.budgetBreakdownContainer.appendChild(row);
