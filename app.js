@@ -1,6 +1,6 @@
 /**
- * Dvh Kids Grocery | Belanja Ceria & Uang Saku Pintar
- * Pink Pastel Kids Theme with Complete Account Creation & Login System
+ * DVH Space Grocery | Belanja Cerdas & Dompet Kosmik
+ * Galaxy Cosmic Nebula Theme with Realtime Cloud Sync & Multi-Device Support
  */
 
 // ==========================================
@@ -1073,7 +1073,7 @@ class GroceryStore {
   async registerAccount({ name, avatar, username, pin, budgetLimit }) {
     const cleanUser = String(username || '').toLowerCase().trim();
     if (!cleanUser) throw new Error('Username wajib diisi!');
-    if (!name || !name.trim()) throw new Error('Nama si kecil wajib diisi!');
+    if (!name || !name.trim()) throw new Error('Nama pengguna wajib diisi!');
 
     // Check if username already exists locally
     const existing = this.accounts.find(a => a.username.toLowerCase() === cleanUser);
@@ -2194,13 +2194,13 @@ class GroceryUIController {
         }
       } else if (unitPrice > 0) {
         this.modalPriceComparatorIndicator.classList.remove('hidden');
-        this.modalPriceComparatorIndicator.className = 'rounded-xl p-2.5 border text-xs font-bold flex items-center justify-between bg-sky-50 text-sky-700 border-sky-200';
+        this.modalPriceComparatorIndicator.className = 'rounded-xl p-2.5 border text-xs font-bold flex items-center justify-between bg-cyan-950/80 text-cyan-300 border-cyan-500/40 shadow-sm';
         this.modalPriceComparatorIndicator.innerHTML = `
           <span class="flex items-center gap-1.5">
             <span class="text-base">⭐</span>
-            <span>Jajanan Baru (Belum ada data bulan lalu)</span>
+            <span>Produk Baru (Belum ada data bulan lalu)</span>
           </span>
-          <span class="text-[11px] font-semibold text-slate-500 font-mono-num">${formatRupiah(unitPrice)}</span>
+          <span class="text-[11px] font-semibold text-slate-300 font-mono-num">${formatRupiah(unitPrice)}</span>
         `;
       } else {
         this.modalPriceComparatorIndicator.classList.add('hidden');
@@ -2214,7 +2214,7 @@ class GroceryUIController {
     this.autoLookupNotice.classList.add('hidden');
 
     if (itemToEdit) {
-      this.modalItemTitle.textContent = 'Edit Jajanan Belanja';
+      this.modalItemTitle.textContent = 'Edit Produk Belanja';
       this.inputItemName.value = itemToEdit.name;
       this.inputItemCategory.value = itemToEdit.category;
       this.inputItemUnit.value = itemToEdit.unit;
@@ -2223,7 +2223,7 @@ class GroceryUIController {
       this.inputItemLastPrice.value = itemToEdit.lastMonthPrice ? formatRupiahNumber(itemToEdit.lastMonthPrice) : '';
       this.inputItemDiscount.value = itemToEdit.discountRaw || '';
     } else {
-      this.modalItemTitle.textContent = 'Tambah Jajanan Baru 🌸';
+      this.modalItemTitle.textContent = 'Tambah Produk Baru 🪐';
       this.inputItemQty.value = '1';
       this.inputItemCategory.value = 'sayur';
       this.inputItemUnit.value = 'pcs';
@@ -2388,11 +2388,11 @@ class GroceryUIController {
 
   handleFinishShopping() {
     if (store.cart.length === 0) {
-      alert('Troli belanja si kecil masih kosong!');
+      alert('Keranjang belanja masih kosong!');
       return;
     }
 
-    const confirmFinish = confirm('Selesaikan belanja dan bayar di kasir? Seluruh jajanan akan dicatat di Buku Riwayat!');
+    const confirmFinish = confirm('Selesaikan belanja dan bayar di kasir? Seluruh item belanja akan dicatat di Riwayat Belanja!');
     if (!confirmFinish) return;
 
     feedback.success();

@@ -1,15 +1,15 @@
 {
-  "name": "Dvh Grocery - Smart Grocery & Budget Safety Tracker",
-  "short_name": "Dvh Grocery",
-  "description": "Smart Grocery & Budget Safety Tracker untuk belanja bulanan hemat bergaya native mobile PWA.",
+  "name": "DVH Space Grocery - Cosmic Shopping & Budget Safety Tracker",
+  "short_name": "DVH Space Grocery",
+  "description": "Smart Grocery & Realtime Cosmic Budget Tracker bertema galaxy untuk belanja cerdas bergaya native mobile PWA.",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#090d16",
-  "theme_color": "#059669",
+  "background_color": "#05030e",
+  "theme_color": "#0B0F19",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "./favicon.svg",
+      "src": "./icon.svg",
       "sizes": "192x192 512x512",
       "type": "image/svg+xml",
       "purpose": "any maskable"
