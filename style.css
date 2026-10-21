@@ -1,4 +1,4 @@
-/* Custom Styles & Mobile Optimizations for Smart Grocery Tracker */
+/* Custom Styles & Mobile Optimizations: Dvh Grocery - Cute Pink Kids Theme */
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap');
 
@@ -16,7 +16,7 @@ html, body {
   margin: 0;
   padding: 0;
   overflow: hidden;
-  background-color: #070b14;
+  background: linear-gradient(135deg, #FFF0F5 0%, #FCE7F3 40%, #FDF2F8 70%, #FBCFE8 100%);
 }
 
 body {
@@ -24,6 +24,7 @@ body {
   -webkit-tap-highlight-color: transparent;
   user-select: none;
   touch-action: manipulation;
+  color: #1F2937;
 }
 
 .font-mono-num {
@@ -31,14 +32,13 @@ body {
   font-feature-settings: "tnum" 1, "cv01" 1;
 }
 
-/* Hide scrollbar for Chrome, Safari and Opera */
+/* Hide scrollbar for clean app feel */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
-/* Hide scrollbar for IE, Edge and Firefox */
 .no-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 /* Touch & Button Enhancements */
@@ -51,26 +51,55 @@ body {
 }
 
 .tap-effect {
-  transition: transform 0.1s ease, background-color 0.15s ease, opacity 0.15s ease;
+  transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
 }
 .tap-effect:active {
-  transform: scale(0.96);
+  transform: scale(0.94);
 }
 
-/* Danger Pulse Animations */
-@keyframes danger-pulse-glow {
+/* Cute Bouncy & Floating Animations */
+@keyframes cute-float {
   0%, 100% {
-    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4), 0 0 20px rgba(239, 68, 68, 0.3);
-    border-color: rgba(239, 68, 68, 0.8);
+    transform: translateY(0px) rotate(0deg);
   }
   50% {
-    box-shadow: 0 0 0 8px rgba(239, 68, 68, 0), 0 0 35px rgba(239, 68, 68, 0.6);
-    border-color: rgba(248, 113, 113, 1);
+    transform: translateY(-8px) rotate(2deg);
+  }
+}
+
+.animate-cute-float {
+  animation: cute-float 3.5s infinite ease-in-out;
+}
+
+@keyframes candy-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 4px 15px rgba(244, 114, 182, 0.35);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 8px 25px rgba(244, 114, 182, 0.55);
+  }
+}
+
+.animate-candy-pulse {
+  animation: candy-pulse 2.2s infinite ease-in-out;
+}
+
+/* Overbudget Danger Pulse (Kids Strawberry Alert) */
+@keyframes danger-pulse-pink {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.4), 0 0 20px rgba(244, 63, 94, 0.25);
+    border-color: rgba(244, 63, 94, 0.8);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(244, 63, 94, 0), 0 0 30px rgba(244, 63, 94, 0.5);
+    border-color: rgba(251, 113, 133, 1);
   }
 }
 
 .animate-danger-pulse {
-  animation: danger-pulse-glow 1.5s infinite ease-in-out;
+  animation: danger-pulse-pink 1.5s infinite ease-in-out;
 }
 
 @keyframes warning-soft-pulse {
@@ -78,7 +107,7 @@ body {
     opacity: 1;
   }
   50% {
-    opacity: 0.75;
+    opacity: 0.8;
   }
 }
 
@@ -88,61 +117,50 @@ body {
 
 /* Progress bar dynamic transition */
 .transition-progress {
-  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.4s ease;
+  transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.4s ease;
 }
 
 /* Mobile Frame simulation on Desktop */
 @media (min-width: 640px) {
   .mobile-shell-shadow {
-    box-shadow: 0 25px 70px -15px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.08);
+    box-shadow: 0 25px 70px -15px rgba(244, 114, 182, 0.35), 0 0 0 2px rgba(251, 182, 206, 0.6);
   }
 }
 
-/* Glassmorphism Classes */
+/* Glassmorphism Classes (Cute Pastel Pink Tint) */
 .glass-panel {
-  background: rgba(15, 23, 42, 0.82);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1.5px solid rgba(251, 207, 232, 0.9);
 }
 
 .glass-header {
-  background: rgba(11, 17, 32, 0.88);
+  background: rgba(255, 245, 248, 0.95);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1.5px solid rgba(251, 207, 232, 0.85);
 }
 
 .glass-nav {
-  background: rgba(15, 23, 42, 0.92);
+  background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.6);
+  border: 1.5px solid rgba(251, 207, 232, 0.9);
+  box-shadow: 0 10px 30px -5px rgba(244, 114, 182, 0.25);
 }
 
-/* Modal animation slide up */
-.bottom-sheet-enter {
-  transform: translateY(100%);
-  opacity: 0;
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
-}
-
-.bottom-sheet-active {
-  transform: translateY(0);
-  opacity: 1;
-}
-
-/* Swipe / action styling */
+/* Grocery Card in Pink Theme */
 .grocery-card {
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .grocery-card:hover {
-  border-color: rgba(56, 189, 248, 0.25);
+  border-color: rgba(244, 114, 182, 0.6);
+  box-shadow: 0 8px 20px -4px rgba(244, 114, 182, 0.2);
 }
 
-/* Shimmer effect for empty states or accents */
+/* Shimmer effect */
 @keyframes shimmer {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(100%); }
@@ -156,6 +174,6 @@ body {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
   animation: shimmer 2s infinite;
 }

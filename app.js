@@ -1,40 +1,37 @@
 /**
- * Dvh Grocery | Smart Grocery & Budget Safety Tracker (PWA)
- * Designed for one-handed mobile supermarket shopping with real-time budget safety
+ * Dvh Kids Grocery | Belanja Ceria & Uang Saku Pintar
+ * Pink Pastel Kids Theme with Complete Account Creation & Login System
  */
 
 // ==========================================
 // 1. DATA MODELS & CONSTANTS
 // ==========================================
 const STORAGE_KEYS = {
-  ACTIVE_USER: 'dvh_grocery_active_user_v2',
-  CART: 'dvh_grocery_cart_v2',
-  HISTORY: 'dvh_grocery_history_v2',
-  PRICE_LOOKUP: 'dvh_grocery_lookup_v2',
-  BUDGET: 'dvh_grocery_budget_v2',
-  INITIALIZED: 'dvh_grocery_init_v2'
+  ACTIVE_USER: 'dvh_grocery_active_user_v3',
+  ACCOUNTS_LIST: 'dvh_grocery_accounts_v3',
+  CART: 'dvh_grocery_cart_v3',
+  HISTORY: 'dvh_grocery_history_v3',
+  LOOKUP: 'dvh_grocery_lookup_v3'
 };
 
 const CATEGORIES = [
-  { id: 'all', name: 'Semua', icon: 'layout-grid', color: 'bg-slate-700 text-slate-200 border-slate-600' },
-  { id: 'sayur', name: 'Sayur Mayur', icon: 'salad', color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
-  { id: 'minuman', name: 'Minuman & Susu', icon: 'coffee', color: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' },
-  { id: 'sembako', name: 'Bumbu & Sembako', icon: 'wheat', color: 'bg-amber-500/20 text-amber-300 border-amber-500/30' },
-  { id: 'kebersihan', name: 'Kebersihan & Mandi', icon: 'sparkles', color: 'bg-purple-500/20 text-purple-300 border-purple-500/30' },
-  { id: 'buah', name: 'Buah Segar', icon: 'apple', color: 'bg-lime-500/20 text-lime-300 border-lime-500/30' },
-  { id: 'daging', name: 'Daging & Lauk', icon: 'drumstick', color: 'bg-rose-500/20 text-rose-300 border-rose-500/30' },
-  { id: 'camilan', name: 'Camilan & Snack', icon: 'cookie', color: 'bg-orange-500/20 text-orange-300 border-orange-500/30' },
-  { id: 'peralatan', name: 'Peralatan', icon: 'wrench', color: 'bg-blue-500/20 text-blue-300 border-blue-500/30' },
-  { id: 'lainnya', name: 'Lainnya', icon: 'tag', color: 'bg-slate-700 text-slate-200 border-slate-600' }
+  { id: 'all', name: '🌟 Semua', icon: 'sparkles', color: 'bg-pink-100 text-pink-700 border-pink-300' },
+  { id: 'sayur', name: '🥬 Sayur Sehat', icon: 'salad', color: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
+  { id: 'minuman', name: '🥤 Minuman & Susu', icon: 'coffee', color: 'bg-cyan-100 text-cyan-800 border-cyan-300' },
+  { id: 'buah', name: '🍎 Buah Manis', icon: 'apple', color: 'bg-lime-100 text-lime-800 border-lime-300' },
+  { id: 'camilan', name: '🍪 Biskuit & Camilan', icon: 'cookie', color: 'bg-orange-100 text-orange-800 border-orange-300' },
+  { id: 'daging', name: '🍳 Sarapan & Lauk', icon: 'drumstick', color: 'bg-rose-100 text-rose-800 border-rose-300' },
+  { id: 'sembako', name: '🌾 Sembako Dapur', icon: 'wheat', color: 'bg-amber-100 text-amber-800 border-amber-300' },
+  { id: 'kebersihan', name: '🧼 Mandi Wangi', icon: 'sparkles', color: 'bg-purple-100 text-purple-800 border-purple-300' },
+  { id: 'peralatan', name: '🔧 Peralatan', icon: 'wrench', color: 'bg-blue-100 text-blue-800 border-blue-300' },
+  { id: 'lainnya', name: 'Lainnya', icon: 'tag', color: 'bg-slate-100 text-slate-700 border-slate-300' }
 ];
 
-const UNITS = ['pcs', 'ikat', 'kg', 'liter', 'botol', 'pack', 'kaleng'];
-
-// Default initial items in cart
-const MOCK_ITEMS = [
+// Initial mock items for newly created cart
+const DEFAULT_KIDS_CART = [
   {
     id: 'mock-1',
-    name: 'Bayam Hijau Hidroponik (Ikat)',
+    name: 'Bayam Hijau Segar Kelinci',
     category: 'sayur',
     unit: 'ikat',
     qty: 2,
@@ -45,159 +42,116 @@ const MOCK_ITEMS = [
   },
   {
     id: 'mock-2',
-    name: 'Air Mineral Aqua 1.5L',
+    name: 'Susu UHT Ultra Milk Strawberry 200ml',
     category: 'minuman',
-    unit: 'botol',
-    qty: 2,
-    unitPrice: 7000,
-    lastMonthPrice: 6500,
+    unit: 'kotak',
+    qty: 3,
+    unitPrice: 6000,
+    lastMonthPrice: 5500,
     discountRaw: '0',
     createdAt: Date.now() - 300000
   },
   {
     id: 'mock-3',
-    name: 'Minyak Goreng Sawit 2L',
-    category: 'sembako',
-    unit: 'liter',
+    name: 'Biskuit Roma Kelapa Manis',
+    category: 'camilan',
+    unit: 'pack',
     qty: 1,
-    unitPrice: 38000,
-    lastMonthPrice: 42000,
+    unitPrice: 9500,
+    lastMonthPrice: 9500,
     discountRaw: '10%',
     createdAt: Date.now() - 200000
   },
   {
     id: 'mock-4',
-    name: 'Sabun Mandi Cair Refill 450ml',
-    category: 'kebersihan',
-    unit: 'pack',
+    name: 'Pisang Cavendish Sunpride',
+    category: 'buah',
+    unit: 'sisir',
     qty: 1,
-    unitPrice: 24000,
-    lastMonthPrice: 24000,
-    discountRaw: '50%+20%',
+    unitPrice: 18000,
+    lastMonthPrice: 20000,
+    discountRaw: '0',
     createdAt: Date.now() - 100000
   },
   {
     id: 'mock-5',
-    name: 'Susu UHT Ultra Milk Full Cream 1L',
-    category: 'minuman',
-    unit: 'liter',
-    qty: 1,
-    unitPrice: 19500,
-    lastMonthPrice: 18500,
-    discountRaw: '0',
+    name: 'Sosis Kanzler Singles Original',
+    category: 'daging',
+    unit: 'pcs',
+    qty: 2,
+    unitPrice: 9000,
+    lastMonthPrice: 9000,
+    discountRaw: '50%+20%',
     createdAt: Date.now() - 50000
   }
 ];
 
 // 1-Tap Quick Catalog Carousel items (User can tap + to add immediately)
 const QUICK_CATALOG_ITEMS = [
-  { name: 'Bayam Hijau Segar', category: 'sayur', unit: 'ikat', price: 6000, lastMonthPrice: 5500, discount: '' },
-  { name: 'Kangkung Hidroponik', category: 'sayur', unit: 'ikat', price: 5000, lastMonthPrice: 5000, discount: '' },
-  { name: 'Brokoli Hijau 500g', category: 'sayur', unit: 'pack', price: 18000, lastMonthPrice: 20000, discount: '' },
-  { name: 'Wortel Berastagi', category: 'sayur', unit: 'kg', price: 12000, lastMonthPrice: 12000, discount: '' },
-  { name: 'Air Aqua 1.5L', category: 'minuman', unit: 'botol', price: 7000, lastMonthPrice: 6500, discount: '' },
-  { name: 'Le Minerale 600ml', category: 'minuman', unit: 'botol', price: 3500, lastMonthPrice: 3500, discount: '' },
-  { name: 'Coca-Cola Pet 390ml', category: 'minuman', unit: 'botol', price: 6500, lastMonthPrice: 6500, discount: '' },
-  { name: 'Sprite Kaleng 330ml', category: 'minuman', unit: 'kaleng', price: 7500, lastMonthPrice: 7000, discount: '' },
-  { name: 'Susu Ultra Milk 1L', category: 'minuman', unit: 'liter', price: 19500, lastMonthPrice: 18500, discount: '' },
-  { name: 'Kopi Cold Brew 220ml', category: 'minuman', unit: 'botol', price: 11000, lastMonthPrice: 11000, discount: '' },
-  { name: 'Pocari Sweat 500ml', category: 'minuman', unit: 'botol', price: 8000, lastMonthPrice: 7500, discount: '' },
-  { name: 'Beras Pulen 5kg', category: 'sembako', unit: 'pack', price: 72000, lastMonthPrice: 68000, discount: '' },
-  { name: 'Telur Ayam 1kg', category: 'sembako', unit: 'kg', price: 31000, lastMonthPrice: 32000, discount: '' },
-  { name: 'Minyak Sawit 2L', category: 'sembako', unit: 'liter', price: 38000, lastMonthPrice: 42000, discount: '10%' },
-  { name: 'Daging Ayam Fillet', category: 'daging', unit: 'kg', price: 29000, lastMonthPrice: 28000, discount: '' }
+  { name: 'Bayam Hijau Kelinci', category: 'sayur', unit: 'ikat', price: 6000, lastMonthPrice: 5500, discount: '' },
+  { name: 'Wortel Manis Kelinci', category: 'sayur', unit: 'kg', price: 12000, lastMonthPrice: 12000, discount: '' },
+  { name: 'Brokoli Hijau Super', category: 'sayur', unit: 'pack', price: 18000, lastMonthPrice: 20000, discount: '' },
+  { name: 'Susu Ultra Strawberry', category: 'minuman', unit: 'kotak', price: 6000, lastMonthPrice: 5500, discount: '' },
+  { name: 'Yakult Probiotik (5 botol)', category: 'minuman', unit: 'pack', price: 11000, lastMonthPrice: 10500, discount: '' },
+  { name: 'Air Aqua Dingin 1.5L', category: 'minuman', unit: 'botol', price: 7000, lastMonthPrice: 6500, discount: '' },
+  { name: 'Milo Kotak Cokelat', category: 'minuman', unit: 'kotak', price: 6000, lastMonthPrice: 6000, discount: '' },
+  { name: 'Pisang Sunpride Manis', category: 'buah', unit: 'sisir', price: 18000, lastMonthPrice: 20000, discount: '' },
+  { name: 'Apel Fuji Merah', category: 'buah', unit: 'kg', price: 38000, lastMonthPrice: 40000, discount: '' },
+  { name: 'Wafer Tango Cokelat', category: 'camilan', unit: 'pack', price: 8500, lastMonthPrice: 8500, discount: '' },
+  { name: 'Biskuit Marie Susu', category: 'camilan', unit: 'pack', price: 10000, lastMonthPrice: 10000, discount: '' },
+  { name: 'Nugget Fiesta Dinosaurus', category: 'daging', unit: 'pack', price: 48000, lastMonthPrice: 46000, discount: '10%' },
+  { name: 'Sosis Kanzler Siap Makan', category: 'daging', unit: 'pcs', price: 9000, lastMonthPrice: 9000, discount: '' },
+  { name: 'Telur Ayam Rebus 1kg', category: 'daging', unit: 'kg', price: 31000, lastMonthPrice: 32000, discount: '' }
 ];
 
 // Product lookup database for instant autofill
 const MOCK_LOOKUP = {
-  // Sayur Mayur
-  'bayam hijau hidroponik (ikat)': { price: 6000, unit: 'ikat', category: 'sayur' },
+  // Sayur Sehat
+  'bayam hijau segar kelinci': { price: 6000, unit: 'ikat', category: 'sayur' },
   'bayam': { price: 6000, unit: 'ikat', category: 'sayur' },
-  'kangkung segar (ikat)': { price: 5000, unit: 'ikat', category: 'sayur' },
-  'kangkung': { price: 5000, unit: 'ikat', category: 'sayur' },
-  'brokoli hijau segar 500g': { price: 18000, unit: 'pack', category: 'sayur' },
-  'brokoli': { price: 18000, unit: 'pack', category: 'sayur' },
-  'wortel berastagi 500g': { price: 12000, unit: 'kg', category: 'sayur' },
+  'wortel manis kelinci': { price: 12000, unit: 'kg', category: 'sayur' },
   'wortel': { price: 12000, unit: 'kg', category: 'sayur' },
-  'pakcoy hidroponik 250g': { price: 7500, unit: 'pack', category: 'sayur' },
-  'pakcoy': { price: 7500, unit: 'pack', category: 'sayur' },
-  'selada keriting fresh 250g': { price: 8000, unit: 'pack', category: 'sayur' },
-  'selada': { price: 8000, unit: 'pack', category: 'sayur' },
-  'buncis muda 500g': { price: 11000, unit: 'pack', category: 'sayur' },
-  'buncis': { price: 11000, unit: 'pack', category: 'sayur' },
-  'kubis / kol putih 1kg': { price: 10000, unit: 'kg', category: 'sayur' },
-  'kol': { price: 10000, unit: 'kg', category: 'sayur' },
-  'terong ungu 500g': { price: 8500, unit: 'kg', category: 'sayur' },
-  'terong': { price: 8500, unit: 'kg', category: 'sayur' },
-  'tomat merah segar 500g': { price: 9000, unit: 'kg', category: 'sayur' },
+  'brokoli hijau super': { price: 18000, unit: 'pack', category: 'sayur' },
+  'brokoli': { price: 18000, unit: 'pack', category: 'sayur' },
+  'kangkung segar': { price: 5000, unit: 'ikat', category: 'sayur' },
+  'kangkung': { price: 5000, unit: 'ikat', category: 'sayur' },
+  'tomat merah segar': { price: 9000, unit: 'kg', category: 'sayur' },
   'tomat': { price: 9000, unit: 'kg', category: 'sayur' },
-  'sawi putih 1kg': { price: 12000, unit: 'kg', category: 'sayur' },
-  'sawi': { price: 12000, unit: 'kg', category: 'sayur' },
-  'jamur tiram 250g': { price: 7000, unit: 'pack', category: 'sayur' },
-  'jamur': { price: 7000, unit: 'pack', category: 'sayur' },
 
   // Minuman & Susu
-  'air mineral aqua 1.5l': { price: 7000, unit: 'botol', category: 'minuman' },
+  'susu uht ultra milk strawberry 200ml': { price: 6000, unit: 'kotak', category: 'minuman' },
+  'susu ultra strawberry': { price: 6000, unit: 'kotak', category: 'minuman' },
+  'susu': { price: 6000, unit: 'kotak', category: 'minuman' },
+  'yakult probiotik (5 botol)': { price: 11000, unit: 'pack', category: 'minuman' },
+  'yakult': { price: 11000, unit: 'pack', category: 'minuman' },
+  'air aqua dingin 1.5l': { price: 7000, unit: 'botol', category: 'minuman' },
   'aqua': { price: 7000, unit: 'botol', category: 'minuman' },
-  'air mineral le minerale 600ml': { price: 3500, unit: 'botol', category: 'minuman' },
-  'le minerale': { price: 3500, unit: 'botol', category: 'minuman' },
-  'air mineral club 1.5l': { price: 5000, unit: 'botol', category: 'minuman' },
-  'coca-cola pet 390ml': { price: 6500, unit: 'botol', category: 'minuman' },
-  'coca cola': { price: 6500, unit: 'botol', category: 'minuman' },
-  'coca-cola': { price: 6500, unit: 'botol', category: 'minuman' },
-  'sprite kaleng 330ml': { price: 7500, unit: 'kaleng', category: 'minuman' },
-  'sprite': { price: 7500, unit: 'kaleng', category: 'minuman' },
-  'fanta merah strawberry 390ml': { price: 6500, unit: 'botol', category: 'minuman' },
-  'fanta': { price: 6500, unit: 'botol', category: 'minuman' },
-  'susu uht ultra milk full cream 1l': { price: 19500, unit: 'liter', category: 'minuman' },
-  'susu ultra milk': { price: 19500, unit: 'liter', category: 'minuman' },
-  'ultra milk': { price: 19500, unit: 'liter', category: 'minuman' },
-  'susu': { price: 19500, unit: 'liter', category: 'minuman' },
-  'susu bear brand steril 189ml': { price: 10500, unit: 'kaleng', category: 'minuman' },
-  'bear brand': { price: 10500, unit: 'kaleng', category: 'minuman' },
-  'kopi nescape cold brew 220ml': { price: 11000, unit: 'botol', category: 'minuman' },
-  'kopi': { price: 11000, unit: 'botol', category: 'minuman' },
-  'teh pucuk harum 350ml': { price: 4000, unit: 'botol', category: 'minuman' },
-  'teh pucuk': { price: 4000, unit: 'botol', category: 'minuman' },
-  'pocari sweat botol 500ml': { price: 8000, unit: 'botol', category: 'minuman' },
-  'pocari': { price: 8000, unit: 'botol', category: 'minuman' },
-  'buavita jus jambu 250ml': { price: 8500, unit: 'pack', category: 'minuman' },
-  'buavita': { price: 8500, unit: 'pack', category: 'minuman' },
-  'milo susu uht kotak 180ml': { price: 6000, unit: 'pack', category: 'minuman' },
-  'milo': { price: 6000, unit: 'pack', category: 'minuman' },
+  'milo kotak cokelat': { price: 6000, unit: 'kotak', category: 'minuman' },
+  'milo': { price: 6000, unit: 'kotak', category: 'minuman' },
+  'susu ultra milk 1l': { price: 19500, unit: 'liter', category: 'minuman' },
 
-  // Bumbu & Sembako
-  'beras pulen super 5kg': { price: 72000, unit: 'pack', category: 'sembako' },
-  'beras': { price: 72000, unit: 'pack', category: 'sembako' },
-  'minyak goreng sawit 2l': { price: 38000, unit: 'liter', category: 'sembako' },
-  'minyak goreng': { price: 38000, unit: 'liter', category: 'sembako' },
-  'minyak': { price: 38000, unit: 'liter', category: 'sembako' },
-  'telur ayam negeri 1kg': { price: 31000, unit: 'kg', category: 'sembako' },
-  'telur': { price: 31000, unit: 'kg', category: 'sembako' },
-  'gula pasir gulaku 1kg': { price: 17500, unit: 'kg', category: 'sembako' },
-  'gula': { price: 17500, unit: 'kg', category: 'sembako' },
-  'garam dapur beriodium 250g': { price: 4500, unit: 'pcs', category: 'sembako' },
-  'garam': { price: 4500, unit: 'pcs', category: 'sembako' },
-  'kecap manis bango 550ml': { price: 23500, unit: 'botol', category: 'sembako' },
-  'kecap': { price: 23500, unit: 'botol', category: 'sembako' },
-  'indomie goreng original (dus/40pcs)': { price: 115000, unit: 'pack', category: 'sembako' },
-  'mie instan': { price: 3500, unit: 'pcs', category: 'sembako' },
-  'indomie': { price: 3500, unit: 'pcs', category: 'sembako' },
+  // Buah
+  'pisang cavendish sunpride': { price: 18000, unit: 'sisir', category: 'buah' },
+  'pisang': { price: 18000, unit: 'sisir', category: 'buah' },
+  'apel fuji merah': { price: 38000, unit: 'kg', category: 'buah' },
+  'apel': { price: 38000, unit: 'kg', category: 'buah' },
+  'jeruk manis': { price: 26000, unit: 'kg', category: 'buah' },
+  'jeruk': { price: 26000, unit: 'kg', category: 'buah' },
 
-  // Kebersihan & Mandi
-  'sabun mandi cair refill 450ml': { price: 24000, unit: 'pack', category: 'kebersihan' },
-  'sabun mandi': { price: 24000, unit: 'pack', category: 'kebersihan' },
-  'sabun': { price: 24000, unit: 'pack', category: 'kebersihan' },
-  'deterjen bubuk attack 800g': { price: 26500, unit: 'pack', category: 'kebersihan' },
-  'deterjen': { price: 26500, unit: 'pack', category: 'kebersihan' },
-  'sampo pantene anti dandruff 160ml': { price: 27000, unit: 'botol', category: 'kebersihan' },
-  'sampo': { price: 27000, unit: 'botol', category: 'kebersihan' },
-  'pasta gigi pepsodent 190g': { price: 14500, unit: 'pcs', category: 'kebersihan' },
-  'pepsodent': { price: 14500, unit: 'pcs', category: 'kebersihan' },
+  // Camilan
+  'biskuit roma kelapa manis': { price: 9500, unit: 'pack', category: 'camilan' },
+  'biskuit': { price: 9500, unit: 'pack', category: 'camilan' },
+  'wafer tango cokelat': { price: 8500, unit: 'pack', category: 'camilan' },
+  'wafer': { price: 8500, unit: 'pack', category: 'camilan' },
+  'cokelat': { price: 12000, unit: 'pcs', category: 'camilan' },
 
-  // Peralatan
-  'wajan anti lengket': { price: 100000, unit: 'pcs', category: 'peralatan' },
-  'wajan': { price: 100000, unit: 'pcs', category: 'peralatan' }
+  // Lauk & Sarapan
+  'sosis kanzler singles original': { price: 9000, unit: 'pcs', category: 'daging' },
+  'sosis': { price: 9000, unit: 'pcs', category: 'daging' },
+  'nugget fiesta dinosaurus': { price: 48000, unit: 'pack', category: 'daging' },
+  'nugget': { price: 48000, unit: 'pack', category: 'daging' },
+  'telur ayam rebus 1kg': { price: 31000, unit: 'kg', category: 'daging' },
+  'telur': { price: 31000, unit: 'kg', category: 'daging' }
 };
 
 // ==========================================
@@ -224,13 +178,11 @@ class FeedbackEngine {
     if ('vibrate' in navigator) {
       try {
         navigator.vibrate(pattern);
-      } catch (e) {
-        // Ignored
-      }
+      } catch (e) {}
     }
   }
 
-  playBeep(freq = 440, type = 'sine', duration = 0.08, volume = 0.05) {
+  playBeep(freq = 520, type = 'sine', duration = 0.08, volume = 0.06) {
     try {
       this.initAudio();
       if (!this.audioCtx) return;
@@ -244,44 +196,42 @@ class FeedbackEngine {
       gain.connect(this.audioCtx.destination);
       osc.start();
       osc.stop(this.audioCtx.currentTime + duration);
-    } catch (e) {
-      // Audio fallback
-    }
+    } catch (e) {}
   }
 
   tap() {
-    this.vibrate(12);
-    this.playBeep(520, 'sine', 0.04, 0.03);
+    this.vibrate(10);
+    this.playBeep(580, 'sine', 0.04, 0.03);
   }
 
   increment() {
-    this.vibrate(18);
-    this.playBeep(680, 'sine', 0.05, 0.04);
+    this.vibrate(15);
+    this.playBeep(780, 'sine', 0.06, 0.05);
   }
 
   decrement() {
-    this.vibrate(18);
-    this.playBeep(420, 'triangle', 0.05, 0.04);
+    this.vibrate(15);
+    this.playBeep(440, 'triangle', 0.06, 0.04);
   }
 
   success() {
-    this.vibrate([25, 40, 35]);
+    this.vibrate([30, 40, 30]);
     try {
       this.initAudio();
       if (!this.audioCtx) return;
-      [523, 659, 784, 1046].forEach((f, i) => {
-        setTimeout(() => this.playBeep(f, 'sine', 0.09, 0.05), i * 65);
+      [587, 659, 784, 880, 1046].forEach((f, i) => {
+        setTimeout(() => this.playBeep(f, 'sine', 0.1, 0.06), i * 70);
       });
     } catch (e) {}
   }
 
   dangerAlert() {
-    this.vibrate([80, 50, 100, 50, 120]);
+    this.vibrate([90, 50, 90, 50, 100]);
     try {
       this.initAudio();
       if (!this.audioCtx) return;
-      this.playBeep(320, 'sawtooth', 0.15, 0.08);
-      setTimeout(() => this.playBeep(260, 'sawtooth', 0.25, 0.09), 140);
+      this.playBeep(340, 'sawtooth', 0.15, 0.08);
+      setTimeout(() => this.playBeep(280, 'sawtooth', 0.25, 0.09), 140);
     } catch (e) {}
   }
 }
@@ -289,7 +239,7 @@ class FeedbackEngine {
 const feedback = new FeedbackEngine();
 
 // ==========================================
-// 3. DISCOUNT & CALCULATION ENGINE [F-03]
+// 3. DISCOUNT & CALCULATION ENGINE
 // ==========================================
 const Calculator = {
   calculateDiscount(unitPrice, discountRaw) {
@@ -306,7 +256,6 @@ const Calculator = {
     let finalUnitPrice = unitPrice;
     let discountText = '';
 
-    // Case 1: Multi-tiered percentage e.g. "50%+20%"
     if (str.includes('+')) {
       const parts = str.split('+').map(p => p.trim());
       let current = unitPrice;
@@ -324,17 +273,13 @@ const Calculator = {
         finalUnitPrice = Math.max(0, Math.round(current));
         discountText = validParts.join('+');
       }
-    }
-    // Case 2: Contains '%' symbol e.g. "25%"
-    else if (str.includes('%')) {
+    } else if (str.includes('%')) {
       const pct = parseFloat(str.replace(/[^0-9.]/g, ''));
       if (!isNaN(pct) && pct > 0) {
         finalUnitPrice = Math.max(0, Math.round(unitPrice * (1 - Math.min(100, pct) / 100)));
         discountText = `${pct}%`;
       }
-    }
-    // Case 3: Pure number without %
-    else {
+    } else {
       const num = parseFloat(str.replace(/[^0-9.]/g, ''));
       if (!isNaN(num) && num > 0) {
         if (num <= 100) {
@@ -375,9 +320,6 @@ const Calculator = {
   }
 };
 
-// ==========================================
-// 4. UTILITIES & FORMATTERS
-// ==========================================
 function formatRupiah(num) {
   const n = Math.round(Number(num) || 0);
   return 'Rp ' + n.toLocaleString('id-ID');
@@ -406,58 +348,349 @@ function formatDateIndo(timestamp) {
 }
 
 // ==========================================
-// 5. APPLICATION STATE STORE
+// 3.5. FIREBASE INTEGRATION & REALTIME CLOUD SYNC
+// ==========================================
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAhtJ6TS6IxXKe49eb5nZqJgRWTLda3pq4",
+  authDomain: "dvh-grocery.firebaseapp.com",
+  projectId: "dvh-grocery",
+  storageBucket: "dvh-grocery.firebasestorage.app",
+  messagingSenderId: "255581478806",
+  appId: "1:255581478806:web:5b3774b875587998aac7b7"
+};
+
+class FirebaseSyncService {
+  constructor() {
+    this.db = null;
+    this.sessionDocRef = null;
+    this.store = null;
+    this.debounceTimer = null;
+    this.isApplyingCloudUpdate = false;
+    this.status = 'initializing';
+  }
+
+  init(store) {
+    this.store = store;
+
+    // Check if Firebase Compat SDK is present
+    if (typeof firebase === 'undefined') {
+      console.warn('[Firebase] SDK is not loaded. Operating in Offline LocalStorage mode.');
+      this.updateStatus('offline', 'Mode Celengan Lokal');
+      return;
+    }
+
+    try {
+      // Initialize Firebase App
+      const app = firebase.apps.length ? firebase.app() : firebase.initializeApp(FIREBASE_CONFIG);
+      this.db = firebase.firestore(app);
+
+      // Enable offline persistence if supported
+      try {
+        this.db.enablePersistence({ synchronizeTabs: true }).catch(err => {
+          if (err.code === 'failed-precondition') {
+            console.info('[Firebase] Persistence enabled in another tab.');
+          } else if (err.code === 'unimplemented') {
+            console.info('[Firebase] Persistence not supported by current browser.');
+          }
+        });
+      } catch (e) {}
+
+      this.setupUserDoc();
+      this.updateStatus('connecting', 'Menghubungkan Cloud...');
+
+      window.addEventListener('online', () => {
+        this.updateStatus('connecting', 'Online, Menyinkronkan...');
+        this.syncNow();
+      });
+      window.addEventListener('offline', () => {
+        this.updateStatus('offline', 'Mode Celengan Lokal');
+      });
+
+      const syncPill = document.getElementById('cloud-sync-pill');
+      if (syncPill) {
+        syncPill.style.cursor = 'pointer';
+        syncPill.addEventListener('click', () => {
+          feedback.tap();
+          this.syncNow();
+        });
+      }
+
+      this.listenToCloud();
+    } catch (err) {
+      console.error('[Firebase] Initialization error:', err);
+      this.updateStatus('offline', 'Mode Celengan Lokal');
+    }
+  }
+
+  setupUserDoc() {
+    if (!this.db) return;
+    const user = (this.store && this.store.currentUser && this.store.currentUser.username)
+      ? this.store.currentUser.username.toLowerCase().trim()
+      : 'guest';
+    this.sessionDocRef = this.db.collection('grocery_users').doc(user).collection('sessions').doc('active_trip');
+  }
+
+  reconnectForUser() {
+    if (!this.db) return;
+    this.setupUserDoc();
+    this.listenToCloud();
+  }
+
+  listenToCloud() {
+    if (!this.sessionDocRef) return;
+
+    this.sessionDocRef.onSnapshot(
+      { includeMetadataChanges: true },
+      (snapshot) => {
+        if (this.isApplyingCloudUpdate) return;
+
+        if (snapshot.exists) {
+          const cloudData = snapshot.data();
+          const fromCache = snapshot.metadata.fromCache;
+          const hasPendingWrites = snapshot.metadata.hasPendingWrites;
+
+          this.applyCloudData(cloudData);
+
+          if (hasPendingWrites) {
+            this.updateStatus('syncing', 'Menyimpan ke Cloud...');
+          } else if (fromCache) {
+            this.updateStatus('synced', 'Celengan Cloud (Cache)');
+          } else {
+            this.updateStatus('synced', 'Celengan Cloud Aktif');
+          }
+        } else {
+          this.syncNow();
+        }
+      },
+      (error) => {
+        console.warn('[Firebase] Firestore notice:', error.code, error.message);
+        this.updateStatus('offline', 'Mode Celengan Lokal');
+      }
+    );
+  }
+
+  applyCloudData(data) {
+    if (!data || !this.store) return;
+    this.isApplyingCloudUpdate = true;
+
+    try {
+      let stateChanged = false;
+
+      if (Array.isArray(data.cart)) {
+        if (JSON.stringify(this.store.cart) !== JSON.stringify(data.cart)) {
+          this.store.cart = data.cart;
+          stateChanged = true;
+        }
+      }
+
+      if (typeof data.budgetLimit === 'number' && this.store.budgetLimit !== data.budgetLimit) {
+        this.store.budgetLimit = data.budgetLimit;
+        stateChanged = true;
+      }
+
+      if (data.priceLookup && typeof data.priceLookup === 'object') {
+        const mergedLookup = { ...this.store.priceLookup, ...data.priceLookup };
+        if (JSON.stringify(this.store.priceLookup) !== JSON.stringify(mergedLookup)) {
+          this.store.priceLookup = mergedLookup;
+          stateChanged = true;
+        }
+      }
+
+      if (Array.isArray(data.history)) {
+        if (JSON.stringify(this.store.history) !== JSON.stringify(data.history)) {
+          this.store.history = data.history;
+          stateChanged = true;
+        }
+      }
+
+      if (stateChanged) {
+        this.store.saveUserState();
+        this.store.listeners.forEach(fn => fn(this.store));
+      }
+    } finally {
+      this.isApplyingCloudUpdate = false;
+    }
+  }
+
+  triggerDebouncedSync() {
+    if (this.isApplyingCloudUpdate || !this.sessionDocRef) return;
+
+    this.updateStatus('syncing', 'Menyimpan...');
+
+    clearTimeout(this.debounceTimer);
+    this.debounceTimer = setTimeout(() => {
+      this.syncNow();
+    }, 600);
+  }
+
+  async syncNow() {
+    if (!this.sessionDocRef || !this.store || !this.store.currentUser) return;
+
+    try {
+      const payload = {
+        cart: this.store.cart,
+        budgetLimit: this.store.budgetLimit,
+        priceLookup: this.store.priceLookup,
+        history: this.store.history,
+        user: {
+          username: this.store.currentUser.username,
+          name: this.store.currentUser.name,
+          avatar: this.store.currentUser.avatar || '🍓'
+        },
+        updatedAt: Date.now()
+      };
+
+      await this.sessionDocRef.set(payload, { merge: true });
+      this.updateStatus('synced', 'Celengan Cloud Aktif');
+    } catch (err) {
+      console.warn('[Firebase] Save status (fallback active):', err.code || err);
+      this.updateStatus('offline', 'Mode Celengan Lokal');
+    }
+  }
+
+  updateStatus(status, label) {
+    this.status = status;
+    const dot = document.getElementById('cloud-sync-dot');
+    const text = document.getElementById('cloud-sync-label');
+    if (!dot || !text) return;
+
+    text.textContent = label;
+    dot.className = 'w-1.5 h-1.5 rounded-full';
+    text.className = 'text-[9px] font-bold';
+
+    switch (status) {
+      case 'synced':
+        dot.className += ' bg-emerald-500';
+        text.className += ' text-emerald-600';
+        break;
+      case 'syncing':
+      case 'connecting':
+        dot.className += ' bg-amber-400 animate-pulse';
+        text.className += ' text-amber-600';
+        break;
+      case 'offline':
+      default:
+        dot.className += ' bg-pink-400';
+        text.className += ' text-pink-600';
+        break;
+    }
+  }
+}
+
+const firebaseSync = new FirebaseSyncService();
+window.firebaseSync = firebaseSync;
+
+// ==========================================
+// 4. APPLICATION STATE & MULTI-USER STORE
 // ==========================================
 class GroceryStore {
   constructor() {
-    this.currentUser = JSON.parse(localStorage.getItem(STORAGE_KEYS.ACTIVE_USER) || 'null');
+    this.accounts = JSON.parse(localStorage.getItem(STORAGE_KEYS.ACCOUNTS_LIST) || '[]');
     
-    // Auto-login to Devin if not authenticated so user sees the app immediately
-    if (!this.currentUser) {
-      this.currentUser = {
-        username: 'devin',
-        name: 'Devin (Anak Kos)',
-        pin: '1234',
-        loginAt: Date.now()
-      };
-      localStorage.setItem(STORAGE_KEYS.ACTIVE_USER, JSON.stringify(this.currentUser));
+    // Seed default demo account if empty
+    if (this.accounts.length === 0) {
+      this.accounts = [
+        {
+          username: 'devin',
+          name: 'Devin',
+          avatar: '🍓',
+          pin: '1234',
+          budgetLimit: 250000,
+          createdAt: Date.now()
+        }
+      ];
+      localStorage.setItem(STORAGE_KEYS.ACCOUNTS_LIST, JSON.stringify(this.accounts));
     }
 
+    // Check currently active logged-in user
+    this.currentUser = JSON.parse(localStorage.getItem(STORAGE_KEYS.ACTIVE_USER) || 'null');
+    
     this.cart = [];
     this.history = [];
     this.priceLookup = { ...MOCK_LOOKUP };
-    this.budgetLimit = 350000; // Target Belanja Grosir Per Bulan Rp 350.000
-    this.currentTab = 'belanja'; // 'belanja' | 'riwayat' | 'anggaran'
+    this.budgetLimit = 250000;
+    this.currentTab = 'belanja';
     this.searchQuery = '';
     this.selectedCategory = 'all';
     this.listeners = [];
 
-    this.loadState();
+    if (this.currentUser) {
+      this.loadUserState();
+    }
   }
 
-  getKey(key) {
-    const user = (this.currentUser && this.currentUser.username)
+  getUserKey(key) {
+    const username = (this.currentUser && this.currentUser.username)
       ? this.currentUser.username.toLowerCase().trim()
-      : 'devin';
-    return `dvh_grocery_${user}_${key}_v2`;
+      : 'guest';
+    return `dvh_kids_${username}_${key}_v3`;
+  }
+
+  // Register a brand new account
+  registerAccount({ name, avatar, username, pin, budgetLimit }) {
+    const cleanUser = String(username || '').toLowerCase().trim();
+    if (!cleanUser) throw new Error('Username wajib diisi!');
+    if (!name || !name.trim()) throw new Error('Nama si kecil wajib diisi!');
+
+    // Check if username already exists
+    const existing = this.accounts.find(a => a.username.toLowerCase() === cleanUser);
+    if (existing) {
+      throw new Error(`Username "${cleanUser}" sudah terdaftar. Silakan pilih username lain atau masuk akun.`);
+    }
+
+    const newAccount = {
+      username: cleanUser,
+      name: name.trim(),
+      avatar: avatar || '🍓',
+      pin: pin || '1234',
+      budgetLimit: Math.max(10000, parseRupiahInput(budgetLimit) || 250000),
+      createdAt: Date.now()
+    };
+
+    this.accounts.push(newAccount);
+    localStorage.setItem(STORAGE_KEYS.ACCOUNTS_LIST, JSON.stringify(this.accounts));
+
+    // Automatically log in to the newly created account
+    return this.login(newAccount.username, newAccount.pin);
   }
 
   login(username, pin = '1234') {
-    const cleanUser = String(username || 'devin').toLowerCase().trim();
-    const displayName = cleanUser === 'devin' 
-      ? 'Devin (Anak Kos)' 
-      : cleanUser === 'rian'
-      ? 'Rian (Anak Kos)'
-      : cleanUser.charAt(0).toUpperCase() + cleanUser.slice(1);
-    
-    this.currentUser = {
-      username: cleanUser,
-      name: displayName,
-      pin: pin || '1234',
-      loginAt: Date.now()
-    };
+    const cleanUser = String(username || '').toLowerCase().trim();
+    const account = this.accounts.find(a => a.username.toLowerCase() === cleanUser);
+
+    if (!account) {
+      // Auto-fallback creation for Devin/Rian demo
+      if (cleanUser === 'devin' || cleanUser === 'rian') {
+        const demoAcc = {
+          username: cleanUser,
+          name: cleanUser === 'devin' ? 'Devin' : 'Rian',
+          avatar: cleanUser === 'devin' ? '🍓' : '🐰',
+          pin: '1234',
+          budgetLimit: 250000,
+          createdAt: Date.now()
+        };
+        this.accounts.push(demoAcc);
+        localStorage.setItem(STORAGE_KEYS.ACCOUNTS_LIST, JSON.stringify(this.accounts));
+        return this.setUserSession(demoAcc);
+      }
+      throw new Error('Akun tidak ditemukan! Silakan buat akun baru di tab sebelah.');
+    }
+
+    if (account.pin && account.pin !== String(pin).trim()) {
+      throw new Error('PIN keamanan salah! Silakan coba lagi.');
+    }
+
+    return this.setUserSession(account);
+  }
+
+  setUserSession(account) {
+    this.currentUser = { ...account, loginAt: Date.now() };
+    this.budgetLimit = account.budgetLimit || 250000;
     localStorage.setItem(STORAGE_KEYS.ACTIVE_USER, JSON.stringify(this.currentUser));
-    this.loadState();
+    this.loadUserState();
+    if (window.firebaseSync) {
+      window.firebaseSync.reconnectForUser();
+    }
     this.notify(true);
     return this.currentUser;
   }
@@ -468,18 +701,18 @@ class GroceryStore {
     this.notify(true);
   }
 
-  loadState() {
+  loadUserState() {
     try {
-      const savedCart = localStorage.getItem(this.getKey('cart'));
-      const savedHistory = localStorage.getItem(this.getKey('history'));
-      const savedLookup = localStorage.getItem(this.getKey('lookup'));
-      const savedBudget = localStorage.getItem(this.getKey('budget'));
+      const savedCart = localStorage.getItem(this.getUserKey('cart'));
+      const savedHistory = localStorage.getItem(this.getUserKey('history'));
+      const savedLookup = localStorage.getItem(this.getUserKey('lookup'));
+      const savedBudget = localStorage.getItem(this.getUserKey('budget'));
 
       if (savedCart) {
         this.cart = JSON.parse(savedCart);
       } else {
-        this.cart = [...MOCK_ITEMS];
-        this.saveState();
+        this.cart = [...DEFAULT_KIDS_CART];
+        this.saveUserState();
       }
 
       if (savedHistory) {
@@ -488,22 +721,20 @@ class GroceryStore {
         this.history = [
           {
             id: 'trip-past-1',
-            date: Date.now() - 2592000000, // 30 hari lalu
-            totalSpent: 312000,
-            totalSaved: 48000,
-            budgetLimit: 350000,
-            itemCount: 6,
+            date: Date.now() - 604800000, // 7 hari lalu
+            totalSpent: 98000,
+            totalSaved: 24000,
+            budgetLimit: this.budgetLimit,
+            itemCount: 4,
             items: [
-              { name: 'Beras Pulen 5kg', qty: 1, unit: 'pack', subtotal: 68000 },
-              { name: 'Minyak Goreng 2L', qty: 2, unit: 'liter', subtotal: 84000 },
-              { name: 'Deterjen Bubuk 800g', qty: 1, unit: 'pack', subtotal: 28000 },
-              { name: 'Bayam Hijau', qty: 3, unit: 'ikat', subtotal: 16500 },
-              { name: 'Air Aqua 1.5L', qty: 4, unit: 'botol', subtotal: 26000 },
-              { name: 'Telur Ayam 1kg', qty: 1, unit: 'kg', subtotal: 32000 }
+              { name: 'Bayam Hijau Segar', qty: 2, unit: 'ikat', subtotal: 12000 },
+              { name: 'Susu Ultra Strawberry', qty: 4, unit: 'kotak', subtotal: 24000 },
+              { name: 'Pisang Sunpride', qty: 1, unit: 'sisir', subtotal: 18000 },
+              { name: 'Nugget Dinosaurus', qty: 1, unit: 'pack', subtotal: 44000 }
             ]
           }
         ];
-        this.saveState();
+        this.saveUserState();
       }
 
       if (savedLookup) {
@@ -513,22 +744,25 @@ class GroceryStore {
       }
 
       if (savedBudget) {
-        this.budgetLimit = parseInt(savedBudget, 10) || 350000;
+        this.budgetLimit = parseInt(savedBudget, 10) || this.currentUser?.budgetLimit || 250000;
+      } else if (this.currentUser?.budgetLimit) {
+        this.budgetLimit = this.currentUser.budgetLimit;
       }
     } catch (e) {
-      console.warn('Error loading state from localStorage:', e);
-      this.cart = [...MOCK_ITEMS];
+      console.warn('Error loading user state:', e);
+      this.cart = [...DEFAULT_KIDS_CART];
     }
   }
 
-  saveState() {
+  saveUserState() {
+    if (!this.currentUser) return;
     try {
-      localStorage.setItem(this.getKey('cart'), JSON.stringify(this.cart));
-      localStorage.setItem(this.getKey('history'), JSON.stringify(this.history));
-      localStorage.setItem(this.getKey('lookup'), JSON.stringify(this.priceLookup));
-      localStorage.setItem(this.getKey('budget'), String(this.budgetLimit));
+      localStorage.setItem(this.getUserKey('cart'), JSON.stringify(this.cart));
+      localStorage.setItem(this.getUserKey('history'), JSON.stringify(this.history));
+      localStorage.setItem(this.getUserKey('lookup'), JSON.stringify(this.priceLookup));
+      localStorage.setItem(this.getUserKey('budget'), String(this.budgetLimit));
     } catch (e) {
-      console.warn('Error saving state:', e);
+      console.warn('Error saving user state:', e);
     }
   }
 
@@ -537,13 +771,14 @@ class GroceryStore {
   }
 
   notify(force = false) {
-    this.saveState();
+    this.saveUserState();
+    if (window.firebaseSync && this.currentUser) {
+      window.firebaseSync.triggerDebouncedSync();
+    }
     this.listeners.forEach(fn => fn(this));
   }
 
-  // ==========================================
-  // CART OPERATIONS [F-01, F-02]
-  // ==========================================
+  // Cart operations
   addItem(item) {
     const newItem = {
       id: 'item_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
@@ -557,7 +792,6 @@ class GroceryStore {
       createdAt: Date.now()
     };
 
-    // Update lookup table
     const key = newItem.name.toLowerCase().trim();
     this.priceLookup[key] = {
       price: newItem.unitPrice,
@@ -614,6 +848,15 @@ class GroceryStore {
 
   setBudget(newLimit) {
     this.budgetLimit = Math.max(0, Number(newLimit) || 0);
+    if (this.currentUser) {
+      this.currentUser.budgetLimit = this.budgetLimit;
+      // Update in accounts array
+      const idx = this.accounts.findIndex(a => a.username === this.currentUser.username);
+      if (idx !== -1) {
+        this.accounts[idx].budgetLimit = this.budgetLimit;
+        localStorage.setItem(STORAGE_KEYS.ACCOUNTS_LIST, JSON.stringify(this.accounts));
+      }
+    }
     this.notify();
   }
 
@@ -660,7 +903,6 @@ class GroceryStore {
       })
     };
 
-    // Update priceLookup table
     this.cart.forEach(item => {
       const key = item.name.toLowerCase().trim();
       this.priceLookup[key] = {
@@ -693,11 +935,11 @@ class GroceryStore {
     const rawPercentage = this.budgetLimit > 0 ? (totalSpent / this.budgetLimit) * 100 : 0;
     const budgetUsagePercent = Math.min(100, Math.max(0, rawPercentage));
 
-    let budgetStatus = 'safe'; // Green: < 90%
+    let budgetStatus = 'safe';
     if (totalSpent > this.budgetLimit) {
-      budgetStatus = 'danger'; // Red: > 100%
-    } else if (rawPercentage >= 90) {
-      budgetStatus = 'warning'; // Amber: 90% - 100%
+      budgetStatus = 'danger';
+    } else if (rawPercentage >= 85) {
+      budgetStatus = 'warning';
     }
 
     return {
@@ -715,10 +957,11 @@ class GroceryStore {
 const store = new GroceryStore();
 
 // ==========================================
-// 6. UI CONTROLLER
+// 5. UI CONTROLLER (PINK KIDS THEME)
 // ==========================================
 class GroceryUIController {
   constructor() {
+    this.selectedAvatar = '🐰';
     this.initDOMElements();
     this.bindEvents();
     this.editingItemId = null;
@@ -734,18 +977,27 @@ class GroceryUIController {
   }
 
   initDOMElements() {
-    // Auth Views
+    // Auth Views & Forms
     this.viewLoginScreen = document.getElementById('view-login-screen');
+    this.authTabBtnLogin = document.getElementById('auth-tab-btn-login');
+    this.authTabBtnRegister = document.getElementById('auth-tab-btn-register');
+    this.authPanelLogin = document.getElementById('auth-panel-login');
+    this.authPanelRegister = document.getElementById('auth-panel-register');
     this.formLogin = document.getElementById('form-login');
+    this.formRegister = document.getElementById('form-register');
     this.inputLoginUsername = document.getElementById('login-username');
     this.inputLoginPin = document.getElementById('login-pin');
     this.btnQuickLoginRian = document.getElementById('btn-quick-login-rian');
-    this.btnLogout = document.getElementById('btn-logout');
-    this.btnTabLogout = document.getElementById('btn-tab-logout');
-    this.headerUserName = document.getElementById('header-user-name');
-    this.tabAccountUser = document.getElementById('tab-account-user');
+
+    // Register Inputs
+    this.regName = document.getElementById('reg-name');
+    this.regUsername = document.getElementById('reg-username');
+    this.regPin = document.getElementById('reg-pin');
+    this.regBudget = document.getElementById('reg-budget');
+    this.avatarOptions = document.querySelectorAll('.avatar-option-btn');
 
     // Header Elements
+    this.headerAvatarBadge = document.getElementById('header-avatar-badge');
     this.headerContainer = document.getElementById('sticky-header-container');
     this.headerTotalSpent = document.getElementById('header-total-spent');
     this.headerBudgetLimit = document.getElementById('header-budget-limit');
@@ -755,6 +1007,10 @@ class GroceryUIController {
     this.headerProgressPercent = document.getElementById('header-progress-percent');
     this.headerStatusBadge = document.getElementById('header-status-badge');
     this.totalSavedBadge = document.getElementById('total-saved-badge');
+    this.headerUserName = document.getElementById('header-user-name');
+    this.tabAccountUser = document.getElementById('tab-account-user');
+    this.btnLogout = document.getElementById('btn-logout');
+    this.btnTabLogout = document.getElementById('btn-tab-logout');
 
     // Tabs & Navigation
     this.tabBelanja = document.getElementById('tab-belanja-content');
@@ -774,7 +1030,7 @@ class GroceryUIController {
     this.floatingAddBtn = document.getElementById('floating-add-btn');
     this.finishShoppingBtn = document.getElementById('btn-finish-shopping');
 
-    // Modal: Item Add/Edit
+    // Modals
     this.modalItem = document.getElementById('modal-item');
     this.modalItemTitle = document.getElementById('modal-item-title');
     this.formItem = document.getElementById('form-item');
@@ -790,13 +1046,11 @@ class GroceryUIController {
     this.modalPreviewSaving = document.getElementById('modal-preview-saving');
     this.modalCloseBtn = document.getElementById('modal-close-btn');
 
-    // Modal: Budget Edit
     this.modalBudget = document.getElementById('modal-budget');
     this.inputBudget = document.getElementById('input-budget');
     this.formBudget = document.getElementById('form-budget');
     this.btnOpenBudgetModal = document.getElementById('btn-open-budget-modal');
 
-    // Modal: Overbudget Danger Warning
     this.modalDanger = document.getElementById('modal-danger');
     this.dangerSpentText = document.getElementById('danger-spent-text');
     this.dangerLimitText = document.getElementById('danger-limit-text');
@@ -804,26 +1058,23 @@ class GroceryUIController {
     this.btnDangerProceed = document.getElementById('btn-danger-proceed');
     this.btnDangerAdjust = document.getElementById('btn-danger-adjust');
 
-    // Modal: Confirm Delete
     this.modalConfirmDelete = document.getElementById('modal-confirm-delete');
     this.deleteItemNameText = document.getElementById('delete-item-name-text');
     this.btnConfirmDelete = document.getElementById('btn-confirm-delete');
     this.btnCancelDelete = document.getElementById('btn-cancel-delete');
 
-    // Modal: Finish Trip Celebration
     this.modalFinishTrip = document.getElementById('modal-finish-trip');
     this.finishSummaryTotal = document.getElementById('finish-summary-total');
     this.finishSummarySaved = document.getElementById('finish-summary-saved');
     this.finishSummaryCount = document.getElementById('finish-summary-count');
     this.btnFinishDone = document.getElementById('btn-finish-done');
 
-    // Riwayat Tab Elements
+    // Riwayat & Anggaran Pages
     this.historyList = document.getElementById('history-list');
     this.historyEmptyState = document.getElementById('history-empty-state');
     this.historyTotalTrips = document.getElementById('history-total-trips');
     this.historyAllSpent = document.getElementById('history-all-spent');
 
-    // Anggaran Tab Elements
     this.budgetPageLimit = document.getElementById('budget-page-limit');
     this.budgetPageCurrent = document.getElementById('budget-page-current');
     this.budgetPagePercent = document.getElementById('budget-page-percent');
@@ -832,6 +1083,100 @@ class GroceryUIController {
   }
 
   bindEvents() {
+    // Auth Tab Switching (Masuk vs Daftar)
+    this.authTabBtnLogin?.addEventListener('click', () => {
+      feedback.tap();
+      this.switchAuthTab('login');
+    });
+
+    this.authTabBtnRegister?.addEventListener('click', () => {
+      feedback.tap();
+      this.switchAuthTab('register');
+    });
+
+    // Avatar Selection in Register Form
+    this.avatarOptions.forEach(btn => {
+      btn.addEventListener('click', () => {
+        feedback.tap();
+        this.selectedAvatar = btn.dataset.avatar || '🐰';
+        this.avatarOptions.forEach(b => {
+          b.className = 'avatar-option-btn p-2 rounded-2xl border border-pink-200 bg-pink-50/60 text-2xl flex items-center justify-center';
+        });
+        btn.className = 'avatar-option-btn p-2 rounded-2xl border-2 border-pink-400 bg-pink-100 text-2xl flex items-center justify-center shadow-xs';
+      });
+    });
+
+    // Budget Presets in Registration
+    document.querySelectorAll('.reg-budget-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        feedback.tap();
+        const amt = pill.dataset.budget;
+        if (this.regBudget) this.regBudget.value = formatRupiahNumber(amt);
+      });
+    });
+
+    // Login Form Submission
+    this.formLogin?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const u = this.inputLoginUsername?.value.trim() || 'devin';
+      const p = this.inputLoginPin?.value.trim() || '1234';
+
+      try {
+        store.login(u, p);
+        feedback.success();
+        this.updateAuthView();
+      } catch (err) {
+        feedback.dangerAlert();
+        alert(err.message || 'Gagal masuk akun');
+      }
+    });
+
+    // Register Form Submission
+    this.formRegister?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = this.regName?.value.trim();
+      const username = this.regUsername?.value.trim();
+      const pin = this.regPin?.value.trim() || '1234';
+      const budgetLimit = this.regBudget?.value || '250.000';
+
+      try {
+        store.registerAccount({
+          name,
+          username,
+          pin,
+          avatar: this.selectedAvatar,
+          budgetLimit
+        });
+        feedback.success();
+        if (typeof confetti === 'function') {
+          confetti({ particleCount: 70, spread: 60, origin: { y: 0.5 } });
+        }
+        alert(`🎉 Selamat datang ${name}! Akun ceria kamu berhasil dibuat.`);
+        this.updateAuthView();
+      } catch (err) {
+        feedback.dangerAlert();
+        alert(err.message || 'Gagal mendaftar akun');
+      }
+    });
+
+    // Quick 1-Click Login for Demo
+    this.btnQuickLoginRian?.addEventListener('click', () => {
+      feedback.success();
+      store.login('devin', '1234');
+      this.updateAuthView();
+    });
+
+    // Logout
+    const handleLogout = () => {
+      feedback.tap();
+      if (confirm('Kunci sesi dan keluar akun? Belanjaanmu tetap aman tersimpan.')) {
+        store.logout();
+        this.updateAuthView();
+      }
+    };
+    this.btnLogout?.addEventListener('click', handleLogout);
+    this.btnTabLogout?.addEventListener('click', handleLogout);
+
     // Navigation Tabs
     this.navBelanja?.addEventListener('click', () => this.switchTab('belanja'));
     this.navRiwayat?.addEventListener('click', () => this.switchTab('riwayat'));
@@ -887,14 +1232,13 @@ class GroceryUIController {
       this.updateModalCalculationPreview();
     });
 
-    // Live preview inside Add/Edit Item modal
     [this.inputItemPrice, this.inputItemDiscount, this.inputItemQty].forEach(el => {
       el?.addEventListener('input', () => {
         this.updateModalCalculationPreview();
       });
     });
 
-    // Modal Stepper inside modal
+    // Modal Stepper
     document.getElementById('modal-qty-minus')?.addEventListener('click', () => {
       let q = parseFloat(this.inputItemQty.value) || 1;
       if (q > 1) {
@@ -916,7 +1260,7 @@ class GroceryUIController {
       this.handleItemFormSubmit();
     });
 
-    // Budget Header Click to Open Budget Modal
+    // Budget Header Click
     this.btnOpenBudgetModal?.addEventListener('click', () => {
       feedback.tap();
       this.openBudgetModal();
@@ -931,7 +1275,7 @@ class GroceryUIController {
       this.closeBudgetModal();
     });
 
-    // Quick Budget Preset Buttons
+    // Quick Budget Presets in Modal
     document.querySelectorAll('.budget-preset-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         feedback.tap();
@@ -949,10 +1293,10 @@ class GroceryUIController {
       });
     });
 
-    // Quick Runner: Muat Skenario Uji Kasus Devin
+    // Test Runner
     document.getElementById('btn-load-dt2-scenarios')?.addEventListener('click', () => {
       feedback.success();
-      this.loadDT2TestScenarios();
+      this.loadTestScenarios();
     });
 
     // Danger Modal Actions
@@ -994,7 +1338,7 @@ class GroceryUIController {
       this.switchTab('riwayat');
     });
 
-    // Currency input formatting on blur
+    // Currency blur formatters
     this.inputItemPrice?.addEventListener('blur', (e) => {
       const val = parseRupiahInput(e.target.value);
       if (val > 0) e.target.value = formatRupiahNumber(val);
@@ -1007,33 +1351,20 @@ class GroceryUIController {
       const val = parseRupiahInput(e.target.value);
       if (val > 0) e.target.value = formatRupiahNumber(val);
     });
+  }
 
-    // Authentication listeners
-    this.formLogin?.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const u = this.inputLoginUsername?.value.trim() || 'devin';
-      const p = this.inputLoginPin?.value.trim() || '1234';
-      feedback.success();
-      store.login(u, p);
-      this.updateAuthView();
-    });
-
-    this.btnQuickLoginRian?.addEventListener('click', () => {
-      feedback.success();
-      store.login('devin', '1234');
-      this.updateAuthView();
-    });
-
-    const handleLogout = () => {
-      feedback.tap();
-      if (confirm('Kunci sesi belanja dan keluar akun? Data belanja Anda tetap aman tersimpan.')) {
-        store.logout();
-        this.updateAuthView();
-      }
-    };
-
-    this.btnLogout?.addEventListener('click', handleLogout);
-    this.btnTabLogout?.addEventListener('click', handleLogout);
+  switchAuthTab(tab) {
+    if (tab === 'register') {
+      this.authTabBtnLogin.className = 'py-2 rounded-xl transition-all duration-200 text-slate-500 hover:text-pink-600 flex items-center justify-center gap-1.5';
+      this.authTabBtnRegister.className = 'py-2 rounded-xl transition-all duration-200 bg-white text-pink-600 shadow-sm flex items-center justify-center gap-1.5';
+      this.authPanelLogin.classList.add('hidden');
+      this.authPanelRegister.classList.remove('hidden');
+    } else {
+      this.authTabBtnLogin.className = 'py-2 rounded-xl transition-all duration-200 bg-white text-pink-600 shadow-sm flex items-center justify-center gap-1.5';
+      this.authTabBtnRegister.className = 'py-2 rounded-xl transition-all duration-200 text-slate-500 hover:text-pink-600 flex items-center justify-center gap-1.5';
+      this.authPanelLogin.classList.remove('hidden');
+      this.authPanelRegister.classList.add('hidden');
+    }
   }
 
   updateAuthView() {
@@ -1041,26 +1372,25 @@ class GroceryUIController {
       this.viewLoginScreen?.classList.remove('hidden');
     } else {
       this.viewLoginScreen?.classList.add('hidden');
-      if (this.headerUserName) this.headerUserName.textContent = store.currentUser.username;
-      if (this.tabAccountUser) this.tabAccountUser.textContent = store.currentUser.name;
+      if (this.headerUserName) this.headerUserName.textContent = store.currentUser.name || store.currentUser.username;
+      if (this.tabAccountUser) this.tabAccountUser.textContent = `${store.currentUser.avatar || '🍓'} ${store.currentUser.name || store.currentUser.username}`;
+      if (this.headerAvatarBadge) this.headerAvatarBadge.textContent = store.currentUser.avatar || '🍓';
       this.render();
     }
     if (window.lucide) window.lucide.createIcons();
   }
 
-  // Navigation & Tab Switching
   switchTab(tab) {
     feedback.tap();
     store.currentTab = tab;
 
-    // Reset styles
     [this.navBelanja, this.navRiwayat, this.navAnggaran].forEach(el => {
       if (!el) return;
-      el.classList.remove('text-emerald-400', 'font-bold');
+      el.classList.remove('text-pink-600', 'font-black');
       el.classList.add('text-slate-400');
       const icon = el.querySelector('.nav-icon-container');
       if (icon) {
-        icon.classList.remove('bg-emerald-500/20', 'text-emerald-400', 'ring-2', 'ring-emerald-500/40');
+        icon.classList.remove('bg-pink-100', 'text-pink-600', 'ring-2', 'ring-pink-300');
       }
     });
 
@@ -1068,25 +1398,24 @@ class GroceryUIController {
       if (el) el.classList.add('hidden');
     });
 
-    // Activate active tab
     if (tab === 'belanja') {
       this.tabBelanja?.classList.remove('hidden');
-      this.navBelanja?.classList.add('text-emerald-400', 'font-bold');
+      this.navBelanja?.classList.add('text-pink-600', 'font-black');
       this.navBelanja?.classList.remove('text-slate-400');
-      this.navBelanja?.querySelector('.nav-icon-container')?.classList.add('bg-emerald-500/20', 'text-emerald-400', 'ring-2', 'ring-emerald-500/40');
+      this.navBelanja?.querySelector('.nav-icon-container')?.classList.add('bg-pink-100', 'text-pink-600', 'ring-2', 'ring-pink-300');
       this.floatingAddBtn?.classList.remove('hidden');
     } else if (tab === 'riwayat') {
       this.tabRiwayat?.classList.remove('hidden');
-      this.navRiwayat?.classList.add('text-emerald-400', 'font-bold');
+      this.navRiwayat?.classList.add('text-pink-600', 'font-black');
       this.navRiwayat?.classList.remove('text-slate-400');
-      this.navRiwayat?.querySelector('.nav-icon-container')?.classList.add('bg-emerald-500/20', 'text-emerald-400', 'ring-2', 'ring-emerald-500/40');
+      this.navRiwayat?.querySelector('.nav-icon-container')?.classList.add('bg-pink-100', 'text-pink-600', 'ring-2', 'ring-pink-300');
       this.floatingAddBtn?.classList.add('hidden');
       this.renderHistoryList();
     } else if (tab === 'anggaran') {
       this.tabAnggaran?.classList.remove('hidden');
-      this.navAnggaran?.classList.add('text-emerald-400', 'font-bold');
+      this.navAnggaran?.classList.add('text-pink-600', 'font-black');
       this.navAnggaran?.classList.remove('text-slate-400');
-      this.navAnggaran?.querySelector('.nav-icon-container')?.classList.add('bg-emerald-500/20', 'text-emerald-400', 'ring-2', 'ring-emerald-500/40');
+      this.navAnggaran?.querySelector('.nav-icon-container')?.classList.add('bg-pink-100', 'text-pink-600', 'ring-2', 'ring-pink-300');
       this.floatingAddBtn?.classList.add('hidden');
       this.renderAnggaranPage();
     }
@@ -1096,13 +1425,12 @@ class GroceryUIController {
     }
   }
 
-  // Auto Lookup [F-01]
   handleProductLookup(typedName) {
     const found = store.lookupProduct(typedName);
     if (found && typedName.trim().length >= 3) {
       this.autoLookupNotice.innerHTML = `
-        <div class="flex items-center gap-1.5 text-xs text-cyan-300 bg-cyan-950/60 border border-cyan-800/60 rounded-lg px-2.5 py-1.5 animate-fadeIn">
-          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-cyan-400 shrink-0"></i>
+        <div class="flex items-center gap-1.5 text-xs text-pink-700 bg-pink-100 border border-pink-200 rounded-xl px-2.5 py-1.5">
+          <span>✨</span>
           <span>Ditemukan referensi: <b>${formatRupiah(found.price)}</b> / ${found.unit || 'pcs'}</span>
         </div>
       `;
@@ -1141,14 +1469,13 @@ class GroceryUIController {
     }
   }
 
-  // Modal Controls: Add / Edit
   openAddItemModal(itemToEdit = null) {
     this.editingItemId = itemToEdit ? itemToEdit.id : null;
     this.formItem.reset();
     this.autoLookupNotice.classList.add('hidden');
 
     if (itemToEdit) {
-      this.modalItemTitle.textContent = 'Edit Barang Belanja';
+      this.modalItemTitle.textContent = 'Edit Jajanan Belanja';
       this.inputItemName.value = itemToEdit.name;
       this.inputItemCategory.value = itemToEdit.category;
       this.inputItemUnit.value = itemToEdit.unit;
@@ -1157,7 +1484,7 @@ class GroceryUIController {
       this.inputItemLastPrice.value = itemToEdit.lastMonthPrice ? formatRupiahNumber(itemToEdit.lastMonthPrice) : '';
       this.inputItemDiscount.value = itemToEdit.discountRaw || '';
     } else {
-      this.modalItemTitle.textContent = 'Tambah Barang Baru';
+      this.modalItemTitle.textContent = 'Tambah Jajanan Baru 🌸';
       this.inputItemQty.value = '1';
       this.inputItemCategory.value = 'sayur';
       this.inputItemUnit.value = 'pcs';
@@ -1209,7 +1536,6 @@ class GroceryUIController {
       store.addItem(itemData);
       feedback.increment();
 
-      // Check if newly added item pushed total into overbudget [F-05]
       const summary = store.getCartSummary();
       if (summary.budgetStatus === 'danger' && !this.overbudgetWarningSuppressed) {
         this.triggerOverbudgetDanger(summary);
@@ -1219,7 +1545,6 @@ class GroceryUIController {
     this.closeItemModal();
   }
 
-  // Budget Edit Modal
   openBudgetModal() {
     this.inputBudget.value = formatRupiahNumber(store.budgetLimit);
     this.modalBudget.classList.remove('hidden');
@@ -1230,7 +1555,6 @@ class GroceryUIController {
     this.modalBudget.classList.add('hidden');
   }
 
-  // Danger Modal [F-05]
   triggerOverbudgetDanger(summary) {
     feedback.dangerAlert();
     this.dangerSpentText.textContent = formatRupiah(summary.totalSpent);
@@ -1246,85 +1570,72 @@ class GroceryUIController {
     this.modalDanger.classList.add('hidden');
   }
 
-  // Test Runner Preloader
-  loadDT2TestScenarios() {
+  loadTestScenarios() {
     this.overbudgetWarningSuppressed = false;
-    store.budgetLimit = 350000;
+    store.budgetLimit = 250000;
     
     store.cart = [
       {
-        id: 'dt2-1',
-        name: 'Bayam Hijau Hidroponik (Ikat)',
+        id: 'test-1',
+        name: 'Bayam Hijau Segar Kelinci',
         category: 'sayur',
         unit: 'ikat',
         qty: 3,
         unitPrice: 6000,
-        lastMonthPrice: 5500, // Fluktuasi Naik (Rp 5.500 -> Rp 6.000)
+        lastMonthPrice: 5500,
         discountRaw: '0',
         createdAt: Date.now() - 60000
       },
       {
-        id: 'dt2-2',
-        name: 'Air Mineral Aqua 1.5L',
+        id: 'test-2',
+        name: 'Susu UHT Ultra Milk Strawberry 200ml',
         category: 'minuman',
-        unit: 'botol',
+        unit: 'kotak',
         qty: 4,
-        unitPrice: 7000,
-        lastMonthPrice: 6500,
+        unitPrice: 6000,
+        lastMonthPrice: 6000,
         discountRaw: '0',
         createdAt: Date.now() - 50000
       },
       {
-        id: 'dt2-3',
-        name: 'Brokoli Hijau Segar 500g',
+        id: 'test-3',
+        name: 'Brokoli Hijau Super',
         category: 'sayur',
         unit: 'pack',
         qty: 1,
         unitPrice: 18000,
-        lastMonthPrice: 20000, // Fluktuasi Turun Hemat (Rp 20.000 -> Rp 18.000)
+        lastMonthPrice: 20000,
         discountRaw: '0',
         createdAt: Date.now() - 40000
       },
       {
-        id: 'dt2-4',
-        name: 'Sabun Mandi Refill 450ml',
-        category: 'kebersihan',
-        unit: 'pack',
+        id: 'test-4',
+        name: 'Sosis Kanzler Singles',
+        category: 'daging',
+        unit: 'pcs',
         qty: 2,
-        unitPrice: 24000,
-        lastMonthPrice: 24000,
-        discountRaw: '50%+20%', // Diskon Kompound 50%+20% (Harga jadi Rp 9.600)
+        unitPrice: 9000,
+        lastMonthPrice: 9000,
+        discountRaw: '50%+20%',
         createdAt: Date.now() - 30000
       },
       {
-        id: 'dt2-5',
-        name: 'Minyak Goreng Sawit 2L',
-        category: 'sembako',
-        unit: 'liter',
-        qty: 2,
-        unitPrice: 38000,
-        lastMonthPrice: 42000,
-        discountRaw: '10%', // Diskon Tunggal 10%
-        createdAt: Date.now() - 20000
-      },
-      {
-        id: 'dt2-6',
-        name: 'Beras Pulen Super 5kg',
-        category: 'sembako',
+        id: 'test-5',
+        name: 'Nugget Fiesta Dinosaurus',
+        category: 'daging',
         unit: 'pack',
         qty: 2,
-        unitPrice: 74000,
-        lastMonthPrice: 68000,
-        discountRaw: '0',
-        createdAt: Date.now() - 10000
+        unitPrice: 48000,
+        lastMonthPrice: 46000,
+        discountRaw: '10%',
+        createdAt: Date.now() - 20000
       }
     ];
 
     store.notify();
-    alert('✅ Data Uji Kasus Devin berhasil dimuat!\n\n1. Skenario Kategori Murni: Sayur Mayur (Bayam, Brokoli) & Minuman (Aqua 1.5L)\n2. Skenario Diskon Bertingkat: Sabun 50%+20% (Hemat 60%)\n3. Skenario Komparasi Harga: Bayam (Naik ↑), Brokoli (Turun ↓), Sabun (Stabil =)\n4. Cek Gauge: Total anggaran mendekati batas limit!');
+    alert('✅ Data Uji Ceria berhasil dimuat!\n\n1. Kategori Anak: Sayur Sehat Kelinci & Susu Segar\n2. Diskon Bertingkat: Sosis 50%+20%\n3. Celengan: Cek indikator uang saku anak pintar!');
   }
 
-  // Confirm Delete Modal
   openConfirmDeleteModal(item) {
     this.pendingDeleteItem = item;
     this.deleteItemNameText.textContent = `"${item.name}"`;
@@ -1336,23 +1647,21 @@ class GroceryUIController {
     this.pendingDeleteItem = null;
   }
 
-  // Finish Trip Modal
   handleFinishShopping() {
     if (store.cart.length === 0) {
-      alert('Keranjang belanja masih kosong!');
+      alert('Troli belanja si kecil masih kosong!');
       return;
     }
 
-    const confirmFinish = confirm('Selesaikan dan simpan belanjaan hari ini? Seluruh item akan diarsipkan ke Tab Riwayat dan harga terbarunya disimpan sebagai acuan bulan depan.');
+    const confirmFinish = confirm('Selesaikan belanja dan bayar di kasir? Seluruh jajanan akan dicatat di Buku Riwayat!');
     if (!confirmFinish) return;
 
     feedback.success();
 
-    // Trigger celebration confetti
     if (typeof confetti === 'function') {
       confetti({
-        particleCount: 80,
-        spread: 60,
+        particleCount: 100,
+        spread: 70,
         origin: { y: 0.6 }
       });
     }
@@ -1361,7 +1670,7 @@ class GroceryUIController {
 
     this.finishSummaryTotal.textContent = formatRupiah(trip.totalSpent);
     this.finishSummarySaved.textContent = formatRupiah(trip.totalSaved);
-    this.finishSummaryCount.textContent = `${trip.itemCount} Barang`;
+    this.finishSummaryCount.textContent = `${trip.itemCount} Macam Barang`;
 
     this.modalFinishTrip.classList.remove('hidden');
     if (window.lucide) window.lucide.createIcons();
@@ -1371,7 +1680,6 @@ class GroceryUIController {
     this.modalFinishTrip.classList.add('hidden');
   }
 
-  // Main Render Method
   render() {
     this.renderHeaderBudget();
     this.renderCategoryFilters();
@@ -1389,7 +1697,6 @@ class GroceryUIController {
     }
   }
 
-  // Sticky Header & Budget Safety
   renderHeaderBudget() {
     const summary = store.getCartSummary();
 
@@ -1398,48 +1705,44 @@ class GroceryUIController {
 
     if (summary.remainingBudget >= 0) {
       this.headerRemaining.textContent = formatRupiah(summary.remainingBudget);
-      this.headerRemaining.classList.remove('text-rose-400');
-      this.headerRemaining.classList.add('text-emerald-400');
-      this.headerRemainingLabel.textContent = 'Sisa Anggaran';
+      this.headerRemaining.className = 'text-base font-black text-emerald-600 font-mono-num tracking-tight leading-tight';
+      this.headerRemainingLabel.textContent = 'Sisa Uang Saku';
     } else {
       this.headerRemaining.textContent = `- ${formatRupiah(Math.abs(summary.remainingBudget))}`;
-      this.headerRemaining.classList.remove('text-emerald-400');
-      this.headerRemaining.classList.add('text-rose-400');
-      this.headerRemainingLabel.textContent = 'Defisit Overbudget!';
+      this.headerRemaining.className = 'text-base font-black text-rose-600 font-mono-num tracking-tight leading-tight';
+      this.headerRemainingLabel.textContent = 'Uang Saku Kurang!';
     }
 
     this.headerProgressBar.style.width = `${summary.budgetUsagePercent}%`;
     this.headerProgressPercent.textContent = `${Math.round(summary.rawPercentage)}%`;
 
-    this.headerContainer.classList.remove('animate-danger-pulse', 'border-rose-500/70', 'border-amber-500/50');
-    this.headerProgressBar.classList.remove('bg-emerald-500', 'bg-amber-500', 'bg-rose-500');
+    this.headerContainer.classList.remove('animate-danger-pulse', 'border-rose-400');
 
     const overbudgetTopBanner = document.getElementById('overbudget-top-banner');
 
     if (summary.budgetStatus === 'safe') {
-      this.headerProgressBar.classList.add('bg-emerald-500');
-      this.headerStatusBadge.className = 'text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1';
-      this.headerStatusBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Aman`;
+      this.headerProgressBar.className = 'h-full rounded-full transition-progress bg-gradient-to-r from-pink-400 to-pink-500';
+      this.headerStatusBadge.className = 'text-[11px] font-bold px-2 py-0.5 rounded-full bg-pink-100 text-pink-700 border border-pink-200 flex items-center gap-1';
+      this.headerStatusBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-pink-500"></span> 💖 Uang Saku Aman`;
       if (overbudgetTopBanner) overbudgetTopBanner.classList.add('hidden');
     } else if (summary.budgetStatus === 'warning') {
-      this.headerProgressBar.classList.add('bg-amber-500');
-      this.headerContainer.classList.add('border-amber-500/50');
-      this.headerStatusBadge.className = 'text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1 animate-soft-pulse';
-      this.headerStatusBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Waspada (${Math.round(summary.rawPercentage)}%)`;
+      this.headerProgressBar.className = 'h-full rounded-full transition-progress bg-amber-400';
+      this.headerStatusBadge.className = 'text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 flex items-center gap-1 animate-soft-pulse';
+      this.headerStatusBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> ⭐ Sisa Sedikit (${Math.round(summary.rawPercentage)}%)`;
       if (overbudgetTopBanner) overbudgetTopBanner.classList.add('hidden');
     } else {
-      this.headerProgressBar.classList.add('bg-rose-500');
-      this.headerContainer.classList.add('animate-danger-pulse', 'border-rose-500/70');
-      this.headerStatusBadge.className = 'text-[11px] font-bold px-2 py-0.5 rounded-full bg-rose-500 text-white flex items-center gap-1';
-      this.headerStatusBadge.innerHTML = `<i data-lucide="alert-triangle" class="w-3 h-3"></i> OVERBUDGET!`;
+      this.headerProgressBar.className = 'h-full rounded-full transition-progress bg-rose-500';
+      this.headerContainer.classList.add('animate-danger-pulse', 'border-rose-400');
+      this.headerStatusBadge.className = 'text-[11px] font-black px-2 py-0.5 rounded-full bg-rose-500 text-white flex items-center gap-1';
+      this.headerStatusBadge.innerHTML = `<span>🚨</span> UANG SAKU HABIS!`;
       if (overbudgetTopBanner) overbudgetTopBanner.classList.remove('hidden');
     }
 
     if (summary.totalSaved > 0) {
       this.totalSavedBadge.innerHTML = `
-        <div class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 text-xs font-semibold">
-          <i data-lucide="tag" class="w-3.5 h-3.5 text-emerald-400"></i>
-          <span>Total Hemat: ${formatRupiah(summary.totalSaved)}</span>
+        <div class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-pink-100 border border-pink-300 text-pink-700 text-xs font-bold shadow-xs">
+          <span>🏷️</span>
+          <span>Hemat Diskon: ${formatRupiah(summary.totalSaved)}</span>
         </div>
       `;
       this.totalSavedBadge.classList.remove('hidden');
@@ -1448,7 +1751,6 @@ class GroceryUIController {
     }
   }
 
-  // Category Filter Pills
   renderCategoryFilters() {
     if (!this.categoryFiltersContainer) return;
     this.categoryFiltersContainer.innerHTML = '';
@@ -1457,15 +1759,12 @@ class GroceryUIController {
       const isSelected = store.selectedCategory === cat.id;
       const pill = document.createElement('button');
       pill.type = 'button';
-      pill.className = `shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-150 flex items-center gap-1.5 tap-effect ${
+      pill.className = `shrink-0 px-3 py-1.5 rounded-2xl text-xs font-extrabold transition-all duration-150 flex items-center gap-1.5 tap-effect ${
         isSelected
-          ? 'bg-emerald-500 text-slate-950 font-bold shadow-md shadow-emerald-500/20'
-          : 'bg-slate-800/90 text-slate-300 hover:bg-slate-700/80 border border-slate-700/50'
+          ? 'bg-gradient-to-r from-pink-500 to-rose-400 text-white shadow-md shadow-pink-300'
+          : 'bg-white text-pink-700 hover:bg-pink-50 border border-pink-200'
       }`;
-      pill.innerHTML = `
-        <i data-lucide="${cat.icon}" class="w-3.5 h-3.5"></i>
-        <span>${cat.name}</span>
-      `;
+      pill.innerHTML = `<span>${cat.name}</span>`;
 
       pill.addEventListener('click', () => {
         feedback.tap();
@@ -1479,7 +1778,6 @@ class GroceryUIController {
     });
   }
 
-  // 1-Tap Quick Catalog Carousel
   renderQuickCatalog() {
     if (!this.quickCatalogCarousel) return;
     this.quickCatalogCarousel.innerHTML = '';
@@ -1494,27 +1792,26 @@ class GroceryUIController {
 
     items.forEach(item => {
       const card = document.createElement('div');
-      card.className = 'shrink-0 w-36 bg-slate-900/90 border border-slate-800 rounded-2xl p-2.5 flex flex-col justify-between shadow-sm hover:border-emerald-500/50 transition-all';
+      card.className = 'shrink-0 w-36 bg-white border-2 border-pink-200 rounded-2xl p-2.5 flex flex-col justify-between shadow-xs hover:border-pink-400 transition-all';
       
       const catObj = CATEGORIES.find(c => c.id === item.category) || CATEGORIES[1];
 
       card.innerHTML = `
         <div>
-          <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${catObj.color} inline-block mb-1">
+          <span class="text-[9px] font-black px-1.5 py-0.5 rounded-md ${catObj.color} inline-block mb-1">
             ${catObj.name}
           </span>
-          <h4 class="text-xs font-bold text-slate-100 truncate" title="${item.name}">${item.name}</h4>
-          <div class="text-[11px] font-mono-num font-extrabold text-emerald-400 mt-0.5">
+          <h4 class="text-xs font-black text-slate-800 truncate" title="${item.name}">${item.name}</h4>
+          <div class="text-[11px] font-mono-num font-black text-pink-600 mt-0.5">
             ${formatRupiah(item.price)}
           </div>
         </div>
 
         <button 
           type="button" 
-          class="mt-2 w-full py-1 px-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500 text-emerald-300 hover:text-slate-950 border border-emerald-500/30 text-[10px] font-extrabold flex items-center justify-center gap-1 tap-effect transition-all"
+          class="mt-2 w-full py-1.5 px-2 rounded-xl bg-pink-100 hover:bg-gradient-to-r hover:from-pink-500 hover:to-rose-400 text-pink-700 hover:text-white border border-pink-200 text-[10px] font-black flex items-center justify-center gap-1 tap-effect transition-all"
         >
-          <i data-lucide="plus" class="w-3 h-3"></i>
-          <span>Tambah</span>
+          <span>+ Tambah</span>
         </button>
       `;
 
@@ -1542,7 +1839,6 @@ class GroceryUIController {
     if (window.lucide) window.lucide.createIcons();
   }
 
-  // Cart List & Item Cards
   renderCartList() {
     let filtered = store.cart;
     if (store.selectedCategory !== 'all') {
@@ -1571,9 +1867,8 @@ class GroceryUIController {
       this.cartEmptyState?.classList.add('hidden');
       this.cartItemList.innerHTML = `
         <div class="py-12 text-center text-slate-400">
-          <i data-lucide="search-x" class="w-10 h-10 mx-auto mb-2 text-slate-500"></i>
-          <p class="text-sm font-medium">Tidak ada barang yang cocok dengan "${store.searchQuery}"</p>
-          <button type="button" class="mt-3 text-xs text-emerald-400 underline font-semibold" id="btn-reset-filters">Reset Pencarian & Kategori</button>
+          <p class="text-sm font-bold text-slate-600">Tidak ada jajanan yang cocok dengan "${store.searchQuery}"</p>
+          <button type="button" class="mt-3 text-xs text-pink-600 underline font-black" id="btn-reset-filters">Tampilkan Semua Jajanan</button>
         </div>
       `;
       document.getElementById('btn-reset-filters')?.addEventListener('click', () => {
@@ -1583,7 +1878,6 @@ class GroceryUIController {
         this.clearSearchBtn?.classList.add('hidden');
         this.render();
       });
-      if (window.lucide) window.lucide.createIcons();
       return;
     }
 
@@ -1602,7 +1896,7 @@ class GroceryUIController {
 
   createItemCard(item) {
     const card = document.createElement('div');
-    card.className = 'grocery-card relative bg-slate-900/90 border border-slate-800/90 rounded-2xl p-3.5 shadow-lg backdrop-blur-md hover:border-slate-700/80 transition-all';
+    card.className = 'grocery-card relative bg-white border-2 border-pink-200 rounded-3xl p-3.5 shadow-sm hover:border-pink-400 transition-all';
     card.dataset.itemId = item.id;
 
     const totals = Calculator.getItemTotals(item);
@@ -1614,31 +1908,27 @@ class GroceryUIController {
       const diff = item.unitPrice - item.lastMonthPrice;
       if (diff > 0) {
         priceComparatorBadge = `
-          <span class="inline-flex items-center gap-0.5 text-[11px] font-bold px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-300 border border-rose-500/30">
-            <i data-lucide="trending-up" class="w-3 h-3 text-rose-400"></i>
+          <span class="inline-flex items-center gap-0.5 text-[11px] font-bold px-2 py-0.5 rounded-lg bg-rose-100 text-rose-700 border border-rose-200">
             &uarr; +${formatRupiah(diff)} (Naik)
           </span>
         `;
       } else if (diff < 0) {
         priceComparatorBadge = `
-          <span class="inline-flex items-center gap-0.5 text-[11px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-            <i data-lucide="trending-down" class="w-3 h-3 text-emerald-400"></i>
+          <span class="inline-flex items-center gap-0.5 text-[11px] font-bold px-2 py-0.5 rounded-lg bg-emerald-100 text-emerald-700 border border-emerald-200">
             &darr; -${formatRupiah(Math.abs(diff))} (Hemat)
           </span>
         `;
       } else {
         priceComparatorBadge = `
-          <span class="inline-flex items-center gap-0.5 text-[11px] font-medium px-2 py-0.5 rounded-md bg-slate-700/50 text-slate-300 border border-slate-600/50">
-            <i data-lucide="equal" class="w-3 h-3 text-slate-400"></i>
-            = ${formatRupiah(item.unitPrice)} (Stabil)
+          <span class="inline-flex items-center gap-0.5 text-[11px] font-semibold px-2 py-0.5 rounded-lg bg-pink-50 text-pink-600 border border-pink-200">
+            = ${formatRupiah(item.unitPrice)} (Harga Pas)
           </span>
         `;
       }
     } else {
       priceComparatorBadge = `
-        <span class="inline-flex items-center gap-0.5 text-[11px] font-semibold px-2 py-0.5 rounded-md bg-sky-500/20 text-sky-300 border border-sky-500/30">
-          <i data-lucide="sparkle" class="w-3 h-3 text-sky-400"></i>
-          Barang Baru
+        <span class="inline-flex items-center gap-0.5 text-[11px] font-bold px-2 py-0.5 rounded-lg bg-sky-100 text-sky-700 border border-sky-200">
+          ⭐ Jajanan Baru
         </span>
       `;
     }
@@ -1649,26 +1939,25 @@ class GroceryUIController {
 
     if (totals.isDiscounted) {
       discountBadgeHtml = `
-        <span class="inline-flex items-center gap-1 text-[11px] font-extrabold px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/40">
-          <i data-lucide="percent" class="w-3 h-3 text-amber-400"></i>
+        <span class="inline-flex items-center gap-1 text-[11px] font-black px-2 py-0.5 rounded-lg bg-amber-100 text-amber-800 border border-amber-300">
           Diskon ${totals.discountText}
         </span>
-        <span class="text-[11px] font-semibold text-emerald-400">
+        <span class="text-[11px] font-bold text-emerald-600">
           Hemat ${formatRupiah(totals.totalSaving)}
         </span>
       `;
       unitPriceHtml = `
         <div class="flex items-baseline gap-1.5 flex-wrap">
-          <span class="text-sm font-bold text-emerald-300 font-mono-num">${formatRupiah(totals.finalUnitPrice)}</span>
-          <span class="text-xs text-slate-500 line-through font-mono-num">${formatRupiah(item.unitPrice)}</span>
-          <span class="text-xs text-slate-400">/${item.unit}</span>
+          <span class="text-sm font-black text-pink-600 font-mono-num">${formatRupiah(totals.finalUnitPrice)}</span>
+          <span class="text-xs text-slate-400 line-through font-mono-num">${formatRupiah(item.unitPrice)}</span>
+          <span class="text-xs text-slate-500">/${item.unit}</span>
         </div>
       `;
     } else {
       unitPriceHtml = `
         <div class="flex items-baseline gap-1">
-          <span class="text-sm font-semibold text-slate-200 font-mono-num">${formatRupiah(item.unitPrice)}</span>
-          <span class="text-xs text-slate-400">/${item.unit}</span>
+          <span class="text-sm font-black text-pink-600 font-mono-num">${formatRupiah(item.unitPrice)}</span>
+          <span class="text-xs text-slate-500">/${item.unit}</span>
         </div>
       `;
     }
@@ -1677,13 +1966,13 @@ class GroceryUIController {
       <div class="flex items-start justify-between gap-2 mb-2">
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-1.5 flex-wrap mb-1">
-            <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border ${catObj.color}">
+            <span class="text-[10px] font-black tracking-wider px-2 py-0.5 rounded-md border ${catObj.color}">
               ${catObj.name}
             </span>
             ${priceComparatorBadge}
           </div>
 
-          <h3 class="text-base font-bold text-slate-100 truncate pr-2 item-title cursor-pointer" title="${item.name}">
+          <h3 class="text-sm font-black text-slate-800 truncate pr-2 item-title cursor-pointer" title="${item.name}">
             ${item.name}
           </h3>
           ${unitPriceHtml}
@@ -1694,31 +1983,31 @@ class GroceryUIController {
         </div>
 
         <div class="flex items-center gap-1 shrink-0">
-          <button type="button" class="btn-edit-item touch-target w-8 h-8 rounded-lg bg-slate-800/80 text-slate-300 hover:text-emerald-400 hover:bg-slate-700 tap-effect" title="Edit Barang">
+          <button type="button" class="btn-edit-item touch-target w-8 h-8 rounded-xl bg-pink-50 text-pink-600 hover:bg-pink-100 tap-effect" title="Edit">
             <i data-lucide="edit-3" class="w-4 h-4"></i>
           </button>
-          <button type="button" class="btn-delete-item touch-target w-8 h-8 rounded-lg bg-slate-800/80 text-slate-400 hover:text-rose-400 hover:bg-rose-950/40 tap-effect" title="Hapus Barang">
+          <button type="button" class="btn-delete-item touch-target w-8 h-8 rounded-xl bg-pink-50 text-rose-500 hover:bg-rose-100 tap-effect" title="Hapus">
             <i data-lucide="trash-2" class="w-4 h-4"></i>
           </button>
         </div>
       </div>
 
-      <div class="pt-2 mt-2 border-t border-slate-800/80 flex items-center justify-between gap-3">
+      <div class="pt-2 mt-2 border-t border-pink-100 flex items-center justify-between gap-3">
         <div>
-          <span class="text-[11px] text-slate-400 block font-medium">Subtotal</span>
-          <span class="text-base font-extrabold text-slate-50 font-mono-num tracking-tight">${formatRupiah(totals.subtotal)}</span>
+          <span class="text-[11px] text-pink-500 block font-bold">Subtotal</span>
+          <span class="text-base font-black text-pink-700 font-mono-num tracking-tight">${formatRupiah(totals.subtotal)}</span>
         </div>
 
-        <div class="flex items-center bg-slate-800/90 rounded-xl p-1 border border-slate-700/60 shadow-inner">
-          <button type="button" class="btn-stepper-minus touch-target w-11 h-11 rounded-lg bg-slate-700/70 text-slate-200 active:bg-rose-600 active:text-white tap-effect font-black text-xl flex items-center justify-center">
-            <i data-lucide="minus" class="w-5 h-5"></i>
+        <div class="flex items-center bg-pink-50 rounded-2xl p-1 border border-pink-200 shadow-inner">
+          <button type="button" class="btn-stepper-minus touch-target w-10 h-10 rounded-xl bg-white text-pink-700 active:bg-rose-500 active:text-white tap-effect font-black text-xl flex items-center justify-center shadow-xs">
+            <i data-lucide="minus" class="w-4 h-4"></i>
           </button>
           <div class="w-12 text-center">
-            <span class="font-extrabold text-base text-slate-100 font-mono-num">${item.qty}</span>
-            <span class="text-[10px] text-slate-400 block -mt-1">${item.unit}</span>
+            <span class="font-black text-base text-pink-700 font-mono-num">${item.qty}</span>
+            <span class="text-[10px] text-pink-400 block -mt-1 font-semibold">${item.unit}</span>
           </div>
-          <button type="button" class="btn-stepper-plus touch-target w-11 h-11 rounded-lg bg-emerald-600 text-slate-950 active:bg-emerald-400 tap-effect font-black text-xl flex items-center justify-center shadow-sm">
-            <i data-lucide="plus" class="w-5 h-5"></i>
+          <button type="button" class="btn-stepper-plus touch-target w-10 h-10 rounded-xl bg-gradient-to-tr from-pink-500 to-rose-400 text-white active:scale-95 tap-effect font-black text-xl flex items-center justify-center shadow-xs">
+            <i data-lucide="plus" class="w-4 h-4"></i>
           </button>
         </div>
       </div>
@@ -1774,7 +2063,6 @@ class GroceryUIController {
     return card;
   }
 
-  // Riwayat Tab
   renderHistoryList() {
     if (!this.historyList) return;
     this.historyList.innerHTML = '';
@@ -1789,40 +2077,40 @@ class GroceryUIController {
 
     this.historyEmptyState?.classList.add('hidden');
     const totalSpentAll = history.reduce((acc, t) => acc + (t.totalSpent || 0), 0);
-    if (this.historyTotalTrips) this.historyTotalTrips.textContent = `${history.length} Kali Belanja`;
+    if (this.historyTotalTrips) this.historyTotalTrips.textContent = `${history.length} Kali Belanja ⭐`;
     if (this.historyAllSpent) this.historyAllSpent.textContent = formatRupiah(totalSpentAll);
 
     history.forEach(trip => {
       const tripCard = document.createElement('div');
-      tripCard.className = 'bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-md space-y-3';
+      tripCard.className = 'bg-white border-2 border-pink-200 rounded-3xl p-4 shadow-xs space-y-3';
       
       const itemsListHtml = (trip.items || []).slice(0, 4).map(it => `
-        <div class="flex items-center justify-between text-xs py-1 border-b border-slate-800/60 last:border-0">
-          <span class="text-slate-300 truncate max-w-[200px]">${it.name} (${it.qty} ${it.unit})</span>
-          <span class="font-mono-num text-slate-200 font-semibold">${formatRupiah(it.subtotal)}</span>
+        <div class="flex items-center justify-between text-xs py-1 border-b border-pink-100 last:border-0 font-medium">
+          <span class="text-slate-700 truncate max-w-[200px]">${it.name} (${it.qty} ${it.unit})</span>
+          <span class="font-mono-num text-pink-700 font-bold">${formatRupiah(it.subtotal)}</span>
         </div>
       `).join('');
 
       tripCard.innerHTML = `
-        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+        <div class="flex items-center justify-between border-b border-pink-100 pb-2">
           <div class="flex items-center gap-2">
-            <div class="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-              <i data-lucide="check" class="w-4 h-4"></i>
+            <div class="w-8 h-8 rounded-xl bg-pink-100 text-pink-600 flex items-center justify-center text-base">
+              🌸
             </div>
             <div>
-              <span class="text-xs font-bold text-slate-100 block">${formatDateIndo(trip.date)}</span>
-              <span class="text-[10px] text-slate-400">${trip.itemCount || 0} macam barang</span>
+              <span class="text-xs font-black text-pink-700 block">${formatDateIndo(trip.date)}</span>
+              <span class="text-[10px] text-pink-500 font-bold">${trip.itemCount || 0} macam jajanan</span>
             </div>
           </div>
           <div class="text-right">
-            <span class="text-sm font-black text-emerald-400 font-mono-num block">${formatRupiah(trip.totalSpent)}</span>
-            ${trip.totalSaved > 0 ? `<span class="text-[10px] text-amber-400 font-semibold">Hemat ${formatRupiah(trip.totalSaved)}</span>` : ''}
+            <span class="text-sm font-black text-pink-700 font-mono-num block">${formatRupiah(trip.totalSpent)}</span>
+            ${trip.totalSaved > 0 ? `<span class="text-[10px] text-emerald-600 font-extrabold">Hemat ${formatRupiah(trip.totalSaved)}</span>` : ''}
           </div>
         </div>
 
-        <div class="bg-slate-950/60 rounded-xl p-2.5 space-y-1">
+        <div class="bg-pink-50 rounded-2xl p-2.5 space-y-1">
           ${itemsListHtml}
-          ${(trip.items || []).length > 4 ? `<div class="text-[10px] text-slate-500 text-center pt-1">+ ${(trip.items || []).length - 4} barang lainnya</div>` : ''}
+          ${(trip.items || []).length > 4 ? `<div class="text-[10px] text-pink-500 text-center pt-1 font-bold">+ ${(trip.items || []).length - 4} jajanan lainnya</div>` : ''}
         </div>
       `;
 
@@ -1832,7 +2120,6 @@ class GroceryUIController {
     if (window.lucide) window.lucide.createIcons();
   }
 
-  // Anggaran Tab
   renderAnggaranPage() {
     const summary = store.getCartSummary();
 
@@ -1840,17 +2127,16 @@ class GroceryUIController {
     if (this.budgetPageCurrent) this.budgetPageCurrent.textContent = formatRupiah(summary.totalSpent);
     if (this.budgetPagePercent) {
       this.budgetPagePercent.textContent = `${Math.round(summary.rawPercentage)}% Digunakan`;
-      this.budgetPagePercent.className = summary.budgetStatus === 'danger' ? 'font-bold text-rose-400' : 'font-bold text-emerald-400';
+      this.budgetPagePercent.className = summary.budgetStatus === 'danger' ? 'font-black text-rose-600' : 'font-black text-pink-600';
     }
 
     if (this.budgetGaugeBar) {
       this.budgetGaugeBar.style.width = `${summary.budgetUsagePercent}%`;
       this.budgetGaugeBar.className = `h-full rounded-full transition-all duration-300 ${
-        summary.budgetStatus === 'danger' ? 'bg-rose-500' : summary.budgetStatus === 'warning' ? 'bg-amber-500' : 'bg-emerald-500'
+        summary.budgetStatus === 'danger' ? 'bg-rose-500' : summary.budgetStatus === 'warning' ? 'bg-amber-400' : 'bg-gradient-to-r from-pink-400 to-pink-500'
       }`;
     }
 
-    // Category breakdown
     if (this.budgetBreakdownContainer) {
       this.budgetBreakdownContainer.innerHTML = '';
       const spend = summary.categorySpend || {};
@@ -1858,13 +2144,13 @@ class GroceryUIController {
 
       if (catKeys.length === 0) {
         this.budgetBreakdownContainer.innerHTML = `
-          <div class="text-center py-4 text-xs text-slate-500">
-            Keranjang belanja kosong. Belum ada pengeluaran kategori.
+          <div class="text-center py-4 text-xs text-pink-400 font-bold">
+            Troli masih kosong. Belum ada pengeluaran jajanan.
           </div>
         `;
       } else {
         catKeys.forEach(catId => {
-          const catObj = CATEGORIES.find(c => c.id === catId) || { name: catId, color: 'bg-slate-700' };
+          const catObj = CATEGORIES.find(c => c.id === catId) || { name: catId, color: 'bg-pink-100' };
           const amount = spend[catId];
           const pct = summary.totalSpent > 0 ? Math.round((amount / summary.totalSpent) * 100) : 0;
 
@@ -1872,11 +2158,11 @@ class GroceryUIController {
           row.className = 'space-y-1 text-xs';
           row.innerHTML = `
             <div class="flex items-center justify-between">
-              <span class="text-slate-300 font-medium">${catObj.name}</span>
-              <span class="font-mono-num font-bold text-slate-100">${formatRupiah(amount)} (${pct}%)</span>
+              <span class="text-slate-700 font-bold">${catObj.name}</span>
+              <span class="font-mono-num font-black text-pink-700">${formatRupiah(amount)} (${pct}%)</span>
             </div>
-            <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-              <div class="h-full bg-emerald-500 rounded-full" style="width: ${pct}%"></div>
+            <div class="w-full bg-pink-100 rounded-full h-2 overflow-hidden">
+              <div class="h-full bg-gradient-to-r from-pink-400 to-rose-400 rounded-full" style="width: ${pct}%"></div>
             </div>
           `;
           this.budgetBreakdownContainer.appendChild(row);
@@ -1886,9 +2172,9 @@ class GroceryUIController {
   }
 }
 
-// ==========================================
-// 7. INITIALIZATION ON DOM READY
-// ==========================================
 document.addEventListener('DOMContentLoaded', () => {
+  if (window.firebaseSync) {
+    window.firebaseSync.init(store);
+  }
   window.appController = new GroceryUIController();
 });
