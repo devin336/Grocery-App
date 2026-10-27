@@ -29,10 +29,10 @@ const CATEGORIES = [
   { id: 'lainnya', name: '🏷️ Lainnya', icon: 'tag', color: 'bg-slate-900/80 text-slate-300 border-slate-700/60' }
 ];
 
-// Initial mock items for newly created cart (Skenario DT2 Rian - Lotte Mart)
+// Initial mock items for newly created cart (Contoh Belanja Bulanan Supermarket)
 const DEFAULT_KIDS_CART = [
   {
-    id: 'dt2-beras',
+    id: 'cart-beras',
     name: 'Beras Rojolele',
     category: 'bahan-pokok',
     unit: 'karung/5kg',
@@ -43,7 +43,7 @@ const DEFAULT_KIDS_CART = [
     createdAt: Date.now() - 500000
   },
   {
-    id: 'dt2-minyak',
+    id: 'cart-minyak',
     name: 'Minyak Goreng 2L',
     category: 'bahan-pokok',
     unit: 'liter',
@@ -54,7 +54,7 @@ const DEFAULT_KIDS_CART = [
     createdAt: Date.now() - 400000
   },
   {
-    id: 'dt2-sabun',
+    id: 'cart-sabun',
     name: 'Sabun Cuci',
     category: 'kebersihan',
     unit: 'pcs',
@@ -65,7 +65,7 @@ const DEFAULT_KIDS_CART = [
     createdAt: Date.now() - 300000
   },
   {
-    id: 'dt2-wajan',
+    id: 'cart-wajan',
     name: 'Wajan Penggorengan',
     category: 'peralatan',
     unit: 'pcs',
@@ -76,7 +76,7 @@ const DEFAULT_KIDS_CART = [
     createdAt: Date.now() - 200000
   },
   {
-    id: 'dt2-telur',
+    id: 'cart-telur',
     name: 'Telur Ayam 1kg',
     category: 'daging',
     unit: 'kg',
@@ -87,7 +87,7 @@ const DEFAULT_KIDS_CART = [
     createdAt: Date.now() - 100000
   },
   {
-    id: 'dt2-garam',
+    id: 'cart-garam',
     name: 'Garam Dapur 500g',
     category: 'bahan-pokok',
     unit: 'pack',
@@ -115,7 +115,7 @@ const QUICK_CATALOG_ITEMS = [
 
 // Product lookup database for instant autofill (Lotte Mart Grocery - Puri Indah)
 const MOCK_LOOKUP = {
-  // Skenario DT2 Lotte Mart Puri Indah
+  // Referensi Harga Toko Lotte Mart Puri Indah
   'beras rojolele': { price: 74000, lastMonthPrice: 68000, unit: 'karung/5kg', category: 'bahan-pokok' },
   'beras 5kg': { price: 74000, lastMonthPrice: 68000, unit: 'karung/5kg', category: 'bahan-pokok' },
   'beras': { price: 74000, lastMonthPrice: 68000, unit: 'karung/5kg', category: 'bahan-pokok' },
@@ -1141,7 +1141,7 @@ class GroceryStore {
 
     this.accounts = JSON.parse(localStorage.getItem(STORAGE_KEYS.ACCOUNTS_LIST) || '[]');
     
-    // Seed default demo accounts if empty (Rian for DT2 and Devin)
+    // Seed default demo accounts if empty (Rian and Devin)
     if (this.accounts.length === 0) {
       this.accounts = [
         {
@@ -1164,7 +1164,7 @@ class GroceryStore {
       localStorage.setItem(STORAGE_KEYS.ACCOUNTS_LIST, JSON.stringify(this.accounts));
     }
 
-    // Default to Rian for DT2 test scenario if no user logged in
+    // Default to Rian if no user logged in
     this.currentUser = JSON.parse(localStorage.getItem(STORAGE_KEYS.ACTIVE_USER) || 'null');
     if (!this.currentUser) {
       const defaultUser = this.accounts.find(a => a.username === 'rian') || this.accounts[0];
@@ -1663,7 +1663,7 @@ class GroceryUIController {
     this.btnGoogleAuthRegister = document.getElementById('btn-google-auth-register');
     this.cloudAccountsChips = document.getElementById('cloud-accounts-chips');
 
-    // Sesi Belanja (Toko & Tanggal - SRS F-01)
+    // Sesi Belanja (Toko & Tanggal)
     this.sessionStoreSelect = document.getElementById('session-store-select');
     this.btnAddStoreLocation = document.getElementById('btn-add-store-location');
     this.btnAddStoreLocationLink = document.getElementById('btn-add-store-location-link');
@@ -1903,13 +1903,13 @@ class GroceryUIController {
       }
     });
 
-    // Quick 1-Click Login for Rian (DT2) & Devin
+    // Quick 1-Click Login for Rian & Devin
     this.btnQuickLoginRian?.addEventListener('click', async () => {
       try {
         await store.login('rian', '1234');
         feedback.success();
         this.updateAuthView();
-        showToast('Masuk sebagai Rian (Skenario DT2)!', 'success', '🐰');
+        showToast('Selamat datang, Rian!', 'success', '🐰');
       } catch (err) {
         showToast(err.message, 'danger', '⚠️');
       }
@@ -2221,7 +2221,7 @@ class GroceryUIController {
     });
 
     // Test Runner
-    document.getElementById('btn-load-dt2-scenarios')?.addEventListener('click', () => {
+    document.getElementById('btn-load-sample-cart')?.addEventListener('click', () => {
       feedback.success();
       this.loadTestScenarios();
     });
@@ -2865,7 +2865,7 @@ class GroceryUIController {
     
     store.cart = [
       {
-        id: 'dt2-1',
+        id: 'sample-1',
         name: 'Beras Rojolele',
         category: 'bahan-pokok',
         unit: 'karung/5kg',
@@ -2876,7 +2876,7 @@ class GroceryUIController {
         createdAt: Date.now() - 60000
       },
       {
-        id: 'dt2-2',
+        id: 'sample-2',
         name: 'Minyak Goreng 2L',
         category: 'bahan-pokok',
         unit: 'pouch',
@@ -2887,7 +2887,7 @@ class GroceryUIController {
         createdAt: Date.now() - 50000
       },
       {
-        id: 'dt2-3',
+        id: 'sample-3',
         name: 'Sabun Cuci',
         category: 'kebersihan',
         unit: 'pcs',
@@ -2898,7 +2898,7 @@ class GroceryUIController {
         createdAt: Date.now() - 40000
       },
       {
-        id: 'dt2-4',
+        id: 'sample-4',
         name: 'Wajan',
         category: 'peralatan',
         unit: 'pcs',
@@ -2909,7 +2909,7 @@ class GroceryUIController {
         createdAt: Date.now() - 30000
       },
       {
-        id: 'dt2-5',
+        id: 'sample-5',
         name: 'Telur Ayam 1kg',
         category: 'bahan-pokok',
         unit: 'kg',
@@ -2920,7 +2920,7 @@ class GroceryUIController {
         createdAt: Date.now() - 20000
       },
       {
-        id: 'dt2-6',
+        id: 'sample-6',
         name: 'Garam Dapur 500g',
         category: 'bahan-pokok',
         unit: 'pack',
@@ -2933,7 +2933,7 @@ class GroceryUIController {
     ];
 
     store.notify();
-    showToast('🏬 Skenario Kasus Rian (Lotte Mart Puri Indah) DT2 berhasil dimuat!', 'success', '🎯');
+    showToast('🏬 Contoh keranjang belanja bulanan berhasil dimuat!', 'success', '🛒');
   }
 
   openConfirmDeleteModal(item) {

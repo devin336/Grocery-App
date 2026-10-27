@@ -1,5 +1,5 @@
 ﻿// Service Worker for Dvh Grocery PWA
-const CACHE_NAME = 'dvh-grocery-v3-dt2-stores';
+const CACHE_NAME = 'dvh-grocery-v3-production';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
