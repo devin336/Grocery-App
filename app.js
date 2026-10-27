@@ -2960,7 +2960,7 @@ class GroceryUIController {
       <div class="pt-2 mt-2 border-t border-violet-500/20 flex items-center justify-between gap-3">
         <div>
           <span class="text-[11px] text-slate-400 block font-bold">Subtotal</span>
-          <span class="text-base font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-violet-300 font-mono-num tracking-tight">${formatRupiah(totals.subtotal)}</span>
+          <span class="card-subtotal-val text-base font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-violet-300 font-mono-num tracking-tight">${formatRupiah(totals.subtotal)}</span>
         </div>
 
         <div class="flex items-center bg-slate-950/90 rounded-2xl p-1 border border-violet-500/30 shadow-inner">
@@ -2995,6 +2995,21 @@ class GroceryUIController {
     const titleEl = card.querySelector('.item-title');
 
     if (rowQtyInput) {
+      rowQtyInput.addEventListener('input', (e) => {
+        let val = parseFloat(e.target.value);
+        if (!isNaN(val) && val > 0) {
+          const previewTotals = Calculator.getItemTotals({ ...item, qty: val });
+          const subtotalEl = card.querySelector('.card-subtotal-val');
+          if (subtotalEl) subtotalEl.textContent = formatRupiah(previewTotals.subtotal);
+        }
+      });
+
+      rowQtyInput.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') {
+          rowQtyInput.blur();
+        }
+      });
+
       rowQtyInput.addEventListener('change', (e) => {
         let val = parseFloat(e.target.value);
         if (isNaN(val) || val <= 0) {
