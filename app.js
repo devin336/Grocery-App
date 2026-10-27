@@ -1791,14 +1791,19 @@ class GroceryUIController {
     this.btnLoginFirebaseConfig = document.getElementById('btn-login-firebase-config');
     this.cloudSyncPill = document.getElementById('cloud-sync-pill');
 
-    // Modal Google Auth Elements
+    // Modal Google Auth Elements (Official Account Chooser Simulation)
     this.modalGoogleAuth = document.getElementById('modal-google-auth');
     this.btnCloseGoogleModal = document.getElementById('btn-close-google-modal');
-    this.btnCancelGoogleModal = document.getElementById('btn-cancel-google-modal');
-    this.btnGoogleOptSiswa = document.getElementById('btn-google-opt-siswa');
-    this.btnGoogleOptRian = document.getElementById('btn-google-opt-rian');
-    this.btnGoogleOptDevin = document.getElementById('btn-google-opt-devin');
-    this.btnGoogleOptPopup = document.getElementById('btn-google-opt-popup');
+    this.googleLoadingBar = document.getElementById('google-loading-bar');
+    this.googleViewChooser = document.getElementById('google-view-chooser');
+    this.googleViewInput = document.getElementById('google-view-input');
+    this.btnGoogleAccountDevin = document.getElementById('btn-google-account-devin');
+    this.btnGoogleAccountRian = document.getElementById('btn-google-account-rian');
+    this.btnGoogleAccountSiswa = document.getElementById('btn-google-account-siswa');
+    this.btnGoogleAccountOther = document.getElementById('btn-google-account-other');
+    this.btnGoogleBackToChooser = document.getElementById('btn-google-back-to-chooser');
+    this.btnGoogleSubmitEmail = document.getElementById('btn-google-submit-email');
+    this.inputGoogleEmailField = document.getElementById('input-google-email-field');
   }
 
   bindEvents() {
@@ -1926,11 +1931,14 @@ class GroceryUIController {
       }
     });
 
-    // Google Authorization Modal Triggers
+    // Google Authorization Modal Triggers (Official Account Chooser Simulation)
     const openGoogleModal = () => {
       feedback.tap();
+      if (this.googleLoadingBar) this.googleLoadingBar.classList.add('hidden');
+      if (this.googleViewChooser) this.googleViewChooser.classList.remove('hidden');
+      if (this.googleViewInput) this.googleViewInput.classList.add('hidden');
+      if (this.inputGoogleEmailField) this.inputGoogleEmailField.value = '';
       this.modalGoogleAuth?.classList.remove('hidden');
-      if (window.lucide) window.lucide.createIcons();
     };
     this.btnGoogleAuthLogin?.addEventListener('click', openGoogleModal);
     this.btnGoogleAuthRegister?.addEventListener('click', openGoogleModal);
@@ -1940,15 +1948,41 @@ class GroceryUIController {
       this.modalGoogleAuth?.classList.add('hidden');
     };
     this.btnCloseGoogleModal?.addEventListener('click', closeGoogleModal);
-    this.btnCancelGoogleModal?.addEventListener('click', closeGoogleModal);
     this.modalGoogleAuth?.addEventListener('click', (e) => {
       if (e.target === this.modalGoogleAuth) closeGoogleModal();
     });
 
-    // Google Opt 1: Siswa Google Lab
-    this.btnGoogleOptSiswa?.addEventListener('click', async () => {
+    const triggerGoogleLoginWithAnimation = async (profile) => {
+      feedback.tap();
+      if (this.googleLoadingBar) this.googleLoadingBar.classList.remove('hidden');
+      await new Promise(r => setTimeout(r, 450));
       closeGoogleModal();
-      await this.loginWithGoogleProfile({
+      await this.loginWithGoogleProfile(profile);
+    };
+
+    // Akun 1: Devin Hamsidi (devin@mutiarabangsa.sch.id - Sesuai Screenshot User)
+    this.btnGoogleAccountDevin?.addEventListener('click', async () => {
+      await triggerGoogleLoginWithAnimation({
+        username: 'devin',
+        name: 'Devin Hamsidi',
+        email: 'devin@mutiarabangsa.sch.id',
+        avatar: '🪐'
+      });
+    });
+
+    // Akun 2: Rian (rian.grocery@gmail.com)
+    this.btnGoogleAccountRian?.addEventListener('click', async () => {
+      await triggerGoogleLoginWithAnimation({
+        username: 'rian',
+        name: 'Rian',
+        email: 'rian.grocery@gmail.com',
+        avatar: '🐰'
+      });
+    });
+
+    // Akun 3: Siswa Google Lab (siswa@google.sch.id)
+    this.btnGoogleAccountSiswa?.addEventListener('click', async () => {
+      await triggerGoogleLoginWithAnimation({
         username: 'google_siswa',
         name: 'Siswa Google Lab',
         email: 'siswa@google.sch.id',
@@ -1956,55 +1990,40 @@ class GroceryUIController {
       });
     });
 
-    // Google Opt 2: Rian Google
-    this.btnGoogleOptRian?.addEventListener('click', async () => {
-      closeGoogleModal();
-      await this.loginWithGoogleProfile({
-        username: 'rian',
-        name: 'Rian Google',
-        email: 'rian.grocery@gmail.com',
-        avatar: '🐰'
-      });
+    // Opsi: Gunakan Akun Lain (Buka Form Email Google)
+    this.btnGoogleAccountOther?.addEventListener('click', () => {
+      feedback.tap();
+      this.googleViewChooser?.classList.add('hidden');
+      this.googleViewInput?.classList.remove('hidden');
+      setTimeout(() => this.inputGoogleEmailField?.focus(), 80);
     });
 
-    // Google Opt 3: Devin Google
-    this.btnGoogleOptDevin?.addEventListener('click', async () => {
-      closeGoogleModal();
-      await this.loginWithGoogleProfile({
-        username: 'devin',
-        name: 'Devin',
-        email: 'devin@mutiarabangsa.sch.id',
-        avatar: '🪐'
-      });
+    this.btnGoogleBackToChooser?.addEventListener('click', () => {
+      feedback.tap();
+      this.googleViewInput?.classList.add('hidden');
+      this.googleViewChooser?.classList.remove('hidden');
     });
 
-    // Google Opt 4: Masukkan Email Google Sendiri
-    const handleCustomGoogleSubmit = async () => {
-      const inputEl = document.getElementById('input-google-custom-email');
-      const email = inputEl ? inputEl.value.trim() : '';
-      if (!email) {
-        showToast('Masukkan alamat email Google Anda!', 'warning', '⚠️');
+    const handleGoogleEmailSubmit = async () => {
+      const email = this.inputGoogleEmailField?.value.trim() || '';
+      if (!email || !email.includes('@')) {
+        showToast('Masukkan alamat email Google yang valid!', 'warning', '⚠️');
+        if (this.inputGoogleEmailField) this.inputGoogleEmailField.focus();
         return;
       }
-      closeGoogleModal();
       const prefix = email.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '_');
-      await this.loginWithGoogleProfile({
+      const formattedName = prefix.charAt(0).toUpperCase() + prefix.slice(1);
+      await triggerGoogleLoginWithAnimation({
         username: prefix,
-        name: prefix.charAt(0).toUpperCase() + prefix.slice(1) + ' (Google)',
+        name: formattedName,
         email: email,
         avatar: '🌐'
       });
     };
 
-    document.getElementById('btn-google-custom-submit')?.addEventListener('click', handleCustomGoogleSubmit);
-    document.getElementById('input-google-custom-email')?.addEventListener('keyup', (e) => {
-      if (e.key === 'Enter') handleCustomGoogleSubmit();
-    });
-
-    // Google Opt 4: Buka Pop-up Browser Google
-    this.btnGoogleOptPopup?.addEventListener('click', async () => {
-      closeGoogleModal();
-      await this.handleGooglePopupAuth();
+    this.btnGoogleSubmitEmail?.addEventListener('click', handleGoogleEmailSubmit);
+    this.inputGoogleEmailField?.addEventListener('keyup', (e) => {
+      if (e.key === 'Enter') handleGoogleEmailSubmit();
     });
 
     // Sesi Belanja: Store Select
@@ -2452,8 +2471,12 @@ class GroceryUIController {
         authProvider: 'google'
       };
       store.accounts.push(account);
-      localStorage.setItem(STORAGE_KEYS.ACCOUNTS_LIST, JSON.stringify(store.accounts));
+    } else {
+      if (name) account.name = name;
+      if (email) account.email = email;
+      account.authProvider = 'google';
     }
+    localStorage.setItem(STORAGE_KEYS.ACCOUNTS_LIST, JSON.stringify(store.accounts));
 
     // Background cloud sync without blocking
     if (window.firebaseSync) {

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
@@ -1252,120 +1252,137 @@
     </div>
 
     <!-- ======================================================== -->
-    <!-- MODAL 7: GOOGLE AUTHORIZATION ACCOUNT PICKER -->
+    <!-- MODAL 7: GOOGLE OFFICIAL ACCOUNT CHOOSER (SIMULASI RESMI GOOGLE) -->
     <!-- ======================================================== -->
-    <div id="modal-google-auth" class="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
-      <div class="w-full max-w-sm bg-[#0E1322] border-2 border-violet-500/40 rounded-3xl p-5 shadow-2xl space-y-4 text-white">
+    <div id="modal-google-auth" class="fixed inset-0 z-[100] bg-black/65 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 hidden font-sans">
+      <div class="w-full max-w-[440px] bg-white text-[#1f1f1f] rounded-[28px] p-6 sm:p-8 shadow-2xl border border-slate-200/90 relative overflow-hidden transition-all">
         
-        <div class="flex items-center justify-between pb-2 border-b border-violet-500/20">
-          <div class="flex items-center gap-2.5">
-            <div class="w-9 h-9 rounded-2xl bg-white flex items-center justify-center shadow-md">
-              <svg class="w-5 h-5" viewBox="0 0 24 24">
-                <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
-                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
-                <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
-                <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-              </svg>
-            </div>
-            <div>
-              <h3 class="text-sm font-black text-white leading-tight">Pilih Akun Google</h3>
-              <p class="text-[10px] text-cyan-300 font-semibold">Google Authorization Sign-In</p>
-            </div>
-          </div>
-          <button id="btn-close-google-modal" type="button" class="touch-target w-8 h-8 rounded-xl text-slate-400 hover:text-white flex items-center justify-center tap-effect">
-            <i data-lucide="x" class="w-5 h-5"></i>
+        <!-- Google Loading Bar (Animated on Selection) -->
+        <div id="google-loading-bar" class="absolute top-0 left-0 right-0 h-1 bg-[#0b57d0] animate-pulse hidden"></div>
+
+        <!-- Top Header: Official Google Logo & Close Button -->
+        <div class="flex items-start justify-between mb-4">
+          <svg class="w-10 h-10 shrink-0" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <button id="btn-close-google-modal" type="button" class="w-8 h-8 rounded-full text-[#444746] hover:bg-slate-100 flex items-center justify-center tap-effect transition-colors" title="Tutup">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
           </button>
         </div>
 
-        <p class="text-xs text-slate-300">Pilih akun Google untuk langsung masuk ke keranjang belanja:</p>
+        <!-- VIEW 1: PILIH AKUN GOOGLE (ACCOUNT CHOOSER SESUAI SCREENSHOT) -->
+        <div id="google-view-chooser" class="space-y-1">
+          <h1 class="text-2xl font-normal text-[#1f1f1f] tracking-tight">Pilih akun</h1>
+          <p class="text-xs text-[#444746] pb-3">untuk melanjutkan ke <span class="font-medium text-[#1f1f1f]">Smart Grocery</span></p>
 
-        <!-- Daftar Pilihan Akun Google -->
-        <div class="space-y-2">
-          <!-- Opsi 1: Google Siswa Lab -->
-          <button id="btn-google-opt-siswa" type="button" class="w-full p-3 rounded-2xl bg-slate-900/90 hover:bg-violet-950/80 border border-violet-500/30 hover:border-cyan-400/60 flex items-center justify-between text-left transition-all tap-effect group">
-            <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white font-black text-sm">
-                S
+          <!-- List Akun Google Sesuai Screenshot -->
+          <div class="space-y-0.5 divide-y divide-[#e0e2ec] border-t border-b border-[#e0e2ec] py-0.5">
+            
+            <!-- Akun 1: Devin Hamsidi (Sesuai Screenshot User) -->
+            <button id="btn-google-account-devin" type="button" class="w-full flex items-center justify-between py-3 px-2 rounded-xl hover:bg-[#f2f4f8] transition-colors text-left tap-effect group">
+              <div class="flex items-center gap-3.5 min-w-0">
+                <div class="w-10 h-10 rounded-full bg-[#0b57d0] text-white flex items-center justify-center font-medium text-base shrink-0 shadow-2xs">
+                  D
+                </div>
+                <div class="min-w-0">
+                  <div class="text-sm font-medium text-[#1f1f1f] leading-tight truncate">Devin Hamsidi</div>
+                  <div class="text-xs text-[#444746] font-normal leading-normal truncate">devin@mutiarabangsa.sch.id</div>
+                </div>
               </div>
-              <div>
-                <span class="text-xs font-black text-white block group-hover:text-cyan-300">Siswa Google Lab</span>
-                <span class="text-[10px] text-slate-400 block font-mono">siswa@google.sch.id</span>
-              </div>
-            </div>
-            <span class="text-xs text-cyan-400 font-bold">Pilih ›</span>
-          </button>
+            </button>
 
-          <!-- Opsi 2: Rian Google -->
-          <button id="btn-google-opt-rian" type="button" class="w-full p-3 rounded-2xl bg-slate-900/90 hover:bg-violet-950/80 border border-violet-500/30 hover:border-cyan-400/60 flex items-center justify-between text-left transition-all tap-effect group">
-            <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-600 flex items-center justify-center text-white font-black text-sm">
-                R
+            <!-- Akun 2: Rian -->
+            <button id="btn-google-account-rian" type="button" class="w-full flex items-center justify-between py-3 px-2 rounded-xl hover:bg-[#f2f4f8] transition-colors text-left tap-effect group">
+              <div class="flex items-center gap-3.5 min-w-0">
+                <div class="w-10 h-10 rounded-full bg-[#1e8e3e] text-white flex items-center justify-center font-medium text-base shrink-0 shadow-2xs">
+                  R
+                </div>
+                <div class="min-w-0">
+                  <div class="text-sm font-medium text-[#1f1f1f] leading-tight truncate">Rian</div>
+                  <div class="text-xs text-[#444746] font-normal leading-normal truncate">rian.grocery@gmail.com</div>
+                </div>
               </div>
-              <div>
-                <span class="text-xs font-black text-white block group-hover:text-cyan-300">Rian</span>
-                <span class="text-[10px] text-slate-400 block font-mono">rian.grocery@gmail.com</span>
-              </div>
-            </div>
-            <span class="text-xs text-cyan-400 font-bold">Pilih ›</span>
-          </button>
+            </button>
 
-          <!-- Opsi 3: Devin Google -->
-          <button id="btn-google-opt-devin" type="button" class="w-full p-3 rounded-2xl bg-slate-900/90 hover:bg-violet-950/80 border border-violet-500/30 hover:border-cyan-400/60 flex items-center justify-between text-left transition-all tap-effect group">
-            <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-violet-500 to-fuchsia-600 flex items-center justify-center text-white font-black text-sm">
-                D
+            <!-- Akun 3: Siswa Google Lab -->
+            <button id="btn-google-account-siswa" type="button" class="w-full flex items-center justify-between py-3 px-2 rounded-xl hover:bg-[#f2f4f8] transition-colors text-left tap-effect group">
+              <div class="flex items-center gap-3.5 min-w-0">
+                <div class="w-10 h-10 rounded-full bg-[#d93025] text-white flex items-center justify-center font-medium text-base shrink-0 shadow-2xs">
+                  S
+                </div>
+                <div class="min-w-0">
+                  <div class="text-sm font-medium text-[#1f1f1f] leading-tight truncate">Siswa Google Lab</div>
+                  <div class="text-xs text-[#444746] font-normal leading-normal truncate">siswa@google.sch.id</div>
+                </div>
               </div>
-              <div>
-                <span class="text-xs font-black text-white block group-hover:text-cyan-300">Devin (Admin MB)</span>
-                <span class="text-[10px] text-slate-400 block font-mono">devin@mutiarabangsa.sch.id</span>
-              </div>
-            </div>
-            <span class="text-xs text-cyan-400 font-bold">Pilih ›</span>
-          </button>
+            </button>
 
-          <!-- Opsi 4: Masukkan Email Google Sendiri -->
-          <div class="p-3 rounded-2xl bg-slate-900/90 border border-violet-500/30 space-y-2">
-            <span class="text-[10px] text-slate-400 font-bold block">Atau Masuk dengan Email Google Sendiri:</span>
-            <div class="flex items-center gap-1.5">
+            <!-- Opsi: Gunakan Akun Lain (Sesuai Screenshot User) -->
+            <button id="btn-google-account-other" type="button" class="w-full flex items-center gap-3.5 py-3.5 px-2 rounded-xl hover:bg-[#f2f4f8] transition-colors text-left tap-effect group">
+              <div class="w-10 h-10 rounded-full border border-[#747775] text-[#444746] flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5 text-[#444746]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              </div>
+              <div class="text-sm font-medium text-[#1f1f1f]">Gunakan akun lain</div>
+            </button>
+
+          </div>
+        </div>
+
+        <!-- VIEW 2: LOGIN AKUN LAIN (GOOGLE SIGN-IN INPUT EMAIL) -->
+        <div id="google-view-input" class="space-y-4 hidden">
+          <div>
+            <h1 class="text-2xl font-normal text-[#1f1f1f] tracking-tight">Login</h1>
+            <p class="text-xs text-[#444746] mt-0.5">Gunakan Akun Google Anda</p>
+          </div>
+
+          <div class="space-y-3 pt-1">
+            <div>
               <input 
-                id="input-google-custom-email" 
+                id="input-google-email-field" 
                 type="email" 
-                placeholder="nama@gmail.com" 
-                class="flex-1 px-3 py-2 rounded-xl bg-slate-950 border border-violet-500/40 text-xs text-cyan-300 font-semibold focus:outline-none focus:border-cyan-400 placeholder-slate-600"
+                placeholder="Email atau ponsel" 
+                class="w-full px-3.5 py-3 rounded-lg border border-[#747775] focus:border-[#0b57d0] focus:ring-2 focus:ring-[#0b57d0]/30 text-sm text-[#1f1f1f] outline-none transition-all placeholder:text-[#747775]"
               />
-              <button 
-                id="btn-google-custom-submit" 
-                type="button" 
-                class="py-2 px-3 rounded-xl bg-gradient-to-r from-cyan-500 to-violet-600 text-white text-xs font-black tap-effect shrink-0 shadow-md shadow-violet-500/30"
-              >
-                Masuk
+            </div>
+            <div class="text-xs text-[#0b57d0] font-medium cursor-pointer hover:underline">
+              Lupa email?
+            </div>
+            <p class="text-[11px] text-[#444746] leading-relaxed pt-1">
+              Bukan komputer Anda? Gunakan mode Tamu untuk login secara pribadi.
+            </p>
+
+            <div class="flex items-center justify-between pt-4">
+              <button id="btn-google-back-to-chooser" type="button" class="text-xs font-semibold text-[#0b57d0] hover:bg-[#f2f4f8] px-3.5 py-2 rounded-full tap-effect transition-colors">
+                Kembali
+              </button>
+              <button id="btn-google-submit-email" type="button" class="px-5 py-2 rounded-full bg-[#0b57d0] hover:bg-[#0842a0] text-white text-xs font-semibold tap-effect shadow-sm transition-all">
+                Berikutnya
               </button>
             </div>
           </div>
-
-          <!-- Opsi 5: Pop-up Google Sign-In Resmi -->
-          <button id="btn-google-opt-popup" type="button" class="w-full p-2.5 rounded-2xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-900 flex items-center justify-between text-left transition-all tap-effect shadow-md">
-            <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center">
-                <svg class="w-5 h-5" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
-                  <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
-                  <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
-                  <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-                </svg>
-              </div>
-              <div>
-                <span class="text-xs font-black block">Gunakan Akun Google Lain</span>
-                <span class="text-[10px] text-slate-500 block">Buka Pop-up Browser Google</span>
-              </div>
-            </div>
-            <span class="text-xs text-blue-600 font-bold">Buka ›</span>
-          </button>
         </div>
 
-        <button id="btn-cancel-google-modal" type="button" class="w-full py-2.5 rounded-2xl bg-slate-900 text-slate-400 hover:text-white font-bold text-xs tap-effect border border-violet-500/20">
-          Batal
-        </button>
+        <!-- Google Footer (Sesuai Screenshot User: Indonesia ▾, Bantuan, Privasi, Persyaratan) -->
+        <div class="flex items-center justify-between pt-5 text-[11px] text-[#444746] border-t border-[#f0f2f5] mt-5">
+          <div class="flex items-center gap-1 cursor-pointer hover:text-[#1f1f1f] transition-colors">
+            <span>Indonesia</span>
+            <span class="text-[9px]">▾</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="hover:text-[#1f1f1f] cursor-pointer transition-colors">Bantuan</span>
+            <span class="hover:text-[#1f1f1f] cursor-pointer transition-colors">Privasi</span>
+            <span class="hover:text-[#1f1f1f] cursor-pointer transition-colors">Persyaratan</span>
+          </div>
+        </div>
 
       </div>
     </div>
@@ -1446,6 +1463,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
   <!-- JavaScript Entry Point -->
-  <script src="./app.js?v=20261027_production_v1"></script>
+  <script src="./app.js?v=20261027_google_chooser_v1"></script>
 </body>
 </html>
