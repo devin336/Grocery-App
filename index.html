@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
@@ -369,7 +369,7 @@
     <!-- ======================================================== -->
     <!-- REALTIME CLOUD SYNC TOAST PILL -->
     <!-- ======================================================== -->
-    <div id="cloud-realtime-toast" class="absolute top-2.5 left-1/2 -translate-x-1/2 z-50 pointer-events-none transition-all duration-300 opacity-0 -translate-y-3">
+    <div id="cloud-realtime-toast" class="fixed top-3 left-1/2 -translate-x-1/2 z-[120] pointer-events-none transition-all duration-300 opacity-0 -translate-y-3 max-w-[92vw]">
       <div class="px-3.5 py-1.5 rounded-full bg-slate-900/95 text-white text-xs font-black shadow-2xl backdrop-blur-md flex items-center gap-2 border border-cyan-400/40 glow-cyan">
         <span id="cloud-toast-icon" class="text-sm">✨</span>
         <span id="cloud-toast-text" class="tracking-tight text-cyan-200">Belanjaan tersinkronisasi realtime</span>
@@ -1240,12 +1240,10 @@
       </div>
     </div>
 
-  </div>
-
     <!-- ======================================================== -->
     <!-- MODAL 7: GOOGLE AUTHORIZATION ACCOUNT PICKER -->
     <!-- ======================================================== -->
-    <div id="modal-google-auth" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div id="modal-google-auth" class="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
       <div class="w-full max-w-sm bg-[#0E1322] border-2 border-violet-500/40 rounded-3xl p-5 shadow-2xl space-y-4 text-white">
         
         <div class="flex items-center justify-between pb-2 border-b border-violet-500/20">
@@ -1260,7 +1258,7 @@
             </div>
             <div>
               <h3 class="text-sm font-black text-white leading-tight">Pilih Akun Google</h3>
-              <p class="text-[10px] text-slate-400">Google Authorization Sign-In</p>
+              <p class="text-[10px] text-cyan-300 font-semibold">Google Authorization Sign-In</p>
             </div>
           </div>
           <button id="btn-close-google-modal" type="button" class="touch-target w-8 h-8 rounded-xl text-slate-400 hover:text-white flex items-center justify-center tap-effect">
@@ -1268,7 +1266,7 @@
           </button>
         </div>
 
-        <p class="text-xs text-slate-300">Pilih akun Google untuk masuk ke Smart Grocery:</p>
+        <p class="text-xs text-slate-300">Pilih akun Google untuk langsung masuk ke keranjang belanja:</p>
 
         <!-- Daftar Pilihan Akun Google -->
         <div class="space-y-2">
@@ -1300,7 +1298,21 @@
             <span class="text-xs text-cyan-400 font-bold">Pilih ›</span>
           </button>
 
-          <!-- Opsi 3: Masukkan Email Google Sendiri -->
+          <!-- Opsi 3: Devin Google -->
+          <button id="btn-google-opt-devin" type="button" class="w-full p-3 rounded-2xl bg-slate-900/90 hover:bg-violet-950/80 border border-violet-500/30 hover:border-cyan-400/60 flex items-center justify-between text-left transition-all tap-effect group">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-violet-500 to-fuchsia-600 flex items-center justify-center text-white font-black text-sm">
+                D
+              </div>
+              <div>
+                <span class="text-xs font-black text-white block group-hover:text-cyan-300">Devin (Admin MB)</span>
+                <span class="text-[10px] text-slate-400 block font-mono">devin@mutiarabangsa.sch.id</span>
+              </div>
+            </div>
+            <span class="text-xs text-cyan-400 font-bold">Pilih ›</span>
+          </button>
+
+          <!-- Opsi 4: Masukkan Email Google Sendiri -->
           <div class="p-3 rounded-2xl bg-slate-900/90 border border-violet-500/30 space-y-2">
             <span class="text-[10px] text-slate-400 font-bold block">Atau Masuk dengan Email Google Sendiri:</span>
             <div class="flex items-center gap-1.5">
@@ -1320,7 +1332,7 @@
             </div>
           </div>
 
-          <!-- Opsi 4: Pop-up Google Sign-In Resmi -->
+          <!-- Opsi 5: Pop-up Google Sign-In Resmi -->
           <button id="btn-google-opt-popup" type="button" class="w-full p-2.5 rounded-2xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-900 flex items-center justify-between text-left transition-all tap-effect shadow-md">
             <div class="flex items-center gap-3">
               <div class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center">
@@ -1347,12 +1359,14 @@
       </div>
     </div>
 
+  </div>
+
   <!-- Firebase SDK (Compat v10 for Web PWA & Realtime Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
   <!-- JavaScript Entry Point -->
-  <script src="./app.js?v=20261027_dt2"></script>
+  <script src="./app.js?v=20261027_dt2_gauth_fix"></script>
 </body>
 </html>

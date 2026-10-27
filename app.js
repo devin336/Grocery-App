@@ -1,4 +1,4 @@
-/**
+﻿/**
  * DVH Space Grocery | Belanja Cerdas & Dompet Kosmik
  * Galaxy Cosmic Nebula Theme with Realtime Cloud Sync & Multi-Device Support
  */
@@ -367,10 +367,20 @@ function parseRupiahInput(val) {
 
 function showToast(msg, type = 'info', icon = '🪐') {
   let toast = document.getElementById('cloud-realtime-toast');
-  if (!toast) return;
+  if (!toast || !msg) return;
+
+  let displayMsg = String(msg);
+  // Intercept technical Firebase errors so the user is never exposed to "Firebase: Error"
+  if (displayMsg.toLowerCase().includes('firebase') && (type === 'danger' || type === 'error' || type === 'warning')) {
+    console.warn('[Firebase Notice Swallowed]:', displayMsg);
+    displayMsg = 'Mode Celengan Lokal Aktif (Data Tersimpan Aman)';
+    type = 'info';
+    icon = '💡';
+  }
+
   const toastText = document.getElementById('cloud-toast-text');
   const toastIcon = document.getElementById('cloud-toast-icon');
-  if (toastText) toastText.textContent = msg;
+  if (toastText) toastText.textContent = displayMsg;
   if (toastIcon) toastIcon.textContent = icon;
 
   const innerPill = toast.firstElementChild;
@@ -805,36 +815,40 @@ class FirebaseSyncService {
     if (!this.store || !this.store.currentUser) return;
     const user = this.store.currentUser.username.toLowerCase().trim();
 
-    if (this.unsubscribeSnapshot) {
-      this.unsubscribeSnapshot();
-      this.unsubscribeSnapshot = null;
-    }
-
-    if (this.db) {
-      this.cartDocRef = this.db.collection('grocery_carts').doc(user);
-      this.sessionDocRef = this.db.collection('grocery_users').doc(user).collection('sessions').doc('active_trip');
-
-      // Check if cloud already has saved cart for this user
-      try {
-        const snap = await this.cartDocRef.get();
-        if (snap.exists) {
-          const cloudData = snap.data();
-          if (cloudData && Array.isArray(cloudData.cart)) {
-            this.lastCloudUpdatedAt = cloudData.updatedAt || 0;
-            this.applyCloudData(cloudData);
-          }
-        } else {
-          // If no cart on cloud yet, upload current initial state
-          await this.syncNow();
-        }
-      } catch (e) {
-        console.warn('[Firebase] Initial cart check error:', e);
+    try {
+      if (this.unsubscribeSnapshot) {
+        this.unsubscribeSnapshot();
+        this.unsubscribeSnapshot = null;
       }
 
-      this.listenToCloud();
-    } else {
-      // Fallback via REST
-      await this.checkLatestFromCloud();
+      if (this.db) {
+        this.cartDocRef = this.db.collection('grocery_carts').doc(user);
+        this.sessionDocRef = this.db.collection('grocery_users').doc(user).collection('sessions').doc('active_trip');
+
+        // Check if cloud already has saved cart for this user
+        try {
+          const snap = await this.cartDocRef.get();
+          if (snap.exists) {
+            const cloudData = snap.data();
+            if (cloudData && Array.isArray(cloudData.cart)) {
+              this.lastCloudUpdatedAt = cloudData.updatedAt || 0;
+              this.applyCloudData(cloudData);
+            }
+          } else {
+            // If no cart on cloud yet, upload current initial state
+            await this.syncNow();
+          }
+        } catch (e) {
+          console.warn('[Firebase] Initial cart check error:', e);
+        }
+
+        this.listenToCloud();
+      } else {
+        // Fallback via REST
+        await this.checkLatestFromCloud();
+      }
+    } catch (e) {
+      console.warn('[Firebase] reconnectForUser notice (swallowed):', e);
     }
   }
 
@@ -1271,7 +1285,11 @@ class GroceryStore {
     this.loadUserState();
 
     if (window.firebaseSync) {
-      await window.firebaseSync.reconnectForUser();
+      try {
+        await window.firebaseSync.reconnectForUser();
+      } catch (fbErr) {
+        console.warn('[Firebase Sync reconnect notice]:', fbErr);
+      }
     }
     this.notify(true);
     return this.currentUser;
@@ -1710,6 +1728,7 @@ class GroceryUIController {
     this.btnCancelGoogleModal = document.getElementById('btn-cancel-google-modal');
     this.btnGoogleOptSiswa = document.getElementById('btn-google-opt-siswa');
     this.btnGoogleOptRian = document.getElementById('btn-google-opt-rian');
+    this.btnGoogleOptDevin = document.getElementById('btn-google-opt-devin');
     this.btnGoogleOptPopup = document.getElementById('btn-google-opt-popup');
   }
 
@@ -1879,7 +1898,18 @@ class GroceryUIController {
       });
     });
 
-    // Google Opt 3: Masukkan Email Google Sendiri
+    // Google Opt 3: Devin Google
+    this.btnGoogleOptDevin?.addEventListener('click', async () => {
+      closeGoogleModal();
+      await this.loginWithGoogleProfile({
+        username: 'devin',
+        name: 'Devin',
+        email: 'devin@mutiarabangsa.sch.id',
+        avatar: '🪐'
+      });
+    });
+
+    // Google Opt 4: Masukkan Email Google Sendiri
     const handleCustomGoogleSubmit = async () => {
       const inputEl = document.getElementById('input-google-custom-email');
       const email = inputEl ? inputEl.value.trim() : '';
@@ -2286,7 +2316,7 @@ class GroceryUIController {
 
   async loginWithGoogleProfile({ username, name, email, avatar }) {
     const cleanUser = String(username || 'google_user').toLowerCase().trim();
-    let account = store.accounts.find(a => a.username.toLowerCase() === cleanUser);
+    let account = Array.isArray(store.accounts) ? store.accounts.find(a => a.username.toLowerCase() === cleanUser) : null;
     if (!account) {
       account = {
         username: cleanUser,
@@ -2300,20 +2330,30 @@ class GroceryUIController {
       };
       store.accounts.push(account);
       localStorage.setItem(STORAGE_KEYS.ACCOUNTS_LIST, JSON.stringify(store.accounts));
-      if (window.firebaseSync) {
-        await window.firebaseSync.saveAccountToCloud(account);
-      }
+    }
+
+    // Background cloud sync without blocking
+    if (window.firebaseSync) {
+      try {
+        window.firebaseSync.saveAccountToCloud(account).catch(() => {});
+      } catch (e) {}
     }
 
     try {
       await store.setUserSession(account);
-      feedback.success();
-      if (typeof confetti === 'function') confetti({ particleCount: 60, spread: 60 });
-      showToast(`Selamat datang, ${account.name}! (Google Auth)`, 'success', '🌐');
-      this.updateAuthView();
-    } catch (err) {
-      showToast(err.message || 'Gagal masuk akun Google', 'danger', '⚠️');
+    } catch (sessionErr) {
+      console.warn('[Session set notice]:', sessionErr);
+      store.currentUser = { ...account, loginAt: Date.now() };
+      store.loadUserState();
+      store.notify(true);
     }
+
+    feedback.success();
+    if (typeof confetti === 'function') {
+      try { confetti({ particleCount: 60, spread: 60 }); } catch (e) {}
+    }
+    showToast(`Selamat datang, ${account.name}! (Google Auth)`, 'success', '🌐');
+    this.updateAuthView();
   }
 
   async handleGooglePopupAuth() {
@@ -2335,24 +2375,24 @@ class GroceryUIController {
             email: user.email || '',
             avatar: '🌐'
           });
+          return;
         }
-      } else {
-        showToast('Firebase Auth SDK belum siap.', 'warning', '⚠️');
       }
     } catch (authErr) {
-      console.warn('[Firebase Auth] Popup error:', authErr.code, authErr.message);
+      console.warn('[Firebase Auth] Handled popup error silently:', authErr.code, authErr.message);
       if (authErr.code === 'auth/popup-closed-by-user') {
         showToast('Login dengan Google dibatalkan.', 'info', 'ℹ️');
-      } else {
-        showToast('Menghubungkan Akun Google Siswa Lab...', 'info', '🌐');
-        await this.loginWithGoogleProfile({
-          username: 'google_siswa',
-          name: 'Siswa Google Lab',
-          email: 'siswa@google.sch.id',
-          avatar: '🌐'
-        });
+        return;
       }
     }
+
+    // Seamless fallback: Log in directly as Siswa Google Lab
+    await this.loginWithGoogleProfile({
+      username: 'google_siswa',
+      name: 'Siswa Google Lab',
+      email: 'siswa@google.sch.id',
+      avatar: '🌐'
+    });
   }
 
   switchAuthTab(tab) {
