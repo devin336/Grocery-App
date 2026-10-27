@@ -764,8 +764,10 @@ class FirebaseSyncService {
       if (window.appController && typeof window.appController.renderCloudAccountChips === 'function') {
         window.appController.renderCloudAccountChips();
       }
+      return accountsData.map(a => a.username.toLowerCase().trim());
     } catch (err) {
       console.warn('[Firebase] fetchAllAccountsFromCloud error:', err);
+      return [];
     }
   }
 
@@ -2200,10 +2202,20 @@ class GroceryUIController {
   async renderCloudAccountChips() {
     if (!this.cloudAccountsChips) return;
     
-    // Ambil akun lokal
-    const localUsers = Object.keys(store.accounts || {});
-    const cloudAccounts = await firebaseSync.fetchAllAccountsFromCloud();
-    const allUsers = Array.from(new Set([...localUsers, ...cloudAccounts]));
+    // Ambil akun lokal (store.accounts adalah Array)
+    const localUsers = Array.isArray(store.accounts) 
+      ? store.accounts.map(a => a.username ? a.username.toLowerCase().trim() : '') 
+      : [];
+    
+    let cloudUsers = [];
+    try {
+      cloudUsers = (await firebaseSync.fetchAllAccountsFromCloud()) || [];
+    } catch (e) {
+      cloudUsers = [];
+    }
+
+    const allUsers = Array.from(new Set([...localUsers, ...cloudUsers]))
+      .filter(u => !!u && typeof u === 'string' && u !== '0' && u !== '1');
 
     if (allUsers.length === 0) {
       this.cloudAccountsChips.innerHTML = '<span class="text-[11px] text-slate-500 italic">Belum ada akun lain</span>';
@@ -2212,20 +2224,20 @@ class GroceryUIController {
 
     this.cloudAccountsChips.innerHTML = '';
     allUsers.forEach(u => {
+      const acc = Array.isArray(store.accounts) ? store.accounts.find(a => a.username.toLowerCase() === u) : null;
       const chip = document.createElement('button');
       chip.type = 'button';
       chip.className = 'px-2.5 py-1 rounded-xl bg-violet-950/80 hover:bg-cyan-950/80 border border-violet-500/40 hover:border-cyan-400/60 text-xs font-bold text-slate-200 flex items-center gap-1.5 transition-all tap-effect';
-      chip.innerHTML = `<span>👤</span><span>${u}</span>`;
+      chip.innerHTML = `<span>${acc?.avatar || '👤'}</span><span>${acc?.name || u}</span>`;
       chip.title = `Klik untuk memilih akun "${u}"`;
       chip.addEventListener('click', () => {
         feedback.tap();
         if (this.inputLoginUsername) this.inputLoginUsername.value = u;
         if (this.inputLoginPin) {
-          const acc = store.accounts ? store.accounts[u] : null;
           this.inputLoginPin.value = acc?.pin || '1234';
           this.inputLoginPin.focus();
         }
-        showToast(`Akun "${u}" dipilih. Tekan Masuk Akun untuk membuka!`, 'info', '🔑');
+        showToast(`Akun "${acc?.name || u}" dipilih. Klik Masuk Akun untuk membuka!`, 'info', '🔑');
       });
       this.cloudAccountsChips.appendChild(chip);
     });
