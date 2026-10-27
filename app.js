@@ -539,11 +539,12 @@ class FirebaseSyncService {
     }
 
     try {
-      if (firebase.apps.length) {
-        await Promise.all(firebase.apps.map(a => a.delete()));
+      let app;
+      if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length) {
+        app = firebase.app();
+      } else {
+        app = firebase.initializeApp(this.activeConfig);
       }
-
-      const app = firebase.initializeApp(this.activeConfig);
       this.db = firebase.firestore(app);
 
       // Listen to cloud accounts list in realtime
@@ -557,35 +558,18 @@ class FirebaseSyncService {
         this.updateStatus('synced', 'Celengan Cloud Aktif', 'Tersambung ke Google Cloud Firestore.');
       }
 
-      // Online/Offline & Focus Event Listeners
+      // Online/Offline Listeners
       window.addEventListener('online', () => {
-        this.updateStatus('connecting', 'Online, Menyinkronkan...', 'Jaringan aktif kembali.');
-        this.checkLatestFromCloud();
+        this.updateStatus('synced', 'Celengan Cloud Aktif', 'Jaringan online kembali.');
       });
       window.addEventListener('offline', () => {
         this.updateStatus('offline', 'Mode Celengan Lokal', 'Koneksi internet terputus.');
       });
 
-      // Immediate refresh when tab or phone screen wakes up
-      document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') {
-          this.checkLatestFromCloud();
-        }
-      });
-      window.addEventListener('focus', () => {
-        this.checkLatestFromCloud();
-      });
-
-      // Heartbeat sync timer (checks cloud every 3.5s for seamless multi-device realtime)
-      clearInterval(this.heartbeatTimer);
-      this.heartbeatTimer = setInterval(() => {
-        this.checkLatestFromCloud();
-      }, 3500);
-
     } catch (err) {
-      console.error('[Firebase] Initialization error:', err);
+      console.warn('[Firebase] Initialization notice:', err);
       this.lastError = err;
-      this.updateStatus('error', 'Gagal Konek Firebase', err.message || 'Periksa API Key dan Project ID.');
+      this.updateStatus('offline', 'Mode Celengan Lokal', 'Bekerja dengan penyimpanan lokal.');
     }
   }
 
@@ -704,7 +688,12 @@ class FirebaseSyncService {
 
   // Fetch all accounts from Cloud and merge into store
   async fetchAllAccountsFromCloud() {
-    if (!this.store) return;
+    if (!this.store) return [];
+    const now = Date.now();
+    if (this._lastAccountsFetch && (now - this._lastAccountsFetch < 60000)) {
+      return (this.store.accounts || []).map(a => a.username.toLowerCase().trim());
+    }
+    this._lastAccountsFetch = now;
     try {
       let accountsData = [];
 
@@ -887,7 +876,7 @@ class FirebaseSyncService {
       (error) => {
         console.warn('[Firebase] Firestore notice:', error.code, error.message);
         this.lastError = error;
-        this.updateStatus('offline', 'Mode Celengan Lokal', error.message || 'Penyimpanan lokal aktif.');
+        this.updateStatus('offline', 'Mode Celengan Lokal', 'Penyimpanan lokal aktif.');
       }
     );
   }
