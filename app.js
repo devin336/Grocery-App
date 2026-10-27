@@ -396,6 +396,14 @@ function showToast(msg, type = 'info', icon = '🪐') {
   }, 2800);
 }
 
+function getTodayDateString() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
 function formatDateIndo(timestamp) {
   const date = new Date(timestamp);
   return date.toLocaleDateString('id-ID', {
@@ -985,7 +993,7 @@ class FirebaseSyncService {
         cart: this.store.cart,
         budgetLimit: this.store.budgetLimit,
         storeLocation: this.store.storeLocation || 'Lotte Mart Grocery - Puri Indah',
-        shoppingDate: this.store.shoppingDate || '2026-10-26',
+        shoppingDate: this.store.shoppingDate || getTodayDateString(),
         priceLookup: this.store.priceLookup,
         history: this.store.history,
         user: {
@@ -1154,7 +1162,7 @@ class GroceryStore {
     }
     
     this.storeLocation = 'Lotte Mart Grocery - Puri Indah';
-    this.shoppingDate = '2026-10-26';
+    this.shoppingDate = getTodayDateString();
     this.cart = [];
     this.history = [];
     this.priceLookup = { ...MOCK_LOOKUP };
@@ -1347,7 +1355,7 @@ class GroceryStore {
       localStorage.setItem(this.getUserKey('lookup'), JSON.stringify(this.priceLookup));
       localStorage.setItem(this.getUserKey('budget'), String(this.budgetLimit));
       localStorage.setItem(this.getUserKey('store_loc'), this.storeLocation || 'Lotte Mart Grocery - Puri Indah');
-      localStorage.setItem(this.getUserKey('shop_date'), this.shoppingDate || '2026-10-26');
+      localStorage.setItem(this.getUserKey('shop_date'), this.shoppingDate || getTodayDateString());
     } catch (e) {
       console.warn('Error saving user state:', e);
     }
@@ -2518,7 +2526,7 @@ class GroceryUIController {
   loadTestScenarios() {
     this.overbudgetWarningSuppressed = false;
     store.storeLocation = 'Lotte Mart Grocery - Puri Indah';
-    store.shoppingDate = '2026-10-26';
+    store.shoppingDate = getTodayDateString();
     store.budgetLimit = 100000;
     
     store.cart = [
