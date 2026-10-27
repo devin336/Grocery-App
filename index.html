@@ -1300,8 +1300,28 @@
             <span class="text-xs text-cyan-400 font-bold">Pilih ›</span>
           </button>
 
-          <!-- Opsi 3: Pop-up Google Sign-In Resmi -->
-          <button id="btn-google-opt-popup" type="button" class="w-full p-3 rounded-2xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-900 flex items-center justify-between text-left transition-all tap-effect shadow-md">
+          <!-- Opsi 3: Masukkan Email Google Sendiri -->
+          <div class="p-3 rounded-2xl bg-slate-900/90 border border-violet-500/30 space-y-2">
+            <span class="text-[10px] text-slate-400 font-bold block">Atau Masuk dengan Email Google Sendiri:</span>
+            <div class="flex items-center gap-1.5">
+              <input 
+                id="input-google-custom-email" 
+                type="email" 
+                placeholder="nama@gmail.com" 
+                class="flex-1 px-3 py-2 rounded-xl bg-slate-950 border border-violet-500/40 text-xs text-cyan-300 font-semibold focus:outline-none focus:border-cyan-400 placeholder-slate-600"
+              />
+              <button 
+                id="btn-google-custom-submit" 
+                type="button" 
+                class="py-2 px-3 rounded-xl bg-gradient-to-r from-cyan-500 to-violet-600 text-white text-xs font-black tap-effect shrink-0 shadow-md shadow-violet-500/30"
+              >
+                Masuk
+              </button>
+            </div>
+          </div>
+
+          <!-- Opsi 4: Pop-up Google Sign-In Resmi -->
+          <button id="btn-google-opt-popup" type="button" class="w-full p-2.5 rounded-2xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-900 flex items-center justify-between text-left transition-all tap-effect shadow-md">
             <div class="flex items-center gap-3">
               <div class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center">
                 <svg class="w-5 h-5" viewBox="0 0 24 24">

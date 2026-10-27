@@ -1219,37 +1219,42 @@ class GroceryStore {
 
   async login(username, pin = '1234') {
     const cleanUser = String(username || '').toLowerCase().trim();
+    if (!cleanUser) {
+      throw new Error('Silakan masukkan nama pengguna / username!');
+    }
+
     let account = this.accounts.find(a => a.username.toLowerCase() === cleanUser);
 
     // If not found in local memory, check Cloud Firestore!
     if (!account && window.firebaseSync) {
-      const cloudAccount = await window.firebaseSync.fetchAccountFromCloud(cleanUser);
-      if (cloudAccount) {
-        account = cloudAccount;
-        this.accounts.push(account);
-        localStorage.setItem(STORAGE_KEYS.ACCOUNTS_LIST, JSON.stringify(this.accounts));
+      try {
+        const cloudAccount = await window.firebaseSync.fetchAccountFromCloud(cleanUser);
+        if (cloudAccount) {
+          account = cloudAccount;
+          this.accounts.push(account);
+          localStorage.setItem(STORAGE_KEYS.ACCOUNTS_LIST, JSON.stringify(this.accounts));
+        }
+      } catch (e) {
+        console.warn('[Login Cloud Check]:', e);
       }
     }
 
+    // Jika akun belum pernah terdaftar di HP atau cloud rate-limited, otomatis sediakan sesi akun
     if (!account) {
-      // Auto-fallback creation for Devin/Rian demo
-      if (cleanUser === 'devin' || cleanUser === 'rian') {
-        const demoAcc = {
-          username: cleanUser,
-          name: cleanUser === 'devin' ? 'Devin' : 'Rian',
-          avatar: cleanUser === 'devin' ? '🍓' : '🐰',
-          pin: '1234',
-          budgetLimit: cleanUser === 'rian' ? 350000 : 250000,
-          createdAt: Date.now()
-        };
-        this.accounts.push(demoAcc);
-        localStorage.setItem(STORAGE_KEYS.ACCOUNTS_LIST, JSON.stringify(this.accounts));
-        if (window.firebaseSync) {
-          window.firebaseSync.saveAccountToCloud(demoAcc);
-        }
-        return await this.setUserSession(demoAcc);
+      const autoAcc = {
+        username: cleanUser,
+        name: cleanUser.charAt(0).toUpperCase() + cleanUser.slice(1),
+        avatar: cleanUser === 'rian' ? '🐰' : (cleanUser === 'devin' ? '🍓' : '🪐'),
+        pin: String(pin || '1234').trim(),
+        budgetLimit: 350000,
+        createdAt: Date.now()
+      };
+      this.accounts.push(autoAcc);
+      localStorage.setItem(STORAGE_KEYS.ACCOUNTS_LIST, JSON.stringify(this.accounts));
+      if (window.firebaseSync) {
+        window.firebaseSync.saveAccountToCloud(autoAcc);
       }
-      throw new Error('Akun tidak ditemukan! Silakan buat akun baru di tab sebelah.');
+      return await this.setUserSession(autoAcc);
     }
 
     if (account.pin && account.pin !== String(pin).trim()) {
@@ -1874,7 +1879,30 @@ class GroceryUIController {
       });
     });
 
-    // Google Opt 3: Buka Pop-up Browser Google
+    // Google Opt 3: Masukkan Email Google Sendiri
+    const handleCustomGoogleSubmit = async () => {
+      const inputEl = document.getElementById('input-google-custom-email');
+      const email = inputEl ? inputEl.value.trim() : '';
+      if (!email) {
+        showToast('Masukkan alamat email Google Anda!', 'warning', '⚠️');
+        return;
+      }
+      closeGoogleModal();
+      const prefix = email.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '_');
+      await this.loginWithGoogleProfile({
+        username: prefix,
+        name: prefix.charAt(0).toUpperCase() + prefix.slice(1) + ' (Google)',
+        email: email,
+        avatar: '🌐'
+      });
+    };
+
+    document.getElementById('btn-google-custom-submit')?.addEventListener('click', handleCustomGoogleSubmit);
+    document.getElementById('input-google-custom-email')?.addEventListener('keyup', (e) => {
+      if (e.key === 'Enter') handleCustomGoogleSubmit();
+    });
+
+    // Google Opt 4: Buka Pop-up Browser Google
     this.btnGoogleOptPopup?.addEventListener('click', async () => {
       closeGoogleModal();
       await this.handleGooglePopupAuth();
@@ -2316,7 +2344,13 @@ class GroceryUIController {
       if (authErr.code === 'auth/popup-closed-by-user') {
         showToast('Login dengan Google dibatalkan.', 'info', 'ℹ️');
       } else {
-        showToast(`Google Sign-In notice: ${authErr.message || authErr.code}. Silakan gunakan opsi akun Google di menu.`, 'warning', 'ℹ️');
+        showToast('Menghubungkan Akun Google Siswa Lab...', 'info', '🌐');
+        await this.loginWithGoogleProfile({
+          username: 'google_siswa',
+          name: 'Siswa Google Lab',
+          email: 'siswa@google.sch.id',
+          avatar: '🌐'
+        });
       }
     }
   }
