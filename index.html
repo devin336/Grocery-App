@@ -487,14 +487,25 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <!-- Lokasi Toko -->
             <div class="space-y-1">
-              <label for="session-store-select" class="text-[10px] text-slate-400 font-bold flex items-center gap-1">
-                <span>📍</span> Lokasi Belanja Uji:
-              </label>
-              <select id="session-store-select" class="w-full px-2.5 py-1.5 rounded-xl bg-slate-950/90 border border-violet-500/40 text-xs text-white font-bold focus:outline-none focus:border-cyan-400">
-                <option value="Lotte Mart Grocery - Puri Indah" selected>Lotte Mart Grocery - Puri Indah</option>
-                <option value="Super Indo Supermarket">Super Indo Supermarket</option>
-                <option value="Hypermart Mall">Hypermart Mall</option>
-              </select>
+              <div class="flex items-center justify-between">
+                <label for="session-store-select" class="text-[10px] text-slate-400 font-bold flex items-center gap-1">
+                  <span>📍</span> Lokasi Belanja:
+                </label>
+                <button id="btn-add-store-location-link" type="button" class="text-[9px] font-extrabold text-cyan-400 hover:text-cyan-300 flex items-center gap-0.5 tap-effect" title="Tambah lokasi toko baru">
+                  <span>➕ Tambah Toko</span>
+                </button>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <select id="session-store-select" class="flex-1 px-2.5 py-1.5 rounded-xl bg-slate-950/90 border border-violet-500/40 text-xs text-white font-bold focus:outline-none focus:border-cyan-400 truncate">
+                  <option value="Lotte Mart Grocery - Puri Indah" selected>Lotte Mart Grocery - Puri Indah</option>
+                  <option value="Super Indo Supermarket">Super Indo Supermarket</option>
+                  <option value="Hypermart Mall">Hypermart Mall</option>
+                  <option value="__add_new__">➕ + Tambah Lokasi Baru...</option>
+                </select>
+                <button id="btn-add-store-location" type="button" class="px-2.5 py-1.5 rounded-xl bg-violet-950/90 hover:bg-violet-900 border border-violet-500/40 text-cyan-300 text-xs font-bold tap-effect flex items-center gap-1 shadow-xs shrink-0" title="Tambah Lokasi Belanja Baru">
+                  <span>➕</span>
+                </button>
+              </div>
             </div>
 
             <!-- Selector Tanggal (Date Picker) -->
@@ -1359,6 +1370,74 @@
       </div>
     </div>
 
+    <!-- ======================================================== -->
+    <!-- MODAL 8: TAMBAH LOKASI BELANJA BARU (CUSTOM STORE) -->
+    <!-- ======================================================== -->
+    <div id="modal-add-store" class="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+      <div class="w-full max-w-sm bg-[#0E1322] border-2 border-violet-500/40 rounded-3xl p-5 shadow-2xl space-y-4 text-white">
+        
+        <div class="flex items-center justify-between pb-2 border-b border-violet-500/20">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-cyan-500 to-violet-600 flex items-center justify-center shadow-md text-base">
+              🏬
+            </div>
+            <div>
+              <h3 class="text-sm font-black text-white leading-tight">Tambah Lokasi Belanja</h3>
+              <p class="text-[10px] text-cyan-300 font-semibold">Kustom Supermarket / Pasar Pilihanmu</p>
+            </div>
+          </div>
+          <button id="btn-close-add-store-modal" type="button" class="touch-target w-8 h-8 rounded-xl text-slate-400 hover:text-white flex items-center justify-center tap-effect">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <div class="space-y-3">
+          <div class="space-y-1">
+            <label for="input-new-store-name" class="text-xs font-bold text-slate-300 block">Nama Toko / Supermarket:</label>
+            <input 
+              id="input-new-store-name" 
+              type="text" 
+              placeholder="Contoh: Grand Lucky SCBD, Indomaret Fresh..." 
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-violet-500/40 text-xs text-cyan-300 font-semibold focus:outline-none focus:border-cyan-400 placeholder-slate-600"
+            />
+          </div>
+
+          <!-- Quick Suggestion Chips -->
+          <div class="space-y-1">
+            <span class="text-[10px] text-slate-400 font-bold block">Pilihan Cepat / Populer:</span>
+            <div class="flex flex-wrap gap-1.5" id="store-suggestion-chips">
+              <button type="button" class="btn-store-suggestion px-2 py-1 rounded-lg bg-violet-950/80 hover:bg-cyan-950/80 border border-violet-500/30 text-[10px] font-bold text-slate-200 tap-effect" data-store="Grand Lucky SCBD">Grand Lucky SCBD</button>
+              <button type="button" class="btn-store-suggestion px-2 py-1 rounded-lg bg-violet-950/80 hover:bg-cyan-950/80 border border-violet-500/30 text-[10px] font-bold text-slate-200 tap-effect" data-store="Pasar Modern BSD">Pasar Modern BSD</button>
+              <button type="button" class="btn-store-suggestion px-2 py-1 rounded-lg bg-violet-950/80 hover:bg-cyan-950/80 border border-violet-500/30 text-[10px] font-bold text-slate-200 tap-effect" data-store="Indomaret Fresh">Indomaret Fresh</button>
+              <button type="button" class="btn-store-suggestion px-2 py-1 rounded-lg bg-violet-950/80 hover:bg-cyan-950/80 border border-violet-500/30 text-[10px] font-bold text-slate-200 tap-effect" data-store="Alfamidi Super">Alfamidi Super</button>
+              <button type="button" class="btn-store-suggestion px-2 py-1 rounded-lg bg-violet-950/80 hover:bg-cyan-950/80 border border-violet-500/30 text-[10px] font-bold text-slate-200 tap-effect" data-store="Farmers Market">Farmers Market</button>
+              <button type="button" class="btn-store-suggestion px-2 py-1 rounded-lg bg-violet-950/80 hover:bg-cyan-950/80 border border-violet-500/30 text-[10px] font-bold text-slate-200 tap-effect" data-store="Transmart Carrefour">Transmart Carrefour</button>
+            </div>
+          </div>
+
+          <!-- Daftar Toko Kustom Yang Pernah Ditambahkan -->
+          <div id="custom-stores-management-section" class="space-y-1.5 pt-1 hidden">
+            <span class="text-[10px] text-violet-400 font-bold block flex items-center gap-1">
+              <span>📋</span> Toko Kustom Tersimpan:
+            </span>
+            <div id="custom-stores-chips-list" class="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto no-scrollbar">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 pt-2">
+            <button id="btn-cancel-add-store" type="button" class="flex-1 py-2.5 rounded-2xl bg-slate-900 text-slate-400 hover:text-white font-bold text-xs tap-effect border border-violet-500/20">
+              Batal
+            </button>
+            <button id="btn-save-new-store" type="button" class="flex-1 py-2.5 rounded-2xl bg-gradient-to-r from-cyan-500 via-violet-600 to-fuchsia-500 text-white font-black text-xs tap-effect shadow-md shadow-violet-500/40">
+              Simpan & Pilih Toko
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
   </div>
 
   <!-- Firebase SDK (Compat v10 for Web PWA & Realtime Firestore & Google Auth) -->
@@ -1367,6 +1446,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
   <!-- JavaScript Entry Point -->
-  <script src="./app.js?v=20261027_dt2_gauth_fix"></script>
+  <script src="./app.js?v=20261027_dt2_custom_stores"></script>
 </body>
 </html>

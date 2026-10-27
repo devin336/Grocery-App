@@ -942,6 +942,15 @@ class FirebaseSyncService {
         stateChanged = true;
       }
 
+      if (Array.isArray(data.customStores)) {
+        const mergedStores = Array.from(new Set([...(this.store.customStores || []), ...data.customStores]));
+        if (mergedStores.length !== (this.store.customStores || []).length) {
+          this.store.customStores = mergedStores;
+          localStorage.setItem('dvh_custom_stores_list_v1', JSON.stringify(this.store.customStores));
+          stateChanged = true;
+        }
+      }
+
       if (typeof data.shoppingDate === 'string' && this.store.shoppingDate !== data.shoppingDate) {
         this.store.shoppingDate = data.shoppingDate;
         stateChanged = true;
@@ -996,6 +1005,7 @@ class FirebaseSyncService {
         cart: this.store.cart,
         budgetLimit: this.store.budgetLimit,
         storeLocation: this.store.storeLocation || 'Lotte Mart Grocery - Puri Indah',
+        customStores: this.store.customStores || [],
         shoppingDate: this.store.shoppingDate || getTodayDateString(),
         priceLookup: this.store.priceLookup,
         history: this.store.history,
@@ -1165,6 +1175,15 @@ class GroceryStore {
     }
     
     this.storeLocation = 'Lotte Mart Grocery - Puri Indah';
+    this.customStores = [];
+    try {
+      const savedCustomStores = localStorage.getItem('dvh_custom_stores_list_v1');
+      if (savedCustomStores) {
+        this.customStores = JSON.parse(savedCustomStores);
+      }
+    } catch (e) {
+      this.customStores = [];
+    }
     this.shoppingDate = getTodayDateString();
     this.cart = [];
     this.history = [];
@@ -1313,6 +1332,16 @@ class GroceryStore {
       if (savedStore) this.storeLocation = savedStore;
       if (savedDate) this.shoppingDate = savedDate;
 
+      const savedCustom = localStorage.getItem(this.getUserKey('custom_stores')) || localStorage.getItem('dvh_custom_stores_list_v1');
+      if (savedCustom) {
+        try {
+          const parsed = JSON.parse(savedCustom);
+          if (Array.isArray(parsed)) {
+            this.customStores = Array.from(new Set([...(this.customStores || []), ...parsed]));
+          }
+        } catch (e) {}
+      }
+
       if (savedCart) {
         this.cart = JSON.parse(savedCart);
       } else {
@@ -1368,6 +1397,8 @@ class GroceryStore {
       localStorage.setItem(this.getUserKey('budget'), String(this.budgetLimit));
       localStorage.setItem(this.getUserKey('store_loc'), this.storeLocation || 'Lotte Mart Grocery - Puri Indah');
       localStorage.setItem(this.getUserKey('shop_date'), this.shoppingDate || getTodayDateString());
+      localStorage.setItem(this.getUserKey('custom_stores'), JSON.stringify(this.customStores || []));
+      localStorage.setItem('dvh_custom_stores_list_v1', JSON.stringify(this.customStores || []));
     } catch (e) {
       console.warn('Error saving user state:', e);
     }
@@ -1490,6 +1521,31 @@ class GroceryStore {
     return null;
   }
 
+  addCustomStore(storeName) {
+    if (!storeName || typeof storeName !== 'string') return false;
+    const clean = storeName.trim();
+    if (clean.length < 2) return false;
+
+    if (!Array.isArray(this.customStores)) this.customStores = [];
+    if (!this.customStores.includes(clean)) {
+      this.customStores.push(clean);
+    }
+    this.storeLocation = clean;
+    this.saveUserState();
+    this.notify();
+    return true;
+  }
+
+  removeCustomStore(storeName) {
+    if (!storeName || !Array.isArray(this.customStores)) return;
+    this.customStores = this.customStores.filter(s => s !== storeName);
+    if (this.storeLocation === storeName) {
+      this.storeLocation = 'Lotte Mart Grocery - Puri Indah';
+    }
+    this.saveUserState();
+    this.notify();
+  }
+
   finishCurrentTrip() {
     if (this.cart.length === 0) return null;
 
@@ -1497,6 +1553,8 @@ class GroceryStore {
     const tripRecord = {
       id: 'trip_' + Date.now(),
       date: Date.now(),
+      storeLocation: this.storeLocation || 'Lotte Mart Grocery - Puri Indah',
+      shoppingDate: this.shoppingDate || getTodayDateString(),
       totalSpent: summary.totalSpent,
       totalSaved: summary.totalSaved,
       budgetLimit: this.budgetLimit,
@@ -1607,7 +1665,18 @@ class GroceryUIController {
 
     // Sesi Belanja (Toko & Tanggal - SRS F-01)
     this.sessionStoreSelect = document.getElementById('session-store-select');
+    this.btnAddStoreLocation = document.getElementById('btn-add-store-location');
+    this.btnAddStoreLocationLink = document.getElementById('btn-add-store-location-link');
     this.sessionDatePicker = document.getElementById('session-date-picker');
+
+    // Modal Add Custom Store Elements
+    this.modalAddStore = document.getElementById('modal-add-store');
+    this.btnCloseAddStoreModal = document.getElementById('btn-close-add-store-modal');
+    this.btnCancelAddStore = document.getElementById('btn-cancel-add-store');
+    this.btnSaveNewStore = document.getElementById('btn-save-new-store');
+    this.inputNewStoreName = document.getElementById('input-new-store-name');
+    this.customStoresChipsList = document.getElementById('custom-stores-chips-list');
+    this.customStoresManagementSection = document.getElementById('custom-stores-management-section');
 
     // Register Inputs
     this.regName = document.getElementById('reg-name');
@@ -1938,12 +2007,66 @@ class GroceryUIController {
       await this.handleGooglePopupAuth();
     });
 
-    // Sesi Belanja: Store Select & Date Picker
+    // Sesi Belanja: Store Select
     this.sessionStoreSelect?.addEventListener('change', (e) => {
       feedback.tap();
+      if (e.target.value === '__add_new__') {
+        this.openAddStoreModal();
+        e.target.value = store.storeLocation;
+        return;
+      }
       store.storeLocation = e.target.value;
+      store.saveUserState();
       store.notify();
       showToast(`Lokasi toko disetel ke: ${store.storeLocation}`, 'info', '🏬');
+    });
+
+    const openStoreModalHandler = () => {
+      feedback.tap();
+      this.openAddStoreModal();
+    };
+    this.btnAddStoreLocation?.addEventListener('click', openStoreModalHandler);
+    this.btnAddStoreLocationLink?.addEventListener('click', openStoreModalHandler);
+
+    this.btnCloseAddStoreModal?.addEventListener('click', () => this.closeAddStoreModal());
+    this.btnCancelAddStore?.addEventListener('click', () => this.closeAddStoreModal());
+    this.modalAddStore?.addEventListener('click', (e) => {
+      if (e.target === this.modalAddStore) this.closeAddStoreModal();
+    });
+
+    // Suggestion chips in Add Store modal
+    document.querySelectorAll('.btn-store-suggestion').forEach(btn => {
+      btn.addEventListener('click', () => {
+        feedback.tap();
+        const storeName = btn.dataset.store || btn.textContent.trim();
+        if (this.inputNewStoreName) {
+          this.inputNewStoreName.value = storeName;
+          this.inputNewStoreName.focus();
+        }
+      });
+    });
+
+    // Submit new store
+    const handleSaveNewStore = () => {
+      feedback.tap();
+      const val = this.inputNewStoreName ? this.inputNewStoreName.value.trim() : '';
+      if (!val || val.length < 2) {
+        showToast('Masukkan nama toko/supermarket yang valid!', 'warning', '⚠️');
+        if (this.inputNewStoreName) this.inputNewStoreName.focus();
+        return;
+      }
+      const success = store.addCustomStore(val);
+      if (success) {
+        feedback.success();
+        if (typeof confetti === 'function') confetti({ particleCount: 50, spread: 50 });
+        showToast(`Lokasi "${val}" berhasil ditambahkan & dipilih!`, 'success', '🏬');
+        this.closeAddStoreModal();
+      }
+    };
+
+    this.btnSaveNewStore?.addEventListener('click', handleSaveNewStore);
+    this.inputNewStoreName?.addEventListener('keyup', (e) => {
+      if (e.key === 'Enter') handleSaveNewStore();
     });
 
     // Klik di mana saja pada kotak input tanggal langsung memunculkan kalender pop-up
@@ -2857,10 +2980,115 @@ class GroceryUIController {
     this.modalFinishTrip.classList.add('hidden');
   }
 
-  render() {
-    if (this.sessionStoreSelect && store.storeLocation) {
-      this.sessionStoreSelect.value = store.storeLocation;
+  openAddStoreModal() {
+    if (this.inputNewStoreName) {
+      this.inputNewStoreName.value = '';
     }
+    this.renderCustomStoresChips();
+    this.modalAddStore?.classList.remove('hidden');
+    setTimeout(() => this.inputNewStoreName?.focus(), 80);
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  closeAddStoreModal() {
+    this.modalAddStore?.classList.add('hidden');
+  }
+
+  renderCustomStoresChips() {
+    if (!this.customStoresChipsList || !this.customStoresManagementSection) return;
+    const list = store.customStores || [];
+    if (list.length === 0) {
+      this.customStoresManagementSection.classList.add('hidden');
+      this.customStoresChipsList.innerHTML = '';
+      return;
+    }
+
+    this.customStoresManagementSection.classList.remove('hidden');
+    this.customStoresChipsList.innerHTML = '';
+    list.forEach(storeName => {
+      const chip = document.createElement('div');
+      chip.className = 'px-2.5 py-1 rounded-xl bg-violet-950/80 border border-violet-500/40 text-xs font-bold text-slate-200 flex items-center gap-1.5 shadow-2xs';
+      chip.innerHTML = `
+        <span class="cursor-pointer hover:text-cyan-300 transition-colors flex items-center gap-1"><span>🏬</span><span>${storeName}</span></span>
+        <button type="button" class="w-4 h-4 rounded-full bg-slate-900 hover:bg-rose-950 text-slate-400 hover:text-rose-400 flex items-center justify-center text-[10px] ml-1 tap-effect" title="Hapus toko kustom">✕</button>
+      `;
+      // Click name to select
+      chip.firstElementChild.addEventListener('click', () => {
+        feedback.tap();
+        store.storeLocation = storeName;
+        store.saveUserState();
+        store.notify();
+        showToast(`Lokasi toko disetel ke: ${storeName}`, 'info', '🏬');
+        this.closeAddStoreModal();
+      });
+      // Click delete button
+      chip.lastElementChild.addEventListener('click', (e) => {
+        e.stopPropagation();
+        feedback.tap();
+        store.removeCustomStore(storeName);
+        this.renderCustomStoresChips();
+        showToast(`Toko "${storeName}" dihapus dari daftar kustom.`, 'info', '🗑️');
+      });
+      this.customStoresChipsList.appendChild(chip);
+    });
+  }
+
+  renderStoreSelectOptions() {
+    if (!this.sessionStoreSelect) return;
+    const currentVal = store.storeLocation || 'Lotte Mart Grocery - Puri Indah';
+
+    const defaultStores = [
+      'Lotte Mart Grocery - Puri Indah',
+      'Super Indo Supermarket',
+      'Hypermart Mall'
+    ];
+
+    const customStores = store.customStores || [];
+    const allStores = Array.from(new Set([...defaultStores, ...customStores]));
+    if (!allStores.includes(currentVal)) {
+      allStores.push(currentVal);
+    }
+
+    this.sessionStoreSelect.innerHTML = '';
+
+    // Group default stores
+    const optGroupDefault = document.createElement('optgroup');
+    optGroupDefault.label = '🏬 Toko Populer / Preset';
+    defaultStores.forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s;
+      opt.textContent = s;
+      if (s === currentVal) opt.selected = true;
+      optGroupDefault.appendChild(opt);
+    });
+    this.sessionStoreSelect.appendChild(optGroupDefault);
+
+    // Custom stores optgroup
+    if (customStores.length > 0) {
+      const optGroupCustom = document.createElement('optgroup');
+      optGroupCustom.label = '📍 Toko Kustom Anda';
+      customStores.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s;
+        opt.textContent = `🏪 ${s}`;
+        if (s === currentVal) opt.selected = true;
+        optGroupCustom.appendChild(opt);
+      });
+      this.sessionStoreSelect.appendChild(optGroupCustom);
+    }
+
+    // Bottom action option to add new
+    const optAdd = document.createElement('option');
+    optAdd.value = '__add_new__';
+    optAdd.textContent = '➕ + Tambah Lokasi Baru...';
+    optAdd.className = 'font-bold text-cyan-400 bg-slate-900';
+    this.sessionStoreSelect.appendChild(optAdd);
+
+    this.sessionStoreSelect.value = currentVal;
+  }
+
+  render() {
+    this.renderStoreSelectOptions();
     if (this.sessionDatePicker && store.shoppingDate) {
       this.sessionDatePicker.value = store.shoppingDate;
     }
@@ -3324,7 +3552,7 @@ class GroceryUIController {
             </div>
             <div>
               <span class="text-xs font-black text-slate-100 block">${formatDateIndo(trip.date)}</span>
-              <span class="text-[10px] text-cyan-400 font-bold">${trip.itemCount || 0} macam item</span>
+              <span class="text-[10px] text-cyan-400 font-bold block truncate max-w-[170px]">📍 ${trip.storeLocation || 'Lotte Mart'} • ${trip.itemCount || 0} item</span>
             </div>
           </div>
           <div class="text-right">
