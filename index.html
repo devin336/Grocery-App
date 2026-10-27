@@ -184,8 +184,28 @@
             </button>
           </form>
 
+          <!-- Opsi 2: Login Google Authorization (Opsional) -->
+          <div class="relative flex items-center justify-center my-2">
+            <div class="border-t border-violet-500/20 w-full"></div>
+            <span class="bg-slate-900 px-2 text-[10px] text-violet-400 uppercase font-bold">atau masuk dengan</span>
+          </div>
+
+          <button 
+            id="btn-google-auth-login" 
+            type="button" 
+            class="w-full py-2.5 px-3 rounded-2xl bg-white hover:bg-slate-100 text-slate-800 text-xs font-black tap-effect flex items-center justify-center gap-2.5 shadow-md shadow-black/30 border border-slate-200 transition-all active:scale-98"
+          >
+            <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
+              <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+            </svg>
+            <span id="btn-google-auth-text">Masuk dengan Akun Google</span>
+          </button>
+
           <!-- Divider -->
-          <div class="relative flex items-center justify-center my-1">
+          <div class="relative flex items-center justify-center my-1 pt-1">
             <div class="border-t border-violet-500/20 w-full"></div>
             <span class="bg-slate-900 px-2 text-[10px] text-violet-400 uppercase font-bold">Pilih Akun Cepat</span>
           </div>
@@ -308,6 +328,26 @@
             >
               <span>✨</span>
               <span>Buat Akun & Mulai Belanja Kosmik! 🚀</span>
+            </button>
+
+            <!-- Opsi Google Auth di Register -->
+            <div class="relative flex items-center justify-center my-2">
+              <div class="border-t border-violet-500/20 w-full"></div>
+              <span class="bg-slate-900 px-2 text-[10px] text-violet-400 uppercase font-bold">atau daftar dengan</span>
+            </div>
+
+            <button 
+              id="btn-google-auth-register" 
+              type="button" 
+              class="w-full py-2.5 px-3 rounded-2xl bg-white hover:bg-slate-100 text-slate-800 text-xs font-black tap-effect flex items-center justify-center gap-2.5 shadow-md shadow-black/30 border border-slate-200 transition-all active:scale-98"
+            >
+              <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
+                <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+                <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+              </svg>
+              <span>Daftar Cepat dengan Akun Google</span>
             </button>
           </form>
         </div>
@@ -459,13 +499,16 @@
 
             <!-- Selector Tanggal (Date Picker) -->
             <div class="space-y-1">
-              <label for="session-date-picker" class="text-[10px] text-slate-400 font-bold flex items-center gap-1">
-                <span>📅</span> Tanggal Transaksi:
+              <label for="session-date-picker" class="text-[10px] text-slate-400 font-bold flex items-center justify-between">
+                <span class="flex items-center gap-1"><span>📅</span> Tanggal Belanja:</span>
+                <span class="text-[9px] text-cyan-400 font-normal">(Klik untuk ganti)</span>
               </label>
               <input 
                 id="session-date-picker" 
                 type="date" 
-                class="w-full px-2.5 py-1.5 rounded-xl bg-slate-950/90 border border-violet-500/40 text-xs text-cyan-300 font-bold focus:outline-none focus:border-cyan-400 font-mono-num"
+                style="color-scheme: dark;"
+                class="w-full px-2.5 py-1.5 rounded-xl bg-slate-950/90 border border-violet-500/40 text-xs text-cyan-300 font-bold focus:outline-none focus:border-cyan-400 font-mono-num cursor-pointer"
+                title="Klik untuk memilih tanggal transaksi"
               />
             </div>
           </div>
@@ -1199,8 +1242,9 @@
 
   </div>
 
-  <!-- Firebase SDK (Compat v10 for Web PWA & Realtime Firestore) -->
+  <!-- Firebase SDK (Compat v10 for Web PWA & Realtime Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
   <!-- JavaScript Entry Point -->
