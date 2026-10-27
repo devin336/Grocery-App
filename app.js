@@ -17,6 +17,7 @@ const STORAGE_KEYS = {
 
 const CATEGORIES = [
   { id: 'all', name: '🌟 Semua', icon: 'sparkles', color: 'bg-violet-950/70 text-violet-300 border-violet-500/50 shadow-xs shadow-violet-500/20' },
+  { id: 'bahan-pokok', name: '🌾 Bahan Pokok', icon: 'wheat', color: 'bg-yellow-950/70 text-yellow-300 border-yellow-500/50 shadow-xs shadow-yellow-500/20' },
   { id: 'sayur', name: '🥬 Sayur Segar', icon: 'salad', color: 'bg-emerald-950/70 text-emerald-300 border-emerald-500/50 shadow-xs shadow-emerald-500/20' },
   { id: 'minuman', name: '🥤 Minuman & Susu', icon: 'coffee', color: 'bg-cyan-950/70 text-cyan-300 border-cyan-500/50 shadow-xs shadow-cyan-500/20' },
   { id: 'buah', name: '🍎 Buah Segar', icon: 'apple', color: 'bg-lime-950/70 text-lime-300 border-lime-500/50 shadow-xs shadow-lime-500/20' },
@@ -28,131 +29,155 @@ const CATEGORIES = [
   { id: 'lainnya', name: '🏷️ Lainnya', icon: 'tag', color: 'bg-slate-900/80 text-slate-300 border-slate-700/60' }
 ];
 
-// Initial mock items for newly created cart
+// Initial mock items for newly created cart (Skenario DT2 Rian - Lotte Mart)
 const DEFAULT_KIDS_CART = [
   {
-    id: 'mock-1',
-    name: 'Bayam Hijau Segar Hidroponik',
-    category: 'sayur',
-    unit: 'ikat',
-    qty: 2,
-    unitPrice: 6000,
-    lastMonthPrice: 5500,
+    id: 'dt2-beras',
+    name: 'Beras Rojolele',
+    category: 'bahan-pokok',
+    unit: 'karung/5kg',
+    qty: 1,
+    unitPrice: 74000,
+    lastMonthPrice: 68000,
+    discountRaw: '0',
+    createdAt: Date.now() - 500000
+  },
+  {
+    id: 'dt2-minyak',
+    name: 'Minyak Goreng 2L',
+    category: 'bahan-pokok',
+    unit: 'liter',
+    qty: 1,
+    unitPrice: 43000,
+    lastMonthPrice: 43000,
     discountRaw: '0',
     createdAt: Date.now() - 400000
   },
   {
-    id: 'mock-2',
-    name: 'Susu UHT Ultra Milk Strawberry 200ml',
-    category: 'minuman',
-    unit: 'kotak',
-    qty: 3,
-    unitPrice: 6000,
-    lastMonthPrice: 5500,
-    discountRaw: '0',
+    id: 'dt2-sabun',
+    name: 'Sabun Cuci',
+    category: 'kebersihan',
+    unit: 'pcs',
+    qty: 1,
+    unitPrice: 20000,
+    lastMonthPrice: 20000,
+    discountRaw: '25%',
     createdAt: Date.now() - 300000
   },
   {
-    id: 'mock-3',
-    name: 'Biskuit Roma Kelapa Manis',
-    category: 'camilan',
-    unit: 'pack',
+    id: 'dt2-wajan',
+    name: 'Wajan Penggorengan',
+    category: 'peralatan',
+    unit: 'pcs',
     qty: 1,
-    unitPrice: 9500,
-    lastMonthPrice: 9500,
-    discountRaw: '10%',
+    unitPrice: 100000,
+    lastMonthPrice: 100000,
+    discountRaw: '50%+20%',
     createdAt: Date.now() - 200000
   },
   {
-    id: 'mock-4',
-    name: 'Pisang Cavendish Sunpride',
-    category: 'buah',
-    unit: 'sisir',
+    id: 'dt2-telur',
+    name: 'Telur Ayam 1kg',
+    category: 'daging',
+    unit: 'kg',
     qty: 1,
-    unitPrice: 18000,
-    lastMonthPrice: 20000,
+    unitPrice: 28000,
+    lastMonthPrice: 32000,
     discountRaw: '0',
     createdAt: Date.now() - 100000
   },
   {
-    id: 'mock-5',
-    name: 'Sosis Kanzler Singles Original',
-    category: 'daging',
-    unit: 'pcs',
-    qty: 2,
-    unitPrice: 9000,
-    lastMonthPrice: 9000,
-    discountRaw: '50%+20%',
+    id: 'dt2-garam',
+    name: 'Garam Dapur 500g',
+    category: 'bahan-pokok',
+    unit: 'pack',
+    qty: 1,
+    unitPrice: 5000,
+    lastMonthPrice: 5000,
+    discountRaw: '0',
     createdAt: Date.now() - 50000
   }
 ];
 
 // 1-Tap Quick Catalog Carousel items (User can tap + to add immediately)
 const QUICK_CATALOG_ITEMS = [
+  { name: 'Beras Rojolele', category: 'bahan-pokok', unit: 'karung/5kg', price: 74000, lastMonthPrice: 68000, discount: '' },
+  { name: 'Minyak Goreng 2L', category: 'bahan-pokok', unit: 'liter', price: 43000, lastMonthPrice: 43000, discount: '' },
+  { name: 'Sabun Cuci', category: 'kebersihan', unit: 'pcs', price: 20000, lastMonthPrice: 20000, discount: '25%' },
+  { name: 'Wajan Penggorengan', category: 'peralatan', unit: 'pcs', price: 100000, lastMonthPrice: 100000, discount: '50%+20%' },
+  { name: 'Telur Ayam 1kg', category: 'daging', unit: 'kg', price: 28000, lastMonthPrice: 32000, discount: '' },
+  { name: 'Garam Dapur 500g', category: 'bahan-pokok', unit: 'pack', price: 5000, lastMonthPrice: 5000, discount: '' },
   { name: 'Bayam Hijau Hidroponik', category: 'sayur', unit: 'ikat', price: 6000, lastMonthPrice: 5500, discount: '' },
-  { name: 'Wortel Berastagi Manis', category: 'sayur', unit: 'kg', price: 12000, lastMonthPrice: 12000, discount: '' },
-  { name: 'Brokoli Hijau Super', category: 'sayur', unit: 'pack', price: 18000, lastMonthPrice: 20000, discount: '' },
   { name: 'Susu Ultra Strawberry', category: 'minuman', unit: 'kotak', price: 6000, lastMonthPrice: 5500, discount: '' },
-  { name: 'Yakult Probiotik (5 botol)', category: 'minuman', unit: 'pack', price: 11000, lastMonthPrice: 10500, discount: '' },
-  { name: 'Air Mineral Aqua 1.5L', category: 'minuman', unit: 'botol', price: 7000, lastMonthPrice: 6500, discount: '' },
-  { name: 'Milo Kotak Cokelat', category: 'minuman', unit: 'kotak', price: 6000, lastMonthPrice: 6000, discount: '' },
   { name: 'Pisang Sunpride Cavendish', category: 'buah', unit: 'sisir', price: 18000, lastMonthPrice: 20000, discount: '' },
-  { name: 'Apel Fuji Merah Manis', category: 'buah', unit: 'kg', price: 38000, lastMonthPrice: 40000, discount: '' },
-  { name: 'Wafer Tango Cokelat', category: 'camilan', unit: 'pack', price: 8500, lastMonthPrice: 8500, discount: '' },
-  { name: 'Biskuit Roma Kelapa', category: 'camilan', unit: 'pack', price: 10000, lastMonthPrice: 10000, discount: '' },
-  { name: 'Nugget Fiesta Dinosaurus', category: 'daging', unit: 'pack', price: 48000, lastMonthPrice: 46000, discount: '10%' },
-  { name: 'Sosis Kanzler Singles Original', category: 'daging', unit: 'pcs', price: 9000, lastMonthPrice: 9000, discount: '' },
-  { name: 'Telur Ayam Negeri 1kg', category: 'daging', unit: 'kg', price: 31000, lastMonthPrice: 32000, discount: '' }
+  { name: 'Sosis Kanzler Singles Original', category: 'daging', unit: 'pcs', price: 9000, lastMonthPrice: 9000, discount: '' }
 ];
 
-// Product lookup database for instant autofill
+// Product lookup database for instant autofill (Lotte Mart Grocery - Puri Indah)
 const MOCK_LOOKUP = {
+  // Skenario DT2 Lotte Mart Puri Indah
+  'beras rojolele': { price: 74000, lastMonthPrice: 68000, unit: 'karung/5kg', category: 'bahan-pokok' },
+  'beras 5kg': { price: 74000, lastMonthPrice: 68000, unit: 'karung/5kg', category: 'bahan-pokok' },
+  'beras': { price: 74000, lastMonthPrice: 68000, unit: 'karung/5kg', category: 'bahan-pokok' },
+  'minyak goreng 2l': { price: 43000, lastMonthPrice: 43000, unit: 'liter', category: 'bahan-pokok' },
+  'minyak goreng': { price: 43000, lastMonthPrice: 43000, unit: 'liter', category: 'bahan-pokok' },
+  'minyak': { price: 43000, lastMonthPrice: 43000, unit: 'liter', category: 'bahan-pokok' },
+  'sabun cuci': { price: 20000, lastMonthPrice: 20000, unit: 'pcs', category: 'kebersihan', discount: '25%' },
+  'sabun mandi': { price: 15000, lastMonthPrice: 15000, unit: 'pcs', category: 'kebersihan' },
+  'sabun': { price: 20000, lastMonthPrice: 20000, unit: 'pcs', category: 'kebersihan' },
+  'wajan penggorengan': { price: 100000, lastMonthPrice: 100000, unit: 'pcs', category: 'peralatan', discount: '50%+20%' },
+  'wajan': { price: 100000, lastMonthPrice: 100000, unit: 'pcs', category: 'peralatan', discount: '50%+20%' },
+  'telur ayam 1kg': { price: 28000, lastMonthPrice: 32000, unit: 'kg', category: 'daging' },
+  'telur 1kg': { price: 28000, lastMonthPrice: 32000, unit: 'kg', category: 'daging' },
+  'telur': { price: 28000, lastMonthPrice: 32000, unit: 'kg', category: 'daging' },
+  'garam dapur 500g': { price: 5000, lastMonthPrice: 5000, unit: 'pack', category: 'bahan-pokok' },
+  'garam 500g': { price: 5000, lastMonthPrice: 5000, unit: 'pack', category: 'bahan-pokok' },
+  'garam': { price: 5000, lastMonthPrice: 5000, unit: 'pack', category: 'bahan-pokok' },
+
   // Sayur Sehat
-  'bayam hijau segar kelinci': { price: 6000, unit: 'ikat', category: 'sayur' },
-  'bayam': { price: 6000, unit: 'ikat', category: 'sayur' },
-  'wortel manis kelinci': { price: 12000, unit: 'kg', category: 'sayur' },
-  'wortel': { price: 12000, unit: 'kg', category: 'sayur' },
-  'brokoli hijau super': { price: 18000, unit: 'pack', category: 'sayur' },
-  'brokoli': { price: 18000, unit: 'pack', category: 'sayur' },
-  'kangkung segar': { price: 5000, unit: 'ikat', category: 'sayur' },
-  'kangkung': { price: 5000, unit: 'ikat', category: 'sayur' },
-  'tomat merah segar': { price: 9000, unit: 'kg', category: 'sayur' },
-  'tomat': { price: 9000, unit: 'kg', category: 'sayur' },
+  'bayam hijau segar kelinci': { price: 6000, lastMonthPrice: 5500, unit: 'ikat', category: 'sayur' },
+  'bayam': { price: 6000, lastMonthPrice: 5500, unit: 'ikat', category: 'sayur' },
+  'wortel manis kelinci': { price: 12000, lastMonthPrice: 12000, unit: 'kg', category: 'sayur' },
+  'wortel': { price: 12000, lastMonthPrice: 12000, unit: 'kg', category: 'sayur' },
+  'brokoli hijau super': { price: 18000, lastMonthPrice: 20000, unit: 'pack', category: 'sayur' },
+  'brokoli': { price: 18000, lastMonthPrice: 20000, unit: 'pack', category: 'sayur' },
+  'kangkung segar': { price: 5000, lastMonthPrice: 5000, unit: 'ikat', category: 'sayur' },
+  'kangkung': { price: 5000, lastMonthPrice: 5000, unit: 'ikat', category: 'sayur' },
+  'tomat merah segar': { price: 9000, lastMonthPrice: 9000, unit: 'kg', category: 'sayur' },
+  'tomat': { price: 9000, lastMonthPrice: 9000, unit: 'kg', category: 'sayur' },
 
   // Minuman & Susu
-  'susu uht ultra milk strawberry 200ml': { price: 6000, unit: 'kotak', category: 'minuman' },
-  'susu ultra strawberry': { price: 6000, unit: 'kotak', category: 'minuman' },
-  'susu': { price: 6000, unit: 'kotak', category: 'minuman' },
-  'yakult probiotik (5 botol)': { price: 11000, unit: 'pack', category: 'minuman' },
-  'yakult': { price: 11000, unit: 'pack', category: 'minuman' },
-  'air aqua dingin 1.5l': { price: 7000, unit: 'botol', category: 'minuman' },
-  'aqua': { price: 7000, unit: 'botol', category: 'minuman' },
-  'milo kotak cokelat': { price: 6000, unit: 'kotak', category: 'minuman' },
-  'milo': { price: 6000, unit: 'kotak', category: 'minuman' },
-  'susu ultra milk 1l': { price: 19500, unit: 'liter', category: 'minuman' },
+  'susu uht ultra milk strawberry 200ml': { price: 6000, lastMonthPrice: 5500, unit: 'kotak', category: 'minuman' },
+  'susu ultra strawberry': { price: 6000, lastMonthPrice: 5500, unit: 'kotak', category: 'minuman' },
+  'susu': { price: 6000, lastMonthPrice: 5500, unit: 'kotak', category: 'minuman' },
+  'yakult probiotik (5 botol)': { price: 11000, lastMonthPrice: 10500, unit: 'pack', category: 'minuman' },
+  'yakult': { price: 11000, lastMonthPrice: 10500, unit: 'pack', category: 'minuman' },
+  'air aqua dingin 1.5l': { price: 7000, lastMonthPrice: 6500, unit: 'botol', category: 'minuman' },
+  'aqua': { price: 7000, lastMonthPrice: 6500, unit: 'botol', category: 'minuman' },
+  'milo kotak cokelat': { price: 6000, lastMonthPrice: 6000, unit: 'kotak', category: 'minuman' },
+  'milo': { price: 6000, lastMonthPrice: 6000, unit: 'kotak', category: 'minuman' },
+  'susu ultra milk 1l': { price: 19500, lastMonthPrice: 19500, unit: 'liter', category: 'minuman' },
 
   // Buah
-  'pisang cavendish sunpride': { price: 18000, unit: 'sisir', category: 'buah' },
-  'pisang': { price: 18000, unit: 'sisir', category: 'buah' },
-  'apel fuji merah': { price: 38000, unit: 'kg', category: 'buah' },
-  'apel': { price: 38000, unit: 'kg', category: 'buah' },
-  'jeruk manis': { price: 26000, unit: 'kg', category: 'buah' },
-  'jeruk': { price: 26000, unit: 'kg', category: 'buah' },
+  'pisang cavendish sunpride': { price: 18000, lastMonthPrice: 20000, unit: 'sisir', category: 'buah' },
+  'pisang': { price: 18000, lastMonthPrice: 20000, unit: 'sisir', category: 'buah' },
+  'apel fuji merah': { price: 38000, lastMonthPrice: 40000, unit: 'kg', category: 'buah' },
+  'apel': { price: 38000, lastMonthPrice: 40000, unit: 'kg', category: 'buah' },
+  'jeruk manis': { price: 26000, lastMonthPrice: 26000, unit: 'kg', category: 'buah' },
+  'jeruk': { price: 26000, lastMonthPrice: 26000, unit: 'kg', category: 'buah' },
 
   // Camilan
-  'biskuit roma kelapa manis': { price: 9500, unit: 'pack', category: 'camilan' },
-  'biskuit': { price: 9500, unit: 'pack', category: 'camilan' },
-  'wafer tango cokelat': { price: 8500, unit: 'pack', category: 'camilan' },
-  'wafer': { price: 8500, unit: 'pack', category: 'camilan' },
-  'cokelat': { price: 12000, unit: 'pcs', category: 'camilan' },
+  'biskuit roma kelapa manis': { price: 9500, lastMonthPrice: 9500, unit: 'pack', category: 'camilan' },
+  'biskuit': { price: 9500, lastMonthPrice: 9500, unit: 'pack', category: 'camilan' },
+  'wafer tango cokelat': { price: 8500, lastMonthPrice: 8500, unit: 'pack', category: 'camilan' },
+  'wafer': { price: 8500, lastMonthPrice: 8500, unit: 'pack', category: 'camilan' },
+  'cokelat': { price: 12000, lastMonthPrice: 12000, unit: 'pcs', category: 'camilan' },
 
   // Lauk & Sarapan
-  'sosis kanzler singles original': { price: 9000, unit: 'pcs', category: 'daging' },
-  'sosis': { price: 9000, unit: 'pcs', category: 'daging' },
-  'nugget fiesta dinosaurus': { price: 48000, unit: 'pack', category: 'daging' },
-  'nugget': { price: 48000, unit: 'pack', category: 'daging' },
-  'telur ayam rebus 1kg': { price: 31000, unit: 'kg', category: 'daging' },
-  'telur': { price: 31000, unit: 'kg', category: 'daging' }
+  'sosis kanzler singles original': { price: 9000, lastMonthPrice: 9000, unit: 'pcs', category: 'daging' },
+  'sosis': { price: 9000, lastMonthPrice: 9000, unit: 'pcs', category: 'daging' },
+  'nugget fiesta dinosaurus': { price: 48000, lastMonthPrice: 46000, unit: 'pack', category: 'daging' },
+  'nugget': { price: 48000, lastMonthPrice: 46000, unit: 'pack', category: 'daging' }
 };
 
 // ==========================================
@@ -333,8 +358,42 @@ function formatRupiahNumber(num) {
 
 function parseRupiahInput(val) {
   if (typeof val === 'number') return val;
-  const cleaned = String(val).replace(/[^0-9]/g, '');
-  return parseInt(cleaned, 10) || 0;
+  const str = String(val || '').trim();
+  const isNegative = str.includes('-');
+  const cleaned = str.replace(/[^0-9]/g, '');
+  const num = parseInt(cleaned, 10) || 0;
+  return isNegative ? -num : num;
+}
+
+function showToast(msg, type = 'info', icon = '🪐') {
+  let toast = document.getElementById('cloud-realtime-toast');
+  if (!toast) return;
+  const toastText = document.getElementById('cloud-toast-text');
+  const toastIcon = document.getElementById('cloud-toast-icon');
+  if (toastText) toastText.textContent = msg;
+  if (toastIcon) toastIcon.textContent = icon;
+
+  const innerPill = toast.firstElementChild;
+  if (innerPill) {
+    if (type === 'error' || type === 'danger') {
+      innerPill.className = 'px-3.5 py-1.5 rounded-full bg-rose-950/95 text-rose-200 text-xs font-black shadow-2xl backdrop-blur-md flex items-center gap-2 border border-rose-500/80 animate-danger-pulse';
+    } else if (type === 'success') {
+      innerPill.className = 'px-3.5 py-1.5 rounded-full bg-emerald-950/95 text-emerald-200 text-xs font-black shadow-2xl backdrop-blur-md flex items-center gap-2 border border-emerald-400/80';
+    } else if (type === 'warning') {
+      innerPill.className = 'px-3.5 py-1.5 rounded-full bg-amber-950/95 text-amber-200 text-xs font-black shadow-2xl backdrop-blur-md flex items-center gap-2 border border-amber-400/80';
+    } else {
+      innerPill.className = 'px-3.5 py-1.5 rounded-full bg-slate-900/95 text-white text-xs font-black shadow-2xl backdrop-blur-md flex items-center gap-2 border border-cyan-400/40 glow-cyan';
+    }
+  }
+
+  toast.classList.remove('opacity-0', '-translate-y-3', 'pointer-events-none');
+  toast.classList.add('opacity-100', 'translate-y-0');
+
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(() => {
+    toast.classList.remove('opacity-100', 'translate-y-0');
+    toast.classList.add('opacity-0', '-translate-y-3', 'pointer-events-none');
+  }, 2800);
 }
 
 function formatDateIndo(timestamp) {
@@ -522,7 +581,7 @@ class FirebaseSyncService {
     }
   }
 
-  // Save account to Firestore cloud
+  // Save account to Firestore cloud (guaranteed both REST and SDK)
   async saveAccountToCloud(account) {
     if (!account || !account.username) return false;
     const cleanUser = account.username.toLowerCase().trim();
@@ -536,18 +595,9 @@ class FirebaseSyncService {
       createdAt: account.createdAt || Date.now()
     };
 
-    // 1. Try Firestore SDK
-    if (this.db) {
-      try {
-        await this.db.collection('grocery_accounts').doc(cleanUser).set(cleanAccount, { merge: true });
-        console.info('[Firebase] Account saved to Cloud Firestore:', cleanUser);
-        return true;
-      } catch (e) {
-        console.warn('[Firebase] SDK saveAccount error, trying REST fallback:', e);
-      }
-    }
+    let saved = false;
 
-    // 2. REST Fallback
+    // 1. Direct REST Save (Immediate HTTP sync to Firestore Cloud servers)
     try {
       const cfg = this.getConfig();
       if (cfg && cfg.projectId && cfg.apiKey) {
@@ -558,7 +608,7 @@ class FirebaseSyncService {
             name: { stringValue: cleanAccount.name },
             avatar: { stringValue: cleanAccount.avatar },
             pin: { stringValue: cleanAccount.pin },
-            budgetLimit: { integerValue: String(cleanAccount.budgetLimit) },
+            budgetLimit: { integerValue: String(Math.round(cleanAccount.budgetLimit)) },
             updatedAt: { integerValue: String(cleanAccount.updatedAt) },
             createdAt: { integerValue: String(cleanAccount.createdAt) }
           }
@@ -570,13 +620,25 @@ class FirebaseSyncService {
         });
         if (res.ok) {
           console.info('[Firebase REST] Account saved via REST fallback:', cleanUser);
-          return true;
+          saved = true;
         }
       }
     } catch (restErr) {
       console.warn('[Firebase REST] Failed to save account via REST:', restErr);
     }
-    return false;
+
+    // 2. Also save via Firestore SDK if available
+    if (this.db) {
+      try {
+        await this.db.collection('grocery_accounts').doc(cleanUser).set(cleanAccount, { merge: true });
+        console.info('[Firebase] Account saved to Cloud Firestore:', cleanUser);
+        saved = true;
+      } catch (e) {
+        console.warn('[Firebase] SDK saveAccount error:', e);
+      }
+    }
+
+    return saved;
   }
 
   // Fetch a specific account from Cloud
@@ -584,7 +646,32 @@ class FirebaseSyncService {
     if (!cleanUser) return null;
     const u = cleanUser.toLowerCase().trim();
 
-    // 1. Try Firestore SDK
+    // 1. Try REST fallback first (instant response across all network states)
+    try {
+      const cfg = this.getConfig();
+      if (cfg && cfg.projectId && cfg.apiKey) {
+        const url = `https://firestore.googleapis.com/v1/projects/${cfg.projectId}/databases/(default)/documents/grocery_accounts/${u}?key=${cfg.apiKey}`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const doc = await res.json();
+          if (doc && doc.fields) {
+            const rawLimit = doc.fields.budgetLimit?.integerValue || doc.fields.budgetLimit?.doubleValue || 250000;
+            return {
+              username: doc.fields.username?.stringValue || u,
+              name: doc.fields.name?.stringValue || u,
+              avatar: doc.fields.avatar?.stringValue || '🍓',
+              pin: doc.fields.pin?.stringValue || (doc.fields.pin?.integerValue ? String(doc.fields.pin.integerValue) : '1234'),
+              budgetLimit: Number(rawLimit) || 250000,
+              createdAt: Number(doc.fields.createdAt?.integerValue || Date.now())
+            };
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('[Firebase REST] Error fetching account:', e);
+    }
+
+    // 2. Try Firestore SDK
     if (this.db) {
       try {
         const snap = await this.db.collection('grocery_accounts').doc(u).get();
@@ -600,33 +687,10 @@ class FirebaseSyncService {
           };
         }
       } catch (e) {
-        console.warn('[Firebase] SDK fetchAccount error, trying REST fallback:', e);
+        console.warn('[Firebase] SDK fetchAccount error:', e);
       }
     }
 
-    // 2. Try REST fallback
-    try {
-      const cfg = this.getConfig();
-      if (cfg && cfg.projectId && cfg.apiKey) {
-        const url = `https://firestore.googleapis.com/v1/projects/${cfg.projectId}/databases/(default)/documents/grocery_accounts/${u}?key=${cfg.apiKey}`;
-        const res = await fetch(url);
-        if (res.ok) {
-          const doc = await res.json();
-          if (doc && doc.fields) {
-            return {
-              username: doc.fields.username?.stringValue || u,
-              name: doc.fields.name?.stringValue || u,
-              avatar: doc.fields.avatar?.stringValue || '🍓',
-              pin: doc.fields.pin?.stringValue || '1234',
-              budgetLimit: Number(doc.fields.budgetLimit?.integerValue || 250000),
-              createdAt: Number(doc.fields.createdAt?.integerValue || Date.now())
-            };
-          }
-        }
-      }
-    } catch (e) {
-      console.warn('[Firebase REST] Error fetching account:', e);
-    }
     return null;
   }
 
@@ -635,27 +699,40 @@ class FirebaseSyncService {
     if (!this.store) return;
     try {
       let accountsData = [];
-      if (this.db) {
-        const querySnapshot = await this.db.collection('grocery_accounts').get();
-        querySnapshot.forEach(doc => {
-          accountsData.push(doc.data());
-        });
-      } else {
-        const cfg = this.getConfig();
-        const url = `https://firestore.googleapis.com/v1/projects/${cfg.projectId}/databases/(default)/documents/grocery_accounts?key=${cfg.apiKey}`;
-        const res = await fetch(url);
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.documents) {
-            accountsData = data.documents.map(d => ({
-              username: d.fields?.username?.stringValue,
-              name: d.fields?.name?.stringValue,
-              avatar: d.fields?.avatar?.stringValue || '🍓',
-              pin: d.fields?.pin?.stringValue || '1234',
-              budgetLimit: Number(d.fields?.budgetLimit?.integerValue || 250000)
-            })).filter(a => !!a.username);
+
+      // 1. Fetch via REST
+      const cfg = this.getConfig();
+      if (cfg && cfg.projectId && cfg.apiKey) {
+        try {
+          const url = `https://firestore.googleapis.com/v1/projects/${cfg.projectId}/databases/(default)/documents/grocery_accounts?key=${cfg.apiKey}`;
+          const res = await fetch(url);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.documents) {
+              accountsData = data.documents.map(d => {
+                const u = d.fields?.username?.stringValue || d.name.split('/').pop();
+                const rawLimit = d.fields?.budgetLimit?.integerValue || d.fields?.budgetLimit?.doubleValue || 250000;
+                return {
+                  username: u,
+                  name: d.fields?.name?.stringValue || u,
+                  avatar: d.fields?.avatar?.stringValue || '🍓',
+                  pin: d.fields?.pin?.stringValue || (d.fields?.pin?.integerValue ? String(d.fields?.pin.integerValue) : '1234'),
+                  budgetLimit: Number(rawLimit) || 250000
+                };
+              }).filter(a => !!a.username);
+            }
           }
-        }
+        } catch (e) {}
+      }
+
+      // 2. Fetch via SDK if REST returned empty
+      if (this.db && accountsData.length === 0) {
+        try {
+          const querySnapshot = await this.db.collection('grocery_accounts').get();
+          querySnapshot.forEach(doc => {
+            accountsData.push(doc.data());
+          });
+        } catch (e) {}
       }
 
       if (accountsData.length > 0) {
@@ -682,6 +759,10 @@ class FirebaseSyncService {
         if (updated) {
           localStorage.setItem(STORAGE_KEYS.ACCOUNTS_LIST, JSON.stringify(this.store.accounts));
         }
+      }
+
+      if (window.appController && typeof window.appController.renderCloudAccountChips === 'function') {
+        window.appController.renderCloudAccountChips();
       }
     } catch (err) {
       console.warn('[Firebase] fetchAllAccountsFromCloud error:', err);
@@ -781,9 +862,6 @@ class FirebaseSyncService {
             return;
           }
 
-          if (cloudData.updatedAt && cloudData.updatedAt < this.lastCloudUpdatedAt) {
-            return;
-          }
           this.lastCloudUpdatedAt = cloudData.updatedAt || Date.now();
 
           const hasApplied = this.applyCloudData(cloudData);
@@ -815,13 +893,11 @@ class FirebaseSyncService {
         if (snap.exists) {
           const cloudData = snap.data();
           if (cloudData && cloudData.updatedBy !== this.store.deviceId) {
-            if (cloudData.updatedAt && cloudData.updatedAt > this.lastCloudUpdatedAt) {
-              this.lastCloudUpdatedAt = cloudData.updatedAt;
-              const applied = this.applyCloudData(cloudData);
-              if (applied) {
-                const source = (cloudData.updatedBy && cloudData.updatedBy.startsWith('hp_')) ? 'HP' : 'PC';
-                this.showRealtimeToast(`Belanjaan diupdate dari ${source}!`, '✨');
-              }
+            this.lastCloudUpdatedAt = cloudData.updatedAt || Date.now();
+            const applied = this.applyCloudData(cloudData);
+            if (applied) {
+              const source = (cloudData.updatedBy && cloudData.updatedBy.startsWith('hp_')) ? 'HP' : 'PC';
+              this.showRealtimeToast(`Belanjaan diupdate dari ${source}!`, '✨');
             }
           }
         }
@@ -845,6 +921,16 @@ class FirebaseSyncService {
 
       if (typeof data.budgetLimit === 'number' && this.store.budgetLimit !== data.budgetLimit) {
         this.store.budgetLimit = data.budgetLimit;
+        stateChanged = true;
+      }
+
+      if (typeof data.storeLocation === 'string' && this.store.storeLocation !== data.storeLocation) {
+        this.store.storeLocation = data.storeLocation;
+        stateChanged = true;
+      }
+
+      if (typeof data.shoppingDate === 'string' && this.store.shoppingDate !== data.shoppingDate) {
+        this.store.shoppingDate = data.shoppingDate;
         stateChanged = true;
       }
 
@@ -896,6 +982,8 @@ class FirebaseSyncService {
         username: user,
         cart: this.store.cart,
         budgetLimit: this.store.budgetLimit,
+        storeLocation: this.store.storeLocation || 'Lotte Mart Grocery - Puri Indah',
+        shoppingDate: this.store.shoppingDate || '2026-10-26',
         priceLookup: this.store.priceLookup,
         history: this.store.history,
         user: {
@@ -1030,9 +1118,17 @@ class GroceryStore {
 
     this.accounts = JSON.parse(localStorage.getItem(STORAGE_KEYS.ACCOUNTS_LIST) || '[]');
     
-    // Seed default demo account if empty
+    // Seed default demo accounts if empty (Rian for DT2 and Devin)
     if (this.accounts.length === 0) {
       this.accounts = [
+        {
+          username: 'rian',
+          name: 'Rian',
+          avatar: '🐰',
+          pin: '1234',
+          budgetLimit: 350000,
+          createdAt: Date.now()
+        },
         {
           username: 'devin',
           name: 'Devin',
@@ -1045,13 +1141,22 @@ class GroceryStore {
       localStorage.setItem(STORAGE_KEYS.ACCOUNTS_LIST, JSON.stringify(this.accounts));
     }
 
-    // Check currently active logged-in user
+    // Default to Rian for DT2 test scenario if no user logged in
     this.currentUser = JSON.parse(localStorage.getItem(STORAGE_KEYS.ACTIVE_USER) || 'null');
+    if (!this.currentUser) {
+      const defaultUser = this.accounts.find(a => a.username === 'rian') || this.accounts[0];
+      if (defaultUser) {
+        this.currentUser = defaultUser;
+        localStorage.setItem(STORAGE_KEYS.ACTIVE_USER, JSON.stringify(this.currentUser));
+      }
+    }
     
+    this.storeLocation = 'Lotte Mart Grocery - Puri Indah';
+    this.shoppingDate = '2026-10-26';
     this.cart = [];
     this.history = [];
     this.priceLookup = { ...MOCK_LOOKUP };
-    this.budgetLimit = 250000;
+    this.budgetLimit = this.currentUser?.budgetLimit || 350000;
     this.currentTab = 'belanja';
     this.searchQuery = '';
     this.selectedCategory = 'all';
@@ -1097,7 +1202,7 @@ class GroceryStore {
       name: name.trim(),
       avatar: avatar || '🍓',
       pin: String(pin || '1234').trim(),
-      budgetLimit: Math.max(10000, parseRupiahInput(budgetLimit) || 250000),
+      budgetLimit: Math.max(10000, parseRupiahInput(budgetLimit) || 350000),
       createdAt: Date.now()
     };
 
@@ -1135,7 +1240,7 @@ class GroceryStore {
           name: cleanUser === 'devin' ? 'Devin' : 'Rian',
           avatar: cleanUser === 'devin' ? '🍓' : '🐰',
           pin: '1234',
-          budgetLimit: 250000,
+          budgetLimit: cleanUser === 'rian' ? 350000 : 250000,
           createdAt: Date.now()
         };
         this.accounts.push(demoAcc);
@@ -1157,7 +1262,7 @@ class GroceryStore {
 
   async setUserSession(account) {
     this.currentUser = { ...account, loginAt: Date.now() };
-    this.budgetLimit = account.budgetLimit || 250000;
+    this.budgetLimit = account.budgetLimit || 350000;
     localStorage.setItem(STORAGE_KEYS.ACTIVE_USER, JSON.stringify(this.currentUser));
     this.loadUserState();
 
@@ -1180,6 +1285,11 @@ class GroceryStore {
       const savedHistory = localStorage.getItem(this.getUserKey('history'));
       const savedLookup = localStorage.getItem(this.getUserKey('lookup'));
       const savedBudget = localStorage.getItem(this.getUserKey('budget'));
+      const savedStore = localStorage.getItem(this.getUserKey('store_loc'));
+      const savedDate = localStorage.getItem(this.getUserKey('shop_date'));
+
+      if (savedStore) this.storeLocation = savedStore;
+      if (savedDate) this.shoppingDate = savedDate;
 
       if (savedCart) {
         this.cart = JSON.parse(savedCart);
@@ -1234,6 +1344,8 @@ class GroceryStore {
       localStorage.setItem(this.getUserKey('history'), JSON.stringify(this.history));
       localStorage.setItem(this.getUserKey('lookup'), JSON.stringify(this.priceLookup));
       localStorage.setItem(this.getUserKey('budget'), String(this.budgetLimit));
+      localStorage.setItem(this.getUserKey('store_loc'), this.storeLocation || 'Lotte Mart Grocery - Puri Indah');
+      localStorage.setItem(this.getUserKey('shop_date'), this.shoppingDate || '2026-10-26');
     } catch (e) {
       console.warn('Error saving user state:', e);
     }
@@ -1416,7 +1528,7 @@ class GroceryStore {
     let budgetStatus = 'safe';
     if (totalSpent > this.budgetLimit) {
       budgetStatus = 'danger';
-    } else if (rawPercentage >= 85) {
+    } else if (rawPercentage >= 90) {
       budgetStatus = 'warning';
     }
 
@@ -1466,6 +1578,12 @@ class GroceryUIController {
     this.inputLoginUsername = document.getElementById('login-username');
     this.inputLoginPin = document.getElementById('login-pin');
     this.btnQuickLoginRian = document.getElementById('btn-quick-login-rian');
+    this.btnQuickLoginDevin = document.getElementById('btn-quick-login-devin');
+    this.cloudAccountsChips = document.getElementById('cloud-accounts-chips');
+
+    // Sesi Belanja (Toko & Tanggal - SRS F-01)
+    this.sessionStoreSelect = document.getElementById('session-store-select');
+    this.sessionDatePicker = document.getElementById('session-date-picker');
 
     // Register Inputs
     this.regName = document.getElementById('reg-name');
@@ -1631,9 +1749,10 @@ class GroceryUIController {
         await store.login(u, p);
         feedback.success();
         this.updateAuthView();
+        showToast(`Selamat datang, ${store.currentUser.name || u}!`, 'success', '🚀');
       } catch (err) {
         feedback.dangerAlert();
-        alert(err.message || 'Gagal masuk akun');
+        showToast(err.message || 'Gagal masuk akun', 'danger', '⚠️');
       } finally {
         if (submitBtn) {
           submitBtn.disabled = false;
@@ -1648,7 +1767,7 @@ class GroceryUIController {
       const name = this.regName?.value.trim();
       const username = this.regUsername?.value.trim();
       const pin = this.regPin?.value.trim() || '1234';
-      const budgetLimit = this.regBudget?.value || '250.000';
+      const budgetLimit = this.regBudget?.value || '350.000';
 
       const submitBtn = this.formRegister.querySelector('button[type="submit"]');
       const originalHtml = submitBtn ? submitBtn.innerHTML : '';
@@ -1669,11 +1788,11 @@ class GroceryUIController {
         if (typeof confetti === 'function') {
           confetti({ particleCount: 70, spread: 60, origin: { y: 0.5 } });
         }
-        alert(`🎉 Selamat datang ${name}! Akun kamu berhasil dibuat dan disimpan di Cloud Firestore.`);
+        showToast(`Akun ${name} berhasil dibuat di Cloud Firestore!`, 'success', '🎉');
         this.updateAuthView();
       } catch (err) {
         feedback.dangerAlert();
-        alert(err.message || 'Gagal mendaftar akun');
+        showToast(err.message || 'Gagal mendaftar akun', 'danger', '⚠️');
       } finally {
         if (submitBtn) {
           submitBtn.disabled = false;
@@ -1682,15 +1801,42 @@ class GroceryUIController {
       }
     });
 
-    // Quick 1-Click Login for Demo
+    // Quick 1-Click Login for Rian (DT2) & Devin
     this.btnQuickLoginRian?.addEventListener('click', async () => {
+      try {
+        await store.login('rian', '1234');
+        feedback.success();
+        this.updateAuthView();
+        showToast('Masuk sebagai Rian (Skenario DT2)!', 'success', '🐰');
+      } catch (err) {
+        showToast(err.message, 'danger', '⚠️');
+      }
+    });
+
+    this.btnQuickLoginDevin?.addEventListener('click', async () => {
       try {
         await store.login('devin', '1234');
         feedback.success();
         this.updateAuthView();
+        showToast('Masuk sebagai Devin!', 'success', '🪐');
       } catch (err) {
-        alert(err.message);
+        showToast(err.message, 'danger', '⚠️');
       }
+    });
+
+    // Sesi Belanja: Store Select & Date Picker
+    this.sessionStoreSelect?.addEventListener('change', (e) => {
+      feedback.tap();
+      store.storeLocation = e.target.value;
+      store.notify();
+      showToast(`Lokasi toko disetel ke: ${store.storeLocation}`, 'info', '🏬');
+    });
+
+    this.sessionDatePicker?.addEventListener('change', (e) => {
+      feedback.tap();
+      store.shoppingDate = e.target.value;
+      store.notify();
+      showToast(`Tanggal transaksi: ${store.shoppingDate}`, 'info', '📅');
     });
 
     // Logout
@@ -1909,9 +2055,9 @@ class GroceryUIController {
         if (this.inputFirebaseAppId) this.inputFirebaseAppId.value = parsed.appId || '';
         if (this.inputFirebaseAuthDomain) this.inputFirebaseAuthDomain.value = parsed.authDomain || '';
         feedback.success();
-        alert('✨ Berhasil mengekstrak konfigurasi Firebase! Klik "Simpan & Sambungkan Sekarang" untuk mengaktifkan.');
+        showToast('✨ Berhasil mengekstrak konfigurasi Firebase! Klik "Simpan & Sambungkan Sekarang".', 'success', '✨');
       } else {
-        alert('Format config belum dikenali. Silakan salin teks langsung dari Firebase Console atau masukkan API Key dan Project ID ke kolom di bawah.');
+        showToast('Format config belum dikenali. Masukkan API Key dan Project ID manual di bawah.', 'warning', '⚠️');
       }
     });
 
@@ -1923,7 +2069,7 @@ class GroceryUIController {
       const authDomain = this.inputFirebaseAuthDomain?.value.trim() || (projectId ? `${projectId}.firebaseapp.com` : '');
 
       if (!apiKey || !projectId) {
-        alert('Harap masukkan API Key dan Project ID terlebih dahulu!');
+        showToast('Harap masukkan API Key dan Project ID terlebih dahulu!', 'warning', '⚠️');
         return;
       }
 
@@ -1939,10 +2085,10 @@ class GroceryUIController {
         this.renderFirebaseModalStatus('connecting', 'Menghubungkan...', 'Sedang menguji koneksi ke Google Cloud Firestore...');
         await firebaseSync.reconfigure(cfg);
         feedback.success();
-        alert('🎉 Selamat! Berhasil terhubung ke Firebase Firestore.');
+        showToast('🎉 Berhasil terhubung ke Firebase Firestore!', 'success', '🟢');
       } catch (err) {
         feedback.dangerAlert();
-        alert('Gagal menyambung ke Firebase: ' + err.message);
+        showToast('Gagal menyambung ke Firebase: ' + err.message, 'danger', '🚨');
       }
     });
 
@@ -1952,9 +2098,9 @@ class GroceryUIController {
         this.renderFirebaseModalStatus('syncing', 'Menyimpan...', 'Mengirim data aktif ke Firestore...');
         await firebaseSync.syncNow();
         feedback.success();
-        alert('✅ Sinkronisasi cloud berhasil!');
+        showToast('✅ Sinkronisasi cloud Firestore berhasil!', 'success', '☁️');
       } catch (err) {
-        alert('Gagal sinkronisasi: ' + err.message);
+        showToast('Gagal sinkronisasi: ' + err.message, 'danger', '🚨');
       }
     });
 
@@ -1964,6 +2110,7 @@ class GroceryUIController {
         await firebaseSync.resetConfig();
         this.populateFirebaseModalFields();
         this.renderFirebaseModalStatus('offline', 'Mode Lokal Aktif', 'Penyimpanan lokal diaktifkan.');
+        showToast('Mode penyimpanan lokal diaktifkan.', 'info', '🏠');
       }
     });
 
@@ -1972,12 +2119,12 @@ class GroceryUIController {
       const rules = `rules_version = '2';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    match /{document=**} {\n      allow read, write: if true;\n    }\n  }\n}`;
       if (navigator.clipboard) {
         navigator.clipboard.writeText(rules).then(() => {
-          alert('🛡️ Aturan Firestore berhasil disalin ke clipboard!');
+          showToast('🛡️ Aturan Firestore berhasil disalin ke clipboard!', 'success', '📋');
         }).catch(() => {
-          alert(rules);
+          showToast(rules, 'info', '📋');
         });
       } else {
-        alert(rules);
+        showToast(rules, 'info', '📋');
       }
     });
   }
@@ -2050,9 +2197,44 @@ class GroceryUIController {
     }
   }
 
+  async renderCloudAccountChips() {
+    if (!this.cloudAccountsChips) return;
+    
+    // Ambil akun lokal
+    const localUsers = Object.keys(store.accounts || {});
+    const cloudAccounts = await firebaseSync.fetchAllAccountsFromCloud();
+    const allUsers = Array.from(new Set([...localUsers, ...cloudAccounts]));
+
+    if (allUsers.length === 0) {
+      this.cloudAccountsChips.innerHTML = '<span class="text-[11px] text-slate-500 italic">Belum ada akun lain</span>';
+      return;
+    }
+
+    this.cloudAccountsChips.innerHTML = '';
+    allUsers.forEach(u => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'px-2.5 py-1 rounded-xl bg-violet-950/80 hover:bg-cyan-950/80 border border-violet-500/40 hover:border-cyan-400/60 text-xs font-bold text-slate-200 flex items-center gap-1.5 transition-all tap-effect';
+      chip.innerHTML = `<span>👤</span><span>${u}</span>`;
+      chip.title = `Klik untuk memilih akun "${u}"`;
+      chip.addEventListener('click', () => {
+        feedback.tap();
+        if (this.inputLoginUsername) this.inputLoginUsername.value = u;
+        if (this.inputLoginPin) {
+          const acc = store.accounts ? store.accounts[u] : null;
+          this.inputLoginPin.value = acc?.pin || '1234';
+          this.inputLoginPin.focus();
+        }
+        showToast(`Akun "${u}" dipilih. Tekan Masuk Akun untuk membuka!`, 'info', '🔑');
+      });
+      this.cloudAccountsChips.appendChild(chip);
+    });
+  }
+
   updateAuthView() {
     if (!store.currentUser) {
       this.viewLoginScreen?.classList.remove('hidden');
+      this.renderCloudAccountChips();
     } else {
       this.viewLoginScreen?.classList.add('hidden');
       if (this.headerUserName) this.headerUserName.textContent = store.currentUser.name || store.currentUser.username;
@@ -2248,13 +2430,23 @@ class GroceryUIController {
   handleItemFormSubmit() {
     const name = this.inputItemName.value.trim();
     if (!name) {
-      alert('Nama barang wajib diisi!');
+      feedback.dangerAlert();
+      showToast('⚠️ Nama barang wajib diisi! Tidak boleh kosong.', 'warning', '📝');
       return;
     }
 
-    const price = parseRupiahInput(this.inputItemPrice.value);
-    if (price <= 0) {
-      alert('Harga satuan harus lebih dari Rp 0!');
+    const rawPriceStr = this.inputItemPrice.value.trim();
+    const price = parseRupiahInput(rawPriceStr);
+    if (rawPriceStr.includes('-') || isNaN(price) || price <= 0) {
+      feedback.dangerAlert();
+      showToast('⚠️ Harga satuan tidak valid / tidak boleh bernilai negatif (-Rp 15.000)! Wajib lebih dari Rp 0.', 'danger', '🛑');
+      return;
+    }
+
+    const qty = parseFloat(this.inputItemQty.value);
+    if (isNaN(qty) || qty <= 0) {
+      feedback.dangerAlert();
+      showToast('⚠️ Kuantitas barang minimal 1!', 'warning', '🔢');
       return;
     }
 
@@ -2262,7 +2454,7 @@ class GroceryUIController {
       name,
       category: this.inputItemCategory.value,
       unit: this.inputItemUnit.value,
-      qty: parseFloat(this.inputItemQty.value) || 1,
+      qty,
       unitPrice: price,
       lastMonthPrice: this.inputItemLastPrice.value ? parseRupiahInput(this.inputItemLastPrice.value) : null,
       discountRaw: this.inputItemDiscount.value.trim()
@@ -2271,9 +2463,11 @@ class GroceryUIController {
     if (this.editingItemId) {
       store.updateItem(this.editingItemId, itemData);
       feedback.tap();
+      showToast(`Produk "${name}" berhasil diperbarui!`, 'success', '✏️');
     } else {
       store.addItem(itemData);
       feedback.increment();
+      showToast(`"${name}" berhasil dimasukkan ke keranjang!`, 'success', '🛒');
 
       const summary = store.getCartSummary();
       if (summary.budgetStatus === 'danger' && !this.overbudgetWarningSuppressed) {
@@ -2311,68 +2505,81 @@ class GroceryUIController {
 
   loadTestScenarios() {
     this.overbudgetWarningSuppressed = false;
-    store.budgetLimit = 250000;
+    store.storeLocation = 'Lotte Mart Grocery - Puri Indah';
+    store.shoppingDate = '2026-10-26';
+    store.budgetLimit = 100000;
     
     store.cart = [
       {
-        id: 'test-1',
-        name: 'Bayam Hijau Segar Kelinci',
-        category: 'sayur',
-        unit: 'ikat',
-        qty: 3,
-        unitPrice: 6000,
-        lastMonthPrice: 5500,
-        discountRaw: '0',
+        id: 'dt2-1',
+        name: 'Beras Rojolele',
+        category: 'bahan-pokok',
+        unit: 'karung/5kg',
+        qty: 1,
+        unitPrice: 74000,
+        lastMonthPrice: 68000,
+        discountRaw: '',
         createdAt: Date.now() - 60000
       },
       {
-        id: 'test-2',
-        name: 'Susu UHT Ultra Milk Strawberry 200ml',
-        category: 'minuman',
-        unit: 'kotak',
-        qty: 4,
-        unitPrice: 6000,
-        lastMonthPrice: 6000,
-        discountRaw: '0',
+        id: 'dt2-2',
+        name: 'Minyak Goreng 2L',
+        category: 'bahan-pokok',
+        unit: 'pouch',
+        qty: 1,
+        unitPrice: 43000,
+        lastMonthPrice: 43000,
+        discountRaw: '',
         createdAt: Date.now() - 50000
       },
       {
-        id: 'test-3',
-        name: 'Brokoli Hijau Super',
-        category: 'sayur',
-        unit: 'pack',
+        id: 'dt2-3',
+        name: 'Sabun Cuci',
+        category: 'kebersihan',
+        unit: 'pcs',
         qty: 1,
-        unitPrice: 18000,
-        lastMonthPrice: 20000,
-        discountRaw: '0',
+        unitPrice: 20000,
+        lastMonthPrice: null,
+        discountRaw: '25%',
         createdAt: Date.now() - 40000
       },
       {
-        id: 'test-4',
-        name: 'Sosis Kanzler Singles',
-        category: 'daging',
+        id: 'dt2-4',
+        name: 'Wajan',
+        category: 'peralatan',
         unit: 'pcs',
-        qty: 2,
-        unitPrice: 9000,
-        lastMonthPrice: 9000,
+        qty: 1,
+        unitPrice: 100000,
+        lastMonthPrice: null,
         discountRaw: '50%+20%',
         createdAt: Date.now() - 30000
       },
       {
-        id: 'test-5',
-        name: 'Nugget Fiesta Dinosaurus',
-        category: 'daging',
-        unit: 'pack',
-        qty: 2,
-        unitPrice: 48000,
-        lastMonthPrice: 46000,
-        discountRaw: '10%',
+        id: 'dt2-5',
+        name: 'Telur Ayam 1kg',
+        category: 'bahan-pokok',
+        unit: 'kg',
+        qty: 1,
+        unitPrice: 28000,
+        lastMonthPrice: 32000,
+        discountRaw: '',
         createdAt: Date.now() - 20000
+      },
+      {
+        id: 'dt2-6',
+        name: 'Garam Dapur 500g',
+        category: 'bahan-pokok',
+        unit: 'pack',
+        qty: 1,
+        unitPrice: 5000,
+        lastMonthPrice: 5000,
+        discountRaw: '',
+        createdAt: Date.now() - 10000
       }
     ];
 
     store.notify();
-    alert('✅ Data Uji Ceria berhasil dimuat!\n\n1. Kategori Anak: Sayur Sehat Kelinci & Susu Segar\n2. Diskon Bertingkat: Sosis 50%+20%\n3. Celengan: Cek indikator uang saku anak pintar!');
+    showToast('🏬 Skenario Kasus Rian (Lotte Mart Puri Indah) DT2 berhasil dimuat!', 'success', '🎯');
   }
 
   openConfirmDeleteModal(item) {
@@ -2388,7 +2595,7 @@ class GroceryUIController {
 
   handleFinishShopping() {
     if (store.cart.length === 0) {
-      alert('Keranjang belanja masih kosong!');
+      showToast('Keranjang belanja masih kosong!', 'warning', '🛒');
       return;
     }
 
@@ -2420,6 +2627,13 @@ class GroceryUIController {
   }
 
   render() {
+    if (this.sessionStoreSelect && store.storeLocation) {
+      this.sessionStoreSelect.value = store.storeLocation;
+    }
+    if (this.sessionDatePicker && store.shoppingDate) {
+      this.sessionDatePicker.value = store.shoppingDate;
+    }
+
     this.renderHeaderBudget();
     this.renderCategoryFilters();
     this.renderQuickCatalog();
@@ -2741,9 +2955,17 @@ class GroceryUIController {
           <button type="button" class="btn-stepper-minus touch-target w-10 h-10 rounded-xl bg-slate-800/90 text-slate-200 active:bg-rose-600 active:text-white border border-slate-700/60 tap-effect font-black text-xl flex items-center justify-center shadow-xs">
             <i data-lucide="minus" class="w-4 h-4"></i>
           </button>
-          <div class="w-12 text-center">
-            <span class="font-black text-base text-cyan-300 font-mono-num">${item.qty}</span>
-            <span class="text-[10px] text-slate-400 block -mt-1 font-semibold">${item.unit}</span>
+          <div class="w-14 text-center px-1">
+            <input 
+              type="number" 
+              inputmode="numeric" 
+              min="1" 
+              step="any"
+              value="${item.qty}" 
+              class="input-row-qty w-full text-center font-black text-base text-cyan-300 font-mono-num bg-slate-900/90 border border-violet-500/30 rounded-lg py-0.5 focus:border-cyan-400 focus:outline-none"
+              title="Ketik kuantitas langsung"
+            />
+            <span class="text-[10px] text-slate-400 block -mt-0.5 font-semibold">${item.unit}</span>
           </div>
           <button type="button" class="btn-stepper-plus touch-target w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-violet-600 text-white active:scale-95 tap-effect font-black text-xl flex items-center justify-center shadow-md shadow-violet-500/30">
             <i data-lucide="plus" class="w-4 h-4"></i>
@@ -2755,9 +2977,27 @@ class GroceryUIController {
     // Event Bindings
     const minusBtn = card.querySelector('.btn-stepper-minus');
     const plusBtn = card.querySelector('.btn-stepper-plus');
+    const rowQtyInput = card.querySelector('.input-row-qty');
     const editBtn = card.querySelector('.btn-edit-item');
     const deleteBtn = card.querySelector('.btn-delete-item');
     const titleEl = card.querySelector('.item-title');
+
+    if (rowQtyInput) {
+      rowQtyInput.addEventListener('change', (e) => {
+        let val = parseFloat(e.target.value);
+        if (isNaN(val) || val <= 0) {
+          val = 1;
+          e.target.value = 1;
+        }
+        feedback.tap();
+        store.updateItem(item.id, { qty: val });
+        const summary = store.getCartSummary();
+        if (summary.budgetStatus === 'danger' && !this.overbudgetWarningSuppressed) {
+          this.triggerOverbudgetDanger(summary);
+        }
+      });
+      rowQtyInput.addEventListener('click', (e) => e.stopPropagation());
+    }
 
     minusBtn.addEventListener('click', (e) => {
       e.stopPropagation();
