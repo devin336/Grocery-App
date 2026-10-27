@@ -1242,6 +1242,91 @@
 
   </div>
 
+    <!-- ======================================================== -->
+    <!-- MODAL 7: GOOGLE AUTHORIZATION ACCOUNT PICKER -->
+    <!-- ======================================================== -->
+    <div id="modal-google-auth" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+      <div class="w-full max-w-sm bg-[#0E1322] border-2 border-violet-500/40 rounded-3xl p-5 shadow-2xl space-y-4 text-white">
+        
+        <div class="flex items-center justify-between pb-2 border-b border-violet-500/20">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-2xl bg-white flex items-center justify-center shadow-md">
+              <svg class="w-5 h-5" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
+                <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+                <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-sm font-black text-white leading-tight">Pilih Akun Google</h3>
+              <p class="text-[10px] text-slate-400">Google Authorization Sign-In</p>
+            </div>
+          </div>
+          <button id="btn-close-google-modal" type="button" class="touch-target w-8 h-8 rounded-xl text-slate-400 hover:text-white flex items-center justify-center tap-effect">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <p class="text-xs text-slate-300">Pilih akun Google untuk masuk ke Smart Grocery:</p>
+
+        <!-- Daftar Pilihan Akun Google -->
+        <div class="space-y-2">
+          <!-- Opsi 1: Google Siswa Lab -->
+          <button id="btn-google-opt-siswa" type="button" class="w-full p-3 rounded-2xl bg-slate-900/90 hover:bg-violet-950/80 border border-violet-500/30 hover:border-cyan-400/60 flex items-center justify-between text-left transition-all tap-effect group">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white font-black text-sm">
+                S
+              </div>
+              <div>
+                <span class="text-xs font-black text-white block group-hover:text-cyan-300">Siswa Google Lab</span>
+                <span class="text-[10px] text-slate-400 block font-mono">siswa@google.sch.id</span>
+              </div>
+            </div>
+            <span class="text-xs text-cyan-400 font-bold">Pilih ›</span>
+          </button>
+
+          <!-- Opsi 2: Rian Google -->
+          <button id="btn-google-opt-rian" type="button" class="w-full p-3 rounded-2xl bg-slate-900/90 hover:bg-violet-950/80 border border-violet-500/30 hover:border-cyan-400/60 flex items-center justify-between text-left transition-all tap-effect group">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-600 flex items-center justify-center text-white font-black text-sm">
+                R
+              </div>
+              <div>
+                <span class="text-xs font-black text-white block group-hover:text-cyan-300">Rian (Akun DT2)</span>
+                <span class="text-[10px] text-slate-400 block font-mono">rian.grocery@gmail.com</span>
+              </div>
+            </div>
+            <span class="text-xs text-cyan-400 font-bold">Pilih ›</span>
+          </button>
+
+          <!-- Opsi 3: Pop-up Google Sign-In Resmi -->
+          <button id="btn-google-opt-popup" type="button" class="w-full p-3 rounded-2xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-900 flex items-center justify-between text-left transition-all tap-effect shadow-md">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center">
+                <svg class="w-5 h-5" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+                  <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
+                  <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+                  <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                </svg>
+              </div>
+              <div>
+                <span class="text-xs font-black block">Gunakan Akun Google Lain</span>
+                <span class="text-[10px] text-slate-500 block">Buka Pop-up Browser Google</span>
+              </div>
+            </div>
+            <span class="text-xs text-blue-600 font-bold">Buka ›</span>
+          </button>
+        </div>
+
+        <button id="btn-cancel-google-modal" type="button" class="w-full py-2.5 rounded-2xl bg-slate-900 text-slate-400 hover:text-white font-bold text-xs tap-effect border border-violet-500/20">
+          Batal
+        </button>
+
+      </div>
+    </div>
+
   <!-- Firebase SDK (Compat v10 for Web PWA & Realtime Firestore & Google Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
