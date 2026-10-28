@@ -3331,7 +3331,10 @@ class GroceryUIController {
 
     if (store.cart.length === 0) {
       this.cartEmptyState?.classList.remove('hidden');
-      this.cartActionsBar?.classList.add('hidden');
+      if (this.cartActionsBar) {
+        this.cartActionsBar.style.display = 'none';
+        this.cartActionsBar.classList.add('hidden');
+      }
       this.cartItemList.innerHTML = '';
       if (this.finishShoppingBtn) {
         this.finishShoppingBtn.disabled = true;
@@ -3341,9 +3344,10 @@ class GroceryUIController {
     }
 
     if (this.cartActionsBar) {
+      this.cartActionsBar.style.display = 'flex';
       this.cartActionsBar.classList.remove('hidden');
       if (this.cartItemCount) {
-        this.cartItemCount.textContent = store.cart.length;
+        this.cartItemCount.textContent = `${store.cart.length} item`;
       }
     }
 

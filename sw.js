@@ -1,5 +1,5 @@
 // Service Worker for Dvh Grocery PWA
-const CACHE_NAME = 'dvh-grocery-v3-google-chooser';
+const CACHE_NAME = 'dvh-grocery-v4-clear-all';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
