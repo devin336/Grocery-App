@@ -62,11 +62,15 @@ export default function CartDrawer({ isOpen, onClose, onOpenCheckout, onShowToas
             {cartItems.length > 0 && (
               <button
                 type="button"
-                onClick={clearCart}
+                onClick={() => {
+                  if (window.confirm(`Hapus semua ${cartItems.length} belanjaan dari keranjang?`)) {
+                    clearCart();
+                  }
+                }}
                 className="text-xs text-rose-500 hover:text-rose-700 font-semibold px-2 py-1 rounded hover:bg-rose-50 transition-colors"
-                title="Kosongkan seluruh keranjang"
+                title="Hapus semua belanjaan"
               >
-                Kosongkan
+                Hapus Semua
               </button>
             )}
             <button

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * DVH Space Grocery | Belanja Cerdas & Dompet Kosmik
  * Galaxy Cosmic Nebula Theme with Realtime Cloud Sync & Multi-Device Support
  */
@@ -1489,6 +1489,11 @@ class GroceryStore {
     this.notify();
   }
 
+  clearCart() {
+    this.cart = [];
+    this.notify();
+  }
+
   setBudget(newLimit) {
     this.budgetLimit = Math.max(0, Number(newLimit) || 0);
     if (this.currentUser) {
@@ -1752,6 +1757,14 @@ class GroceryUIController {
     this.deleteItemNameText = document.getElementById('delete-item-name-text');
     this.btnConfirmDelete = document.getElementById('btn-confirm-delete');
     this.btnCancelDelete = document.getElementById('btn-cancel-delete');
+
+    this.cartActionsBar = document.getElementById('cart-actions-bar');
+    this.cartItemCount = document.getElementById('cart-item-count');
+    this.btnClearCart = document.getElementById('btn-clear-cart');
+    this.modalConfirmClearCart = document.getElementById('modal-confirm-clear-cart');
+    this.clearCartCountText = document.getElementById('clear-cart-count-text');
+    this.btnConfirmClearCart = document.getElementById('btn-confirm-clear-cart');
+    this.btnCancelClearCart = document.getElementById('btn-cancel-clear-cart');
 
     this.modalFinishTrip = document.getElementById('modal-finish-trip');
     this.finishSummaryTotal = document.getElementById('finish-summary-total');
@@ -2153,6 +2166,9 @@ class GroceryUIController {
     this.modalConfirmDelete?.addEventListener('click', (e) => {
       if (e.target === this.modalConfirmDelete) this.closeConfirmDeleteModal();
     });
+    this.modalConfirmClearCart?.addEventListener('click', (e) => {
+      if (e.target === this.modalConfirmClearCart) this.closeConfirmClearCartModal();
+    });
     this.modalFinishTrip?.addEventListener('click', (e) => {
       if (e.target === this.modalFinishTrip) this.closeFinishTripModal();
     });
@@ -2271,6 +2287,24 @@ class GroceryUIController {
     this.btnCancelDelete?.addEventListener('click', () => {
       this.pendingDeleteItem = null;
       this.closeConfirmDeleteModal();
+    });
+
+    // Confirm Clear All Items (Hapus Semua Belanjaan)
+    this.btnClearCart?.addEventListener('click', () => {
+      feedback.tap();
+      this.openConfirmClearCartModal();
+    });
+
+    this.btnConfirmClearCart?.addEventListener('click', () => {
+      feedback.tap();
+      store.clearCart();
+      this.closeConfirmClearCartModal();
+      showToast('Semua belanjaan berhasil dikosongkan dari troli!', 'info', '🗑️');
+    });
+
+    this.btnCancelClearCart?.addEventListener('click', () => {
+      feedback.tap();
+      this.closeConfirmClearCartModal();
     });
 
     // Finish Shopping Trip
@@ -2970,6 +3004,18 @@ class GroceryUIController {
     this.pendingDeleteItem = null;
   }
 
+  openConfirmClearCartModal() {
+    if (this.clearCartCountText) {
+      this.clearCartCountText.textContent = `${store.cart.length} barang`;
+    }
+    this.modalConfirmClearCart?.classList.remove('hidden');
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  closeConfirmClearCartModal() {
+    this.modalConfirmClearCart?.classList.add('hidden');
+  }
+
   handleFinishShopping() {
     if (store.cart.length === 0) {
       showToast('Keranjang belanja masih kosong!', 'warning', '🛒');
@@ -3285,12 +3331,20 @@ class GroceryUIController {
 
     if (store.cart.length === 0) {
       this.cartEmptyState?.classList.remove('hidden');
+      this.cartActionsBar?.classList.add('hidden');
       this.cartItemList.innerHTML = '';
       if (this.finishShoppingBtn) {
         this.finishShoppingBtn.disabled = true;
         this.finishShoppingBtn.classList.add('opacity-50', 'pointer-events-none');
       }
       return;
+    }
+
+    if (this.cartActionsBar) {
+      this.cartActionsBar.classList.remove('hidden');
+      if (this.cartItemCount) {
+        this.cartItemCount.textContent = store.cart.length;
+      }
     }
 
     if (this.finishShoppingBtn) {

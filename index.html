@@ -586,6 +586,25 @@
           </button>
         </div>
 
+        <!-- Cart Header / Actions Bar (Hapus Semua Belanjaan) -->
+        <div id="cart-actions-bar" class="hidden flex items-center justify-between px-3.5 py-2.5 rounded-2xl bg-slate-900/90 border border-violet-500/35 shadow-sm">
+          <div class="flex items-center gap-2">
+            <span class="text-sm">🛒</span>
+            <span class="text-xs font-black text-slate-200">
+              Daftar Belanja (<span id="cart-item-count" class="text-cyan-400 font-mono-num font-black">0</span> barang)
+            </span>
+          </div>
+          <button 
+            id="btn-clear-cart" 
+            type="button" 
+            class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-950/80 hover:bg-rose-900 text-rose-300 hover:text-white border border-rose-500/40 text-[11px] font-black tap-effect transition-all shadow-xs shadow-rose-950/50"
+            title="Hapus semua belanjaan dari troli"
+          >
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            <span>Hapus Semua</span>
+          </button>
+        </div>
+
         <!-- Cart Items List (Card View) -->
         <div id="cart-item-list" class="space-y-3">
           <!-- Item Cards rendered dynamically -->
@@ -1120,6 +1139,35 @@
           </button>
           <button id="btn-confirm-delete" type="button" class="flex-1 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs tap-effect shadow-xs shadow-rose-600/30">
             Ya, Hapus
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- MODAL: KONFIRMASI HAPUS SEMUA BELANJAAN -->
+    <!-- ======================================================== -->
+    <div id="modal-confirm-clear-cart" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+      <div class="w-full max-w-xs bg-[#0D1226] border-2 border-rose-500/40 rounded-3xl p-5 shadow-2xl text-center space-y-4 text-white">
+        
+        <div class="w-12 h-12 mx-auto rounded-2xl bg-rose-950/80 border border-rose-500/40 text-rose-400 flex items-center justify-center text-2xl shadow-lg shadow-rose-500/20">
+          🗑️
+        </div>
+
+        <div class="space-y-1">
+          <h4 class="text-sm font-black text-white">Kosongkan Keranjang?</h4>
+          <p class="text-xs text-slate-400 font-medium">
+            Hapus semua <span id="clear-cart-count-text" class="text-rose-400 font-bold">0</span> dari troli belanja? Tindakan ini tidak dapat dibatalkan.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2 pt-1">
+          <button id="btn-cancel-clear-cart" type="button" class="flex-1 py-2.5 rounded-2xl bg-slate-900 text-slate-300 font-bold text-xs tap-effect border border-violet-500/30">
+            Batal
+          </button>
+          <button id="btn-confirm-clear-cart" type="button" class="flex-1 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs tap-effect shadow-md shadow-rose-600/30">
+            Ya, Hapus Semua
           </button>
         </div>
 
